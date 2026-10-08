@@ -1,0 +1,283 @@
+.mobile-documents{display:none}
+.tiptap:focus-visible{outline:none!important}.command-search:focus-within{outline:2px solid var(--hover);outline-offset:-4px;border-radius:12px 12px 0 0}
+.document-link>span:nth-child(2){font-size:13px}.rail-heading{font-size:12px}.workspace-actions button{font-size:12px}.word-count{font-size:11px}.save-status{font-size:11px}.breadcrumb{font-size:12px}.document-meta{font-size:11px}.document-meta>span:first-child{font-size:10px}.diff-prose{padding-left:0}.diff-row{display:grid;grid-template-columns:24px 1fr;margin-bottom:24px}.diff-gutter{font:13px/30.6px Inter,sans-serif;color:var(--muted)}.diff-row del{color:var(--danger);text-decoration-thickness:1px}.diff-row ins{color:var(--success);text-underline-offset:4px}[data-theme=dark] .diff-row del,[data-theme=dark] .diff-row ins,[data-theme=dark] .contrast-warning{color:var(--text)}
+@media(max-width:760px){.mobile-documents{display:inline-flex}.document-rail.drawer-open{display:flex;position:fixed;z-index:12;inset:0 auto 0 0;width:288px;box-shadow:8px 0 32px #1F1D1A24;padding:24px 16px}.breadcrumb{gap:4px}.breadcrumb:before{display:none}.breadcrumb:after{content:'Writely';font-size:15px;font-weight:500;color:var(--text)}input.document-title{font-size:32px!important}}
+@media(max-width:760px){.save-status{font-size:10px}.workspace-actions button{font-size:11px}.document-meta{font-size:10px}.document-meta>span:first-child{font-size:9px}}
+
+/* Writing tool bar copied from the original Codex design. */
+.icon-button{width:44px;height:44px;padding:12px;flex-shrink:0}
+.icon-button[aria-pressed=true]{background:var(--tint);color:var(--accent)}
+.workspace-tools{position:fixed;right:24px;top:50%;transform:translateY(-50%);border:1px solid var(--border);background:var(--surface);padding:4px;border-radius:12px;display:flex;flex-direction:column;align-items:center;z-index:10;box-shadow:0 4px 16px #1f1d1a05}
+.rail-divider{width:16px;height:1px;background:var(--border);margin:8px}
+.workspace-tools .icon-button{min-width:44px;color:var(--text);font-size:inherit}.workspace-tools .icon-button:hover{background:var(--border)}.workspace-tools .icon-button:active{background:var(--tint);color:#1F1D1A}.workspace-tools .icon-button[aria-pressed=true]{background:var(--tint);color:var(--accent)}
+.utility-panel{position:relative;z-index:11}
+@media(max-width:1000px){.utility-panel{position:absolute}}
+@media(max-width:640px){.workspace-tools{left:50%;right:auto;top:auto;bottom:64px;transform:translateX(-50%);flex-direction:row;border-radius:8px;padding:4px}.workspace-tools .rail-divider{display:none}.workspace-tools .icon-button{width:44px}}
+
+/* Minimal header and document-navigation simplification. */
+.rail-heading{min-height:44px}.document-link{border-bottom:1px solid var(--border)}
+@media(min-width:761px) and (max-width:1000px){.breadcrumb>span:first-of-type{display:block}}
+
+/* Document-row actions stay separate from document navigation. */
+.document-row{display:flex;align-items:center;position:relative;border-bottom:1px solid color-mix(in srgb,var(--border) 55%,transparent);margin:0;border-radius:0;color:var(--muted);background:transparent}
+.document-row.active{background:var(--tint);color:var(--accent);border-radius:8px}[data-theme=dark] .document-row.active{background:var(--surface);color:var(--text)}
+.document-row .document-link{flex:1;min-width:0;width:auto;min-height:44px;margin:0;border:0;background:transparent;color:inherit;padding:8px 0 8px 12px;gap:8px}
+.document-row .document-link>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.document-row .document-symbol{align-self:center;padding-top:0;width:20px;display:flex;justify-content:center;flex-shrink:0}
+.document-actions{position:relative;flex-shrink:0}.document-menu-trigger{width:32px;height:32px;min-width:32px;min-height:32px;padding:8px;color:inherit;opacity:0;pointer-events:none}.document-row:hover .document-menu-trigger,.document-row:focus-within .document-menu-trigger,.document-menu-trigger[aria-expanded=true]{opacity:1;pointer-events:auto}
+.document-menu{position:absolute;right:0;top:100%;z-index:15;min-width:144px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;box-shadow:0 4px 16px #1f1d1a12}
+.document-menu button{width:100%;justify-content:flex-start;color:var(--text)}.document-menu button.danger{color:var(--danger)}
+.document-delete-confirm{background:var(--danger);color:white}.document-delete-confirm:hover{background:var(--danger);color:white}
+
+.selection-toolbar{display:flex;align-items:center;gap:4px;height:48px;padding:0 4px;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 4px 16px #1f1d1a12;z-index:16;max-width:calc(100vw - 16px)}.selection-toolbar button{width:44px;min-width:44px;padding:8px}
+
+/* A single compact writing-navigation grid. */
+.document-rail{padding:16px 12px}
+.document-rail .brand{min-height:44px;gap:8px;padding:0 4px 12px 12px;margin-bottom:12px;border-bottom:1px solid color-mix(in srgb,var(--border) 65%,transparent)}
+.document-rail .brand>span{font-size:20px;font-weight:600;letter-spacing:-.035em}
+.document-rail .brand button{min-height:32px;min-width:32px;width:32px;height:32px;padding:8px}
+.rail-heading{min-height:40px;padding:0 0 0 12px;margin-bottom:4px;gap:8px;font-weight:500}
+.rail-heading button{min-height:32px;min-width:32px;width:32px;height:32px;padding:8px}
+@media(hover:none){.document-menu-trigger{opacity:1;pointer-events:auto;min-width:44px;width:44px;height:44px}.rail-heading button,.document-rail .brand button{min-width:44px;min-height:44px;width:44px;height:44px}}
+
+/* Scroll only the writing list, with no visible scrollbar. */
+.document-rail{min-height:0;overflow:hidden}.document-rail .brand,.document-rail .rail-heading{flex-shrink:0}
+.document-rail nav[aria-label="Documents"]{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none}
+.document-rail nav[aria-label="Documents"]::-webkit-scrollbar{display:none}
+.document-menu{position:fixed;right:auto;width:144px;z-index:15}
+
+/* Tool drawers span the app height without changing the writing layout. */
+.workspace-shell{position:relative}
+.main .workspace-shell>.utility-panel{position:fixed;right:0;top:0;bottom:0;width:320px;max-width:100%;z-index:18;box-shadow:-8px 0 24px #1f1d1a12}
+.utility-panel.is-open{animation:utility-slide-in 200ms ease-out both}.utility-panel.is-closing{animation:utility-slide-out 200ms ease-in both;pointer-events:none}
+.utility-scrim,.utility-scrim:hover,.utility-scrim:active{position:absolute;inset:0;width:100%;height:100%;padding:0;margin:0;border:0;border-radius:0;background:transparent;z-index:17;cursor:default}
+.utility-scrim.is-open{animation:utility-fade-in 200ms ease-out both}.utility-scrim.is-closing{animation:utility-fade-out 200ms ease-in both;pointer-events:none}
+@keyframes utility-slide-in{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes utility-slide-out{from{transform:translateX(0)}to{transform:translateX(100%)}}
+@keyframes utility-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes utility-fade-out{from{opacity:1}to{opacity:0}}
+@media(max-width:760px){.main .workspace-shell>.utility-panel{width:100%}}
+@media(prefers-reduced-motion:reduce){.utility-panel.is-open,.utility-panel.is-closing,.utility-scrim.is-open,.utility-scrim.is-closing{animation:none}}
+
+/* All dialogs share a body-mounted, viewport-centered overlay. */
+.modal-overlay{position:fixed;inset:0;display:grid;grid-template-columns:minmax(0,1fr);place-items:center;padding:24px;overflow:hidden;z-index:100;box-sizing:border-box}
+.modal-overlay .dialog{margin:0;min-width:0;max-width:100%;max-height:calc(100dvh - 48px);overflow-y:auto;box-sizing:border-box;animation:dialog-fade-in 160ms ease-out}
+@keyframes dialog-fade-in{from{opacity:0}to{opacity:1}}
+/* Quiet, consistent interaction feedback in either theme. */
+:root{--control-border:color-mix(in srgb,var(--border) 65%,transparent);--control-hover:color-mix(in srgb,var(--accent) 6%,var(--surface));--control-focus:color-mix(in srgb,var(--accent) 55%,var(--border));--control-ring:color-mix(in srgb,var(--accent) 12%,transparent)}
+input:not([type=range]):not([type=color]),textarea,select{border-color:var(--control-border);transition:border-color 140ms,background-color 140ms,box-shadow 140ms}
+input:not([type=range]):not([type=color]):hover,textarea:hover,select:hover{border-color:color-mix(in srgb,var(--accent) 20%,var(--border))}
+button{transition:background-color 140ms,border-color 140ms,box-shadow 140ms,color 140ms}
+button:not(:disabled):not(.primary):not(.goal-finish):not(.document-delete-confirm):not(.utility-scrim):not(.document-link):not(.document-menu-trigger):hover,.workspace-tools .icon-button:hover{background:var(--control-hover);border-color:var(--control-border)}
+button:not(:disabled):active,.workspace-tools .icon-button:active{color:var(--accent);border-color:var(--control-border)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible,[contenteditable]:focus-visible{outline:none!important;border-color:var(--control-focus);box-shadow:0 0 0 2px var(--control-ring)}
+input:not([type=range]):not([type=color]):focus,textarea:focus,select:focus{outline:none!important;border-color:var(--control-focus);box-shadow:0 0 0 2px var(--control-ring)}
+.command-search:focus-within{outline:none;box-shadow:inset 0 0 0 1px var(--control-focus)}.command-search input:focus{box-shadow:none}
+.presets button.active{outline:none;box-shadow:0 0 0 2px var(--control-ring);border-color:var(--control-focus)}
+.thought.selected .thought-body{outline:none;box-shadow:0 0 0 2px var(--control-ring)}
+.document-row .document-link:hover{background:transparent;border-color:transparent}.document-row .document-link:focus-visible{box-shadow:inset 0 0 0 1px var(--control-focus)}
+.tiptap:focus,.tiptap:focus-visible{outline:none!important;box-shadow:none;border:0}
+.document-delete-confirm:not(:disabled):active{color:white}.primary:not(:disabled):active,.goal-finish:not(:disabled):active{color:var(--surface)}
+@media(max-width:760px){.modal-overlay{padding:16px}.modal-overlay .dialog{max-height:calc(100dvh - 32px)}}
+@media(prefers-reduced-motion:reduce){.modal-overlay .dialog{animation:none}}
+
+/* Match the writing-panel timing while sliding the document list from the left. */
+.document-rail{--writing-rail-width:232px;transition:margin-left 200ms ease-out,visibility 0s}
+.document-rail.list-open{margin-left:0;visibility:visible}
+.document-rail.list-closed{margin-left:calc(-1 * var(--writing-rail-width));visibility:hidden;pointer-events:none;transition:margin-left 200ms ease-in,visibility 0s 200ms}
+@media(min-width:1400px){.document-rail{--writing-rail-width:248px}}
+@media(max-width:1250px){.document-rail{--writing-rail-width:208px}}
+@media(max-width:1000px){.document-rail{--writing-rail-width:192px}}
+@media(max-width:760px){
+ .document-rail,.document-rail.drawer-open{display:flex;position:fixed;z-index:12;top:0;bottom:0;left:-288px;right:auto;width:288px;margin-left:0;padding:24px 16px;box-shadow:8px 0 32px #1F1D1A24;transition:left 200ms ease-out,visibility 0s}
+ .document-rail.list-open{left:0;margin-left:0}
+ .document-rail.list-closed{left:-288px;margin-left:0;transition:left 200ms ease-in,visibility 0s 200ms}
+}
+@media(prefers-reduced-motion:reduce){.document-rail,.document-rail.list-closed{transition:none}}
+
+/* Active writing is marked quietly by its icon, leaving the title neutral. */
+.document-row.active,[data-theme=dark] .document-row.active{background:transparent;color:var(--text)}
+.document-row .document-symbol{height:20px;align-items:center;border-radius:4px}
+.document-row.active .document-symbol{background:var(--tint);color:var(--accent)}
+[data-theme=dark] .document-row.active .document-symbol{background:color-mix(in srgb,var(--accent) 20%,var(--surface));color:var(--text)}
+
+/* Compact writing metrics with a quieter secondary row. */
+.statistics-dialog{width:420px}.writing-statistics,.writing-statistics-secondary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 24px;margin:4px 0 0}
+.writing-statistics dt,.writing-statistics-secondary dt{font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.5}
+.writing-statistics dd{margin:0;font-size:20px;font-weight:500;line-height:1.4;font-variant-numeric:tabular-nums;color:var(--text)}
+.writing-statistics-secondary{margin-top:20px;padding-top:16px;border-top:1px solid var(--control-border)}
+.writing-statistics-secondary dd{margin:0;font-size:14px;font-weight:500;line-height:1.5;font-variant-numeric:tabular-nums;color:var(--muted)}
+
+@media(max-width:640px){.workspace-tools{max-width:calc(100vw - 16px);overflow-x:auto;scrollbar-width:none}.workspace-tools::-webkit-scrollbar{display:none}}
+
+/* Brand and document headers share a full-width, 64px baseline. */
+.app{--app-header-height:64px;--visible-writing-rail:0px}
+.topbar{height:var(--app-header-height);border-bottom:1px solid var(--border)}
+.document-rail,.document-rail.drawer-open{padding:0 12px 16px}
+.document-rail .brand{height:var(--app-header-height);min-height:var(--app-header-height);padding:8px 12px 8px 24px;margin:0 -12px 8px;border-bottom:1px solid var(--border)}
+/* Keep a readable, stable column clear of the temporary right workspace. */
+@media(min-width:1120px){
+ .workspace{padding-right:0}
+ .paper{width:calc(100% - 384px);max-width:680px;transition:transform 200ms ease-out}
+ .tool-panel-visible .paper{transform:translateX(-160px)}
+}
+@media(min-width:761px){.app.with-rail:not(.focus-mode){--visible-writing-rail:232px}}
+@media(min-width:1400px){.app.with-rail:not(.focus-mode){--visible-writing-rail:248px}}
+@media(min-width:761px) and (max-width:1250px){.app.with-rail:not(.focus-mode){--visible-writing-rail:208px}}
+@media(min-width:761px) and (max-width:1000px){.app.with-rail:not(.focus-mode){--visible-writing-rail:192px}}
+/* At smaller widths show one useful workspace instead of a narrow editor sliver. */
+@media(max-width:1119px){
+ .main .workspace-shell>.utility-panel{width:calc(100vw - var(--visible-writing-rail));padding:24px}
+ .utility-panel>*{max-width:480px;margin-left:auto;margin-right:auto}
+}
+
+/* Each document has one continuous hover surface with a nested icon accent. */
+.document-row{border-radius:8px;transition:background-color 140ms}
+.document-row:hover,.document-row:focus-within,[data-theme=dark] .document-row:hover,[data-theme=dark] .document-row:focus-within{background:var(--control-hover)}
+.document-row .document-link:hover,.document-row .document-menu-trigger:hover{background:transparent;border-color:transparent}
+.document-row .document-symbol{transition:background-color 140ms}
+.document-row .document-symbol:hover,[data-theme=dark] .document-row .document-symbol:hover{background:color-mix(in srgb,var(--accent) 24%,var(--bg))}
+
+/* Keep the document-list toggle available without requiring hover. */
+.document-rail .brand button{opacity:1}
+
+/* A small optical adjustment only while the writing list is visible. */
+@media(min-width:761px){.app.with-rail:not(.focus-mode):not(.tool-panel-visible) .paper{transform:translateX(-24px)}}
+
+/* Internal hairlines structure the primary metrics; secondary statistics stay unchanged. */
+.writing-statistics{gap:0}
+.writing-statistics>div{padding:12px 16px}
+.writing-statistics>div:nth-child(odd){border-right:1px solid var(--control-border)}
+.writing-statistics>div:nth-child(-n+2){border-bottom:1px solid var(--control-border)}
+/* Settings remains fixed below the independently scrolling writing list. */
+.sidebar-footer{flex-shrink:0;margin-top:8px;padding-top:8px;border-top:1px solid var(--control-border)}
+.sidebar-settings{width:100%;min-height:44px;padding:8px 12px;justify-content:flex-start;gap:8px;font-size:13px;background:transparent;border:0;text-align:left;color:var(--muted)}
+.sidebar-settings>svg{width:20px}
+.sidebar-settings:hover,.sidebar-settings:focus-visible{background:var(--control-hover)}
+
+.panel-header h2{margin-right:auto}
+.settings-tabs{display:flex;gap:8px;margin-bottom:20px}.settings-tabs button[aria-pressed=true]{background:var(--tint);color:var(--accent)}
+.default-revision-goals h3{font-size:14px;font-weight:500;margin:0 0 8px}.default-revision-goals>p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.default-goal-list{margin-bottom:20px}.default-goal-row{padding:10px 0;border-bottom:1px solid var(--control-border);display:flex;flex-wrap:wrap;align-items:center;gap:8px}.default-goal-row>span{flex:1;min-width:150px;font-size:13px;overflow-wrap:anywhere}.default-goal-row>div{display:flex;gap:2px}.default-goal-row button{min-width:30px;min-height:32px;width:30px;height:32px;padding:6px}
+
+/* Comparison keeps the text scrollable above one aligned footer. */
+.comparison-workspace{overflow:hidden}
+.comparison{max-width:none;height:100%;padding:0;margin:0;display:flex;flex-direction:column;min-height:0}
+.comparison-scroll{flex:1;min-height:0;overflow:auto;padding:32px;}
+.comparison-top,.comparison .diff-columns{max-width:1036px;margin-left:auto;margin-right:auto}
+.comparison-top{justify-content:flex-start;margin-bottom:24px;font-size:12px}
+.comparison-bottom{flex-shrink:0;height:69px;min-height:69px;margin:0;padding:8px 32px 16px;border-top:1px solid var(--control-border);flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;background:var(--bg)}
+.comparison-bottom .comparison-restore{border:1px solid var(--control-border);background:transparent}
+.comparison-bottom .comparison-restore:hover{background:var(--control-hover)}
+.comparison-mode .sidebar-footer{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}
+.diff-row ins{color:var(--success);text-decoration:none;background:transparent}
+[data-theme=dark] .diff-row ins{color:var(--success)}
+[data-theme=dark] .diff-row del{color:var(--danger)}
+@media(max-width:760px){.comparison-scroll{padding:24px}.comparison-bottom{padding-left:16px;padding-right:16px}}
+/* Scrollbars stay invisible without changing scrollable overflow behavior. */
+html,body,.app,.app *,body>.modal-overlay,body>.modal-overlay *{scrollbar-width:none!important;-ms-overflow-style:none!important}
+::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+
+/* Final manuscript lines have room to settle into the writing focus band. */
+.workspace:not(.comparison-workspace){overflow-anchor:none;scroll-behavior:auto}
+.workspace:not(.comparison-workspace) .paper{padding-bottom:calc(48px + var(--flow-bottom-space, 50vh))}
+
+/* The tool palette floats above the card zone and never reserves its width. */
+.writing-tool-items{display:contents}
+.workspace-tools{transform-origin:right center;transition:opacity 200ms ease-out,scale 200ms ease-out,visibility 0s}
+.workspace-tools.tools-open{opacity:1;scale:1;visibility:visible}
+.workspace-tools.tools-closed{opacity:0;scale:.94;visibility:hidden;pointer-events:none;transition:opacity 200ms ease-in,scale 200ms ease-in,visibility 0s 200ms}
+.top-actions .header-tools-launcher{width:32px;height:32px;min-width:32px;min-height:32px;padding:8px;border:1px solid transparent;background:transparent;box-shadow:none;animation:appear 180ms ease-out}
+.top-actions .header-tools-launcher:hover{background:var(--control-hover);border-color:transparent}
+@media(prefers-reduced-motion:reduce){.workspace-tools{transition:none!important}.top-actions .header-tools-launcher{animation:none}}
+
+/* A quiet, recognizable draft title in either writing-list state. */
+.topbar .breadcrumb>span:last-child{font-size:18px;font-weight:500}
+
+/* Center the manuscript at every viewport size when writing navigation is closed. */
+.app:not(.writing-sidebar-open) .paper{transform:translateX(8px)}
+
+/* Quiet manuscript collection, with a stable autosave line under the active name. */
+.rail-heading{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px;padding:12px 12px 8px;margin-bottom:4px}
+.rail-heading .new-writing{width:auto;height:32px;min-width:0;min-height:32px;padding:6px 0;gap:6px;font-size:12px;font-weight:400;border:0;color:var(--muted)}
+.rail-heading .new-writing:hover{background:var(--control-hover)}
+.document-row,.document-row.active{border:0;border-radius:4px;background:transparent;min-height:56px}
+.document-row.active{background:color-mix(in srgb,var(--accent) 5%,transparent);color:var(--text)}
+.document-row.active::before{content:'';position:absolute;left:3px;top:13px;width:2px;height:16px;border-radius:2px;background:color-mix(in srgb,var(--accent) 50%,transparent)}
+.document-row .document-link{height:56px;min-height:56px;align-items:flex-start;padding-top:10px;padding-bottom:24px;line-height:20px}
+.document-row .document-symbol{align-self:flex-start;height:20px;border-radius:0;background:transparent!important}
+.document-row.active .document-symbol{color:var(--accent)}
+.document-row .document-actions{align-self:flex-start;margin-top:4px}
+.document-row .document-link>span:nth-child(2){font-size:13px;font-weight:400}
+.document-save-feedback{position:absolute;left:40px;right:34px;top:31px;height:16px;display:flex;align-items:center;gap:4px;font-size:10px;line-height:16px;color:var(--muted);opacity:1;transition:opacity 220ms ease-out;white-space:nowrap}
+.document-save-feedback.save-idle{opacity:0;pointer-events:none}
+.document-save-feedback.save-error{color:var(--danger)}
+.document-save-feedback button,.save-failure-notice button{min-height:16px;min-width:0;padding:0 3px;font-size:10px;line-height:16px;color:inherit;text-decoration:underline;text-underline-offset:2px}
+.save-spinner{animation:save-spin 900ms linear infinite}
+@keyframes save-spin{to{transform:rotate(360deg)}}
+.save-failure-notice{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--danger);max-width:240px}
+.topbar .breadcrumb:before,.topbar .breadcrumb:after{content:none}
+@media(prefers-reduced-motion:reduce){.document-save-feedback{transition:none}.save-spinner{animation:none}}
+
+/* Writing owns the full canvas; settings replaces the writing view without unmounting it. */
+.main{position:relative}
+.writing-view{display:flex;flex-direction:column;flex:1;min-height:0}
+.writing-view-hidden{visibility:hidden;pointer-events:none}
+.canvas-sidebar-toggle,.canvas-tools-launcher,.settings-sidebar-toggle{position:absolute;top:14px;width:30px;height:30px;min-width:30px;min-height:30px;display:flex;align-items:center;justify-content:center;padding:0;border:0!important;background:transparent;box-shadow:none;color:var(--muted);z-index:12}
+.canvas-sidebar-toggle{left:18px}.canvas-tools-launcher{right:18px}.settings-sidebar-toggle{left:18px;z-index:32}
+.canvas-sidebar-toggle:hover,.canvas-tools-launcher:hover,.settings-sidebar-toggle:hover{background:color-mix(in srgb,var(--text) 4%,transparent)}
+.document-rail .brand{border-bottom:0}
+.document-row.active{background:color-mix(in srgb,var(--text) 3%,transparent)}
+.canvas-save-failure{position:fixed;right:58px;top:14px;z-index:60;font-size:11px;box-shadow:0 2px 10px #00000006}
+.settings-page{position:absolute;inset:0;overflow:auto;background:var(--bg);z-index:30}
+.settings-content{max-width:760px;margin:0 auto;padding:38px 48px 80px}
+.settings-back{display:inline-flex;gap:8px;align-items:center;color:var(--muted);background:transparent;border:0;padding:6px 0;font-size:12px}
+.settings-content h1{font-size:24px;font-weight:500;margin:22px 0 34px;outline:0}
+.settings-section{margin:0 0 38px}.settings-section h2{font-size:16px;font-weight:500;margin:0 0 16px}
+.settings-muted{font-size:12px;line-height:1.7;color:var(--muted);max-width:520px;margin:12px 0 18px}
+.account-details{font-size:13px;margin:0}.account-details>div{display:grid;grid-template-columns:100px 1fr;gap:16px;padding:5px 0}.account-details dt{color:var(--muted)}.account-details dd{margin:0}
+.account-actions{display:flex;gap:12px}.account-actions button{font-size:12px;padding:7px 10px}
+.universal-goal-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid color-mix(in srgb,var(--text) 6%,transparent);font-size:13px;line-height:1.5}
+.universal-goal-row>span{flex:1;min-width:0;overflow-wrap:anywhere}.universal-goal-actions{display:flex;flex-shrink:0;gap:2px}.universal-goal-actions button{width:27px;height:27px;min-width:27px;min-height:27px;padding:0;display:flex;align-items:center;justify-content:center;background:transparent;border:0}.universal-goal-actions button:hover{background:color-mix(in srgb,var(--text) 4%,transparent)}
+.settings-section form{margin-top:22px}.settings-section label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}.universal-goal-form{display:flex;align-items:center;gap:8px}.universal-goal-form input{flex:1;min-width:0}.universal-goal-form button{font-size:12px;white-space:nowrap;padding:10px 12px}
+.revision-group{margin-bottom:24px}.revision-group h3{font-size:11px;font-weight:500;color:var(--muted);margin:2px 0 12px}.revision-group .empty{font-size:12px;padding:8px 0}.set-card-default{margin-right:auto;font-size:12px;color:var(--muted);background:transparent}
+@media(max-width:760px){.settings-content{padding:54px 24px 60px}.universal-goal-form{flex-wrap:wrap}.universal-goal-form input{flex-basis:100%}.universal-goal-actions{gap:0}.canvas-save-failure{max-width:calc(100vw - 90px)}}
+
+/* Floating creation icon shares the closed navigation toggle's quiet left grid. */
+.rail-heading .new-writing{width:30px;height:30px;min-width:30px;min-height:30px;padding:0;margin-left:-6px;border:0;background:transparent;box-shadow:none;justify-content:center}
+.rail-heading .new-writing:hover{background:var(--control-hover)}
+.document-row,.document-row.active{min-height:40px}
+.document-row .document-link{height:40px;min-height:40px;align-items:center;padding-top:8px;padding-bottom:8px}
+.document-row .document-symbol{align-self:center}
+.document-row .document-actions{align-self:center;margin-top:0}
+.document-row.active::before{top:12px}
+.document-save-feedback{position:static;flex-shrink:0;max-width:110px;width:auto;height:16px;margin-right:2px;font-size:9px;gap:3px}
+.document-save-feedback.save-idle{width:0;max-width:0;margin-right:0;gap:0;overflow:hidden}
+
+/* Section label and create control share one quiet navigation row. */
+.rail-heading{flex-direction:row;align-items:center;justify-content:space-between}
+.rail-heading .new-writing{margin-left:0}
+
+.document-saving{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0}
+
+/* Logo divider and a shared vertical axis for sidebar controls. */
+.document-rail .brand{border-bottom:1px solid var(--control-border)}
+.rail-heading{padding-right:1px}
+
+/* A decoration only: never part of manuscript content or saved HTML. */
+.tiptap .empty-draft-line::before{content:attr(data-placeholder);float:left;height:0;width:100%;pointer-events:none;color:color-mix(in srgb,var(--muted) 72%,var(--bg));font-family:inherit;font-size:inherit;line-height:inherit;font-weight:inherit;font-style:inherit}
+
+/* Account details are light icon-led items; secondary actions sit underneath. */
+.account-details{display:flex;flex-wrap:wrap;gap:24px 36px}
+.account-details>div{display:flex;align-items:center;gap:10px;padding:0}
+.account-details>div>svg{color:var(--muted)}
+.account-details dt{font-size:10px;line-height:1.5;margin-bottom:3px}
+.account-details dd{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.account-actions{flex-direction:column;align-items:flex-start;gap:3px;margin-top:16px}
+.account-actions button{min-height:32px;padding:6px 0;font-size:12px}
+.account-actions button.danger{color:var(--danger)}
+.universal-goal-row{padding:12px 0}
+.settings-add-goal{margin-top:16px;background:transparent;padding:6px 0;min-height:32px;font-size:12px;color:var(--accent)}
+.prototype-reset{padding-top:22px;border-top:1px solid var(--control-border)}
+.prototype-reset button{font-size:11px;min-height:32px;padding:6px 0;color:var(--muted)}
+@media(max-width:760px){.account-details{flex-direction:column;gap:18px}}

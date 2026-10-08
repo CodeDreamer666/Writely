@@ -1,0 +1,14 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+evidence/
+.impeccable/
+.restore-backup-*/
+.before-newer-version-restore-*/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db

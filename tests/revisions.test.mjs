@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {migrateRevisions,copyDefaultGoal,reorderGoals,universalChecks} from '../src/revisionModel.js';
+import {bubbleShapes,resolveShape} from '../src/bubbleShapes.js';
+const legacy={theme:'light',docs:[{id:'one',checks:[{id:'seed',text:'Improve the introduction',done:false},{id:'progress',text:'Remove repeated ideas',done:true},{id:'custom',text:'Fix the final scene',done:false}],session:null},{id:'two',checks:[{id:'active',text:'Find a quieter ending',done:false}],session:{checkId:'active'}}]};
+const migrated=migrateRevisions(legacy);
+assert.equal(migrated.defaultRevisionGoals.length,3);assert.deepEqual(migrated.docs[0].checks.map(g=>g.id),['custom']);assert(universalChecks(migrated,migrated.docs[0])[1].done);assert.equal(migrated.docs[1].session.checkId,'universal:'+migrated.defaultRevisionGoals[2].id);assert.equal(migrateRevisions(migrated),migrated);
+const goal=migrated.defaultRevisionGoals[0],copy=copyDefaultGoal(goal);assert.notEqual(copy.id,goal.id);copy.done=true;goal.text='Changed globally';assert.equal(copy.text,'Improve the introduction');assert.equal(goal.done,undefined);
+const ordered=reorderGoals(migrated.defaultRevisionGoals,goal.id,1);assert.equal(ordered[1].id,goal.id);assert.equal(migrated.defaultRevisionGoals[0].id,goal.id);assert.equal(reorderGoals(ordered,'missing',1),ordered);
+assert.equal(bubbleShapes.length,14);assert.equal(new Set(bubbleShapes.map(s=>s.id)).size,14);assert.equal(resolveShape(null).id,'rectangle');assert.equal(resolveShape('missing').id,'rectangle');assert.equal(resolveShape('heart').name,'Heart');assert(bubbleShapes.every(s=>s.path.startsWith('M ')));
+console.log('Revision and shape tests passed: migration, preservation, independent goal copies, ordering, and 14 vector shape options.');

@@ -1,0 +1,66 @@
+.annotation-layer{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:3;overflow:visible}
+.annotation-connectors{position:absolute;top:0;left:0;overflow:visible;pointer-events:none;color:color-mix(in srgb,var(--accent) 48%,var(--muted));fill:none}
+.annotation-connectors g>path{stroke:currentColor;stroke-width:1.6;opacity:.82}.annotation-connectors circle{fill:currentColor;stroke:none;opacity:.85}.annotation-connectors .connector-active path{opacity:1;stroke-width:1.9}.annotation-connectors .connector-preview{stroke:currentColor;stroke-width:1.6;stroke-dasharray:4 5;opacity:.85}
+.annotation-cloud{position:absolute;min-height:104px;isolation:isolate;pointer-events:auto;touch-action:none;filter:drop-shadow(0 4px 8px #1f1d1a06)}
+.cloud-shape{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;fill:var(--cloud-fill);opacity:var(--cloud-opacity);z-index:-1}
+.cloud-body{padding:28px 24px 26px;min-height:104px;font-family:'Source Serif 4',Georgia,serif;font-size:15px;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap;cursor:grab;user-select:none;touch-action:none;border:0;border-radius:40%;outline:none}
+.annotation-cloud.is-dragging{z-index:5}.is-dragging .cloud-body{cursor:grabbing}.cloud-body:focus-visible{outline:none!important;box-shadow:0 0 0 2px var(--control-ring)}
+.cloud-edit{position:absolute;right:12px;bottom:-8px;width:28px;height:28px;min-width:28px;min-height:28px;padding:6px;border-radius:50%;color:var(--muted);background:var(--surface);opacity:0;transition:opacity 140ms}
+.cloud-anchor{position:absolute;width:12px;height:12px;min-width:12px;min-height:12px;padding:0;border:1px solid var(--control-focus);border-radius:50%;background:var(--surface);opacity:0;cursor:crosshair;touch-action:none}
+.cloud-anchor::after{content:'';position:absolute;inset:-8px;border-radius:50%}
+.annotation-cloud:hover .cloud-anchor,.annotation-cloud:focus-within .cloud-anchor,.annotation-cloud.is-selected .cloud-anchor,.annotation-cloud:hover .cloud-edit,.annotation-cloud:focus-within .cloud-edit,.annotation-cloud.is-selected .cloud-edit{opacity:1}
+
+.annotation-link-toolbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:max-content;max-width:calc(100vw - 32px);padding:10px 12px;background:var(--surface);border:1px solid var(--control-border);border-radius:12px;box-shadow:0 6px 24px #1f1d1a12;pointer-events:auto;z-index:22;color:var(--text)}
+.annotation-link-toolbar>span{display:flex;align-items:center;gap:6px;font-size:12px}.annotation-link-toolbar select{width:auto;min-height:32px;font-size:12px;padding:6px}.annotation-link-toolbar button{min-height:32px;padding:6px 8px}.annotation-link-toolbar .icon-button{width:32px;height:32px;min-width:32px;padding:8px}.annotation-link-toolbar small{flex-basis:100%;font-size:10px;color:var(--muted);line-height:1.5}
+.annotation-link-list{display:flex;flex-direction:column;gap:8px;margin-top:16px}.annotation-link-list>div{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}.annotation-link-list span{flex:1;min-width:0;overflow-wrap:anywhere}.annotation-link-list button{min-height:32px;min-width:32px;padding:6px}
+@media(hover:none){.cloud-edit,.cloud-anchor{opacity:1}}
+@media(max-width:640px){.annotation-link-toolbar{bottom:84px}.cloud-body{font-size:15px}}
+
+.bubble-shape-picker{border:0;padding:0;margin:20px 0;min-width:0}.bubble-shape-picker legend{font-size:12px;color:var(--muted);margin-bottom:8px}.bubble-shape-picker>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.bubble-shape-picker>div>button{display:flex;flex-direction:column;gap:4px;padding:8px 4px;min-width:0;min-height:60px;font-size:10px;line-height:1.3;border:1px solid transparent}.bubble-shape-picker svg{width:48px;height:32px;fill:var(--control-hover);stroke:var(--muted);stroke-width:3}.bubble-shape-picker button[aria-pressed=true]{border-color:var(--control-focus);background:var(--control-hover);color:var(--accent)}.bubble-shape-picker .shape-default{width:100%;font-size:11px;margin-bottom:8px;min-height:32px}
+
+.workspace:has(.annotation-layer){overflow-x:hidden}
+
+.annotation-cloud[data-shape=heart] .cloud-body{padding:42px 30px 34px}
+.annotation-cloud[data-shape=starburst] .cloud-body,.annotation-cloud[data-shape=comic-burst] .cloud-body,.annotation-cloud[data-shape=splash] .cloud-body{padding:36px 30px}
+.cloud-shape>path{stroke:color-mix(in srgb,currentColor 14%,transparent);stroke-width:.75;vector-effect:non-scaling-stroke}
+
+.cloud-body{opacity:var(--cloud-opacity)}
+
+/* Full-body dragging surrounds an independently measured central text area. */
+.annotation-cloud .cloud-body{position:absolute;inset:0;min-height:0;padding:0;border-radius:0}
+.cloud-text{pointer-events:none;overflow-wrap:anywhere;white-space:pre-wrap}
+
+
+.annotation-cloud .cloud-edit{top:4px;right:8px;bottom:auto;opacity:1}
+.card-customization-dialog{width:800px;max-height:calc(100dvh - 48px);display:flex;flex-direction:column;overflow:hidden}
+.card-customization-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:24px;min-height:0;flex:1;margin-top:16px}
+.card-preview-column{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--bg);border:1px solid var(--control-border);border-radius:10px;padding:16px}
+.card-preview-column>span{font-size:11px;color:var(--muted);margin-bottom:12px}
+.card-preview-stage{overflow:auto;min-height:0;flex:1;padding:8px 0;scrollbar-width:none;-ms-overflow-style:none}
+.card-live-preview{position:relative;isolation:isolate;width:100%;max-width:260px;margin:0 auto;flex-shrink:0;font-family:'Source Serif 4',Georgia,serif;font-size:15px;line-height:1.5}
+.card-controls-column{min-width:0;overflow:auto;padding:0 4px 4px;scrollbar-width:none;-ms-overflow-style:none}
+.card-controls-column .card-editor{padding:0;margin:0;border:0}
+.card-controls-column .bubble-shape-picker{margin-top:0}
+.card-customization-dialog .dialog-actions{margin-top:16px}
+@media(max-width:600px){.card-customization-grid{grid-template-columns:1fr;grid-template-rows:minmax(140px,210px) minmax(0,1fr);gap:16px}.card-customization-dialog{height:calc(100dvh - 48px)}.card-preview-stage{padding:0}.card-live-preview{max-width:220px}}
+
+.card-preview-stage{display:flex;flex-direction:column}.card-preview-stage>.card-live-preview{margin:auto}
+
+.card-customization-dialog .card-preview-stage::-webkit-scrollbar,.card-customization-dialog .card-controls-column::-webkit-scrollbar,.card-customization-dialog textarea::-webkit-scrollbar{display:none}
+.card-customization-dialog textarea{scrollbar-width:none;-ms-overflow-style:none}
+
+.cloud-collapse{position:absolute;top:4px;right:40px;width:24px;height:28px;min-width:24px;min-height:28px;padding:6px;border-radius:50%;color:var(--muted);background:var(--surface)}
+.card-handdrawn-accents{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;fill:none;stroke:var(--card-ink);stroke-width:1.5;stroke-linecap:round;opacity:.45}
+.thought-paper-marker{position:absolute;padding:0;border:0!important;border-radius:0;background:transparent!important;pointer-events:auto;opacity:var(--cloud-opacity);filter:drop-shadow(0 2px 3px #1f1d1a13);cursor:pointer;transition:filter 140ms}
+.thought-paper-marker svg{width:100%;height:100%;overflow:visible}
+.thought-paper-marker:hover{filter:drop-shadow(0 3px 4px #1f1d1a20)}
+.thought-paper-marker:focus-visible{outline:none;box-shadow:0 0 0 2px var(--control-ring);border-radius:12px}
+
+.thought-paper-marker{touch-action:none;cursor:grab;user-select:none}
+.thought-paper-marker.is-dragging{cursor:grabbing}
+
+.shared-thought-indicator{position:fixed;z-index:24;pointer-events:none;padding:4px 7px;border-radius:6px;background:var(--surface);color:var(--muted);border:1px solid var(--control-border);font:10px/1.4 Inter,sans-serif;box-shadow:0 2px 8px #1f1d1a08}
+.annotation-connectors .connector-active circle{opacity:1}
+
+.card-customization-dialog .presets{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.card-customization-dialog .presets button{min-height:40px}
