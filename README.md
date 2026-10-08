@@ -1,4 +1,4 @@
-# Writely
+# Writely V2
 
 A calm, writing-first workspace for essays, stories, and unfinished thoughts. This repository contains the OpenCode Writely prototype: a manuscript-centered editor with quiet navigation, spatial thought cards, and intentional revision tools.
 
