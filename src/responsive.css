@@ -315,3 +315,12 @@ html,body,.app,.app *,body>.modal-overlay,body>.modal-overlay *{scrollbar-width:
 .universal-section>.settings-add-goal{display:flex;width:100%;min-height:44px;margin:0 0 20px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--accent);background:var(--tint);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:8px}
 .universal-section>.settings-add-goal:hover,.universal-section>.settings-add-goal:active{background:color-mix(in srgb,var(--tint) 70%,var(--surface));color:var(--accent)}
 }
+
+/* Mobile: Log out and Delete account share the row as equal, clearly outlined buttons. */
+@media(max-width:760px){
+.account-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.account-actions button{width:100%;min-height:44px;padding:10px 16px;font-size:13px;font-weight:500;border-radius:8px;color:var(--text);background:var(--surface);border:1px solid var(--border)}
+.account-actions button:disabled{color:var(--muted);background:color-mix(in srgb,var(--text) 3%,transparent);opacity:.7}
+.account-actions button.danger{color:var(--danger);background:color-mix(in srgb,var(--danger) 8%,var(--bg));border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
+.account-actions button.danger:hover,.account-actions button.danger:active{background:color-mix(in srgb,var(--danger) 14%,var(--bg));color:var(--danger)}
+}
