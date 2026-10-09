@@ -293,3 +293,19 @@ html,body,.app,.app *,body>.modal-overlay,body>.modal-overlay *{scrollbar-width:
 .writing-view.is-scrolled::before{border-bottom-color:var(--border);box-shadow:0 1px 8px #1F1D1A0A}
 .paper{padding-top:66px}
 }
+
+/* Settings: no sidebar toggle, so content starts higher; account actions sit side by side. */
+.settings-content{padding-top:24px}
+.account-actions{flex-direction:row;align-items:center;gap:24px}
+.account-actions button{padding:6px 0}
+/* Universal checklist: Add goal sits opposite the heading on desktop, under the description on mobile. */
+.universal-section{display:grid;grid-template-columns:1fr auto;column-gap:16px;align-items:center}
+.universal-section>h2{grid-column:1;grid-row:1;margin:0}
+.universal-section>.settings-add-goal{grid-column:2;grid-row:1;margin:0;white-space:nowrap}
+.universal-section>.settings-muted,.universal-section>.universal-goal-list{grid-column:1/-1}
+@media(max-width:760px){
+.settings-content{padding:20px 24px 60px}
+.universal-section{display:block}
+.universal-section>h2{margin:0 0 16px}
+.universal-section>.settings-add-goal{margin:-6px 0 12px}
+}
