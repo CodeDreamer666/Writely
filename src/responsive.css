@@ -324,8 +324,10 @@ html,body,.app,.app *,body>.modal-overlay,body>.modal-overlay *{scrollbar-width:
 .account-actions button{width:100%;min-height:44px}
 }
 
-/* Desktop: name, email and account actions share one card row. */
+/* Desktop: one list card; Name row, Email row, then the account actions in a footer row. */
 @media(min-width:761px){
-.account-card{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
-.account-card .account-actions{margin-top:0;flex-shrink:0}
+.account-card{display:flex;flex-direction:column;align-items:stretch;gap:0;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.account-card .account-details{flex-direction:column;flex-wrap:nowrap;gap:0}
+.account-card .account-details>div{padding:14px 20px;gap:14px;border-bottom:1px solid var(--border)}
+.account-card .account-actions{margin-top:0;padding:14px 20px;justify-content:flex-end}
 }
