@@ -331,3 +331,6 @@ html,body,.app,.app *,body>.modal-overlay,body>.modal-overlay *{scrollbar-width:
 .account-card .account-details>div{padding:14px 20px;gap:14px;border-bottom:1px solid var(--border)}
 .account-card .account-actions{margin-top:0;padding:14px 20px;justify-content:flex-end}
 }
+
+/* Desktop: Add revision ends on the same line as the account card's Delete account button. */
+@media(min-width:761px){.universal-section>.settings-add-goal{margin-right:21px}}
