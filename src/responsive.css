@@ -309,3 +309,9 @@ html,body,.app,.app *,body>.modal-overlay,body>.modal-overlay *{scrollbar-width:
 .universal-section>h2{margin:0 0 16px}
 .universal-section>.settings-add-goal{margin:-6px 0 12px}
 }
+
+/* Mobile: Add revision is a full-width, clearly outlined button. */
+@media(max-width:760px){
+.universal-section>.settings-add-goal{display:flex;width:100%;min-height:44px;margin:0 0 20px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--accent);background:var(--tint);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:8px}
+.universal-section>.settings-add-goal:hover,.universal-section>.settings-add-goal:active{background:color-mix(in srgb,var(--tint) 70%,var(--surface));color:var(--accent)}
+}
