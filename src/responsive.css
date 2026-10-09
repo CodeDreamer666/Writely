@@ -281,3 +281,7 @@ html,body,.app,.app *,body>.modal-overlay,body>.modal-overlay *{scrollbar-width:
 .prototype-reset{padding-top:22px;border-top:1px solid var(--control-border)}
 .prototype-reset button{font-size:11px;min-height:32px;padding:6px 0;color:var(--muted)}
 @media(max-width:760px){.account-details{flex-direction:column;gap:18px}}
+
+/* Touch: centre the create icon under the close-sidebar icon; keep the manuscript clear of the floating toggles. */
+@media(hover:none){.rail-heading .new-writing{margin-right:6px}}
+@media(max-width:760px){.paper{padding-top:88px}}
