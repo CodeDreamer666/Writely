@@ -286,8 +286,10 @@ html,body,.app,.app *,body>.modal-overlay,body>.modal-overlay *{scrollbar-width:
 @media(hover:none){.rail-heading .new-writing{margin-right:6px}}
 @media(max-width:760px){.paper{padding-top:88px}}
 
-/* Mobile: the floating toggles belong to the top of the page and scroll away with the text. */
+/* Mobile: the two toggles sit on a fixed navbar that picks up a quiet edge once the text scrolls beneath it. */
 @media(max-width:760px){
-.canvas-sidebar-toggle,.canvas-tools-launcher{transform:translateY(calc(-1 * var(--ws-scroll,0px)))}
+.canvas-sidebar-toggle,.canvas-tools-launcher{position:fixed;z-index:12}
+.writing-view::before{content:'';position:fixed;top:0;left:0;right:0;height:58px;z-index:11;background:var(--bg);border-bottom:1px solid transparent;transition:border-color 160ms ease-out,box-shadow 160ms ease-out;pointer-events:none}
+.writing-view.is-scrolled::before{border-bottom-color:var(--border);box-shadow:0 1px 8px #1F1D1A0A}
 .paper{padding-top:66px}
 }

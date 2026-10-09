@@ -72,7 +72,7 @@ function App(){
  const editor=useEditor({extensions:[StarterKit.configure({heading:{levels:[2,3]}}),CardHighlights,EmptyDraftPlaceholder],content:doc.html,editorProps:{attributes:{'aria-label':'Document text',role:'textbox','aria-multiline':'true'},handleDOMEvents:{focus:()=>{setSelected(null);return false;}}},onUpdate:({editor,transaction})=>{const html=editor.getHTML(),nextDoc=transaction.doc;update(d=>({html,cards:remapConnectors(d.cards,transaction.mapping,nextDoc)}));}},[doc.id]);
  useFlowAnchor(editor,workspace,!comparison&&!modal&&!panel&&!settingsOpen);
  useEffect(()=>{setSelected(null);setComparison(null);},[doc.id]);
- useEffect(()=>{const el=workspace.current;if(!el)return;const sync=()=>el.parentElement?.parentElement?.style.setProperty('--ws-scroll',el.scrollTop+'px');el.addEventListener('scroll',sync,{passive:true});return()=>el.removeEventListener('scroll',sync);},[]);
+ useEffect(()=>{const el=workspace.current;if(!el)return;const sync=()=>el.parentElement?.parentElement?.classList.toggle('is-scrolled',el.scrollTop>2);el.addEventListener('scroll',sync,{passive:true});return()=>el.removeEventListener('scroll',sync);},[]);
  useEffect(()=>{document.documentElement.dataset.theme='light';},[]);
  useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),3500);return()=>clearTimeout(t);},[notice]);
  useEffect(()=>{if(modal){priorFocus.current=document.activeElement;requestAnimationFrame(()=>dialog.current?.querySelector('#document-name,#delete-confirmation,input,button')?.focus());}else priorFocus.current?.focus?.();},[modal]);
