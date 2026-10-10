@@ -64,3 +64,8 @@
 
 .card-customization-dialog .presets{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .card-customization-dialog .presets button{min-height:40px}
+
+/* Cap bubble text so long or unbroken input can't stretch the silhouette out of shape. */
+.cloud-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;line-clamp:5;overflow:hidden;word-break:break-word}
+.card-editor>textarea#card-text{margin-bottom:4px}
+.card-text-count{display:block;text-align:right;font-size:11px;color:var(--muted);margin-bottom:16px}

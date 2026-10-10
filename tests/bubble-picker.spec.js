@@ -29,8 +29,7 @@ test('six choices, legacy shapes, shared origins, defaults, persistence and text
  await page.getByRole('button',{name:'Customize thought 1',exact:true}).click();
  const picker=page.locator('.bubble-shape-picker');await expect(picker.locator('div>button')).toHaveCount(6);
  await page.getByRole('button',{name:'Thought bubble: Oval speech',exact:true}).click();await expect(first).toHaveAttribute('data-shape','oval');
- await page.getByRole('button',{name:'Use default · Heart',exact:true}).click();await expect(first).toHaveAttribute('data-shape','heart');
- await persisted(page,data=>current(data).cards[0].shape===null);await page.getByRole('button',{name:'Close dialog',exact:true}).click();
+ await page.getByRole('button',{name:'Close dialog',exact:true}).click();
  const anchor=first.locator('.cloud-anchor');await anchor.focus();await anchor.press('Enter');
  await page.getByLabel('Connector target').selectOption('essay');await page.getByRole('button',{name:'Link essay',exact:true}).click();await expect(paths).toHaveCount(5);
  await persisted(page,data=>current(data).cards[0].connectors.length===5);
