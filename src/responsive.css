@@ -56,7 +56,7 @@
 @keyframes utility-slide-out{from{transform:translateX(0)}to{transform:translateX(100%)}}
 @keyframes utility-fade-in{from{opacity:0}to{opacity:1}}
 @keyframes utility-fade-out{from{opacity:1}to{opacity:0}}
-@media(max-width:760px){.main .workspace-shell>.utility-panel{width:100%}}
+@media(max-width:760px){.main .workspace-shell>.utility-panel{width:min(320px,calc(100vw - 48px))}}
 @media(prefers-reduced-motion:reduce){.utility-panel.is-open,.utility-panel.is-closing,.utility-scrim.is-open,.utility-scrim.is-closing{animation:none}}
 
 /* All dialogs share a body-mounted, viewport-centered overlay. */
@@ -115,21 +115,17 @@ input:not([type=range]):not([type=color]):focus,textarea:focus,select:focus{outl
 .topbar{height:var(--app-header-height);border-bottom:1px solid var(--border)}
 .document-rail,.document-rail.drawer-open{padding:0 12px 16px}
 .document-rail .brand{height:var(--app-header-height);min-height:var(--app-header-height);padding:8px 12px 8px 24px;margin:0 -12px 8px;border-bottom:1px solid var(--border)}
-/* Keep a readable, stable column clear of the temporary right workspace. */
+/* Keep a readable, stable column; the right panel overlays it without moving the editor. */
 @media(min-width:1120px){
  .workspace{padding-right:0}
  .paper{width:calc(100% - 384px);max-width:680px;transition:transform 200ms ease-out}
- .tool-panel-visible .paper{transform:translateX(-160px)}
 }
 @media(min-width:761px){.app.with-rail:not(.focus-mode){--visible-writing-rail:232px}}
 @media(min-width:1400px){.app.with-rail:not(.focus-mode){--visible-writing-rail:248px}}
 @media(min-width:761px) and (max-width:1250px){.app.with-rail:not(.focus-mode){--visible-writing-rail:208px}}
 @media(min-width:761px) and (max-width:1000px){.app.with-rail:not(.focus-mode){--visible-writing-rail:192px}}
-/* At smaller widths show one useful workspace instead of a narrow editor sliver. */
-@media(max-width:1119px){
- .main .workspace-shell>.utility-panel{width:calc(100vw - var(--visible-writing-rail));padding:24px}
- .utility-panel>*{max-width:480px;margin-left:auto;margin-right:auto}
-}
+/* The right panel always floats over the editor at a fixed width instead of resizing it. */
+@media(max-width:1119px){.main .workspace-shell>.utility-panel{padding:24px}}
 
 /* Each document has one continuous hover surface with a nested icon accent. */
 .document-row{border-radius:8px;transition:background-color 140ms}
@@ -142,7 +138,7 @@ input:not([type=range]):not([type=color]):focus,textarea:focus,select:focus{outl
 .document-rail .brand button{opacity:1}
 
 /* A small optical adjustment only while the writing list is visible. */
-@media(min-width:761px){.app.with-rail:not(.focus-mode):not(.tool-panel-visible) .paper{transform:translateX(-24px)}}
+@media(min-width:761px){.app.with-rail:not(.focus-mode) .paper{transform:translateX(-24px)}}
 
 /* Internal hairlines structure the primary metrics; secondary statistics stay unchanged. */
 .writing-statistics{gap:0}
