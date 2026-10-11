@@ -72,6 +72,4 @@
 [data-shape=thought-cloud] .cloud-text{text-align:center}
 /* Long thoughts keep the card's outline fixed and scroll inside the shape's safe column. */
 .cloud-text[data-scroll]{overflow-y:auto;overscroll-behavior:contain;pointer-events:auto;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,currentColor 28%,transparent) transparent}
-.card-editor>textarea#card-text{margin-bottom:16px;min-height:104px;max-height:220px;resize:vertical;overflow-y:auto;line-height:1.5}
-.card-customization-dialog textarea#card-text{scrollbar-width:thin}
-.card-customization-dialog textarea#card-text::-webkit-scrollbar{display:block;width:6px}
+.card-editor>textarea#card-text{margin-bottom:16px;height:132px;line-height:1.5}

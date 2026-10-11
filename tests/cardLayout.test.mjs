@@ -23,4 +23,6 @@ for(const id of ['rectangle','rounded-square','thought-cloud']){
 const cloudArcs=layout=>[...layout.path.matchAll(/ A ([\d.]+)/g)].map(m=>Number(m[1]));
 const smallCloud=cloudArcs(layoutCard('thought-cloud',{contentWidth:120,textHeight:45})),bigCloud=cloudArcs(layoutCard('thought-cloud',{contentWidth:240,textHeight:200}));
 assert(bigCloud.length>smallCloud.length&&smallCloud.length>=7);assert(Math.max(...bigCloud)<=28*1.13);
+// Every lobe is drawn as a small outward arc; an inner arc would cut a bite out of the cloud.
+for(let w=40;w<=300;w+=6)for(let h=20;h<=320;h+=10)for(const arc of layoutCard('thought-cloud',{contentWidth:w,textHeight:h}).path.matchAll(/ A [\d.]+ [\d.]+ 0 (\d) (\d)/g))assert.deepEqual([arc[1],arc[2]],['0','1'],`cloud ${w}x${h} has an inward lobe`);
 console.log('Card layout tests passed: generated silhouettes, proportional growth, capped scrolling and legacy warping.');

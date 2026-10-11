@@ -57,7 +57,7 @@ test('shapes keep their silhouette as text grows, cap their size and scroll long
  }
  // A thought cloud is drawn with many round lobes, not a stretched polygon.
  expect(await page.locator('[data-card-id="thought-cloud-2"] .cloud-shape path').getAttribute('d')).toMatch(/( A [^A]+){9,}/);
- await expect(page.locator('[data-card-id="thought-cloud-2"] .cloud-shape circle')).toHaveCount(2);
+ await expect(page.locator('[data-card-id="thought-cloud-2"] .cloud-shape circle')).toHaveCount(0);
  await page.screenshot({path:'evidence/card-shapes.png',fullPage:true});
 });
 test('thoughts have no length limit and the preview mirrors the real card',async({page})=>{
@@ -75,4 +75,10 @@ test('thoughts have no length limit and the preview mirrors the real card',async
  await page.screenshot({path:'evidence/card-preview-long.png'});
  await modal.getByRole('button',{name:'Close dialog',exact:true}).click();await page.reload();await page.getByRole('button',{name:'Close document list',exact:true}).click();
  await expect(page.locator('[data-card-id="only"] .cloud-text')).toHaveText(text);
+});
+test('cards settle instead of flickering between wraps',async({page})=>{
+ await open(page,['','An unfinished thought that wraps','Hm.'].flatMap((text,i)=>['thought-cloud','rounded-square','rectangle'].map((shape,j)=>({id:`${shape}-${i}`,shape,text,placement:'free',x:.05+i*.3,y:60+j*240}))));
+ const sizes=()=>page.locator('.annotation-cloud').evaluateAll(cards=>cards.map(card=>card.offsetWidth+'x'+card.offsetHeight+':'+card.querySelector('.cloud-text').offsetHeight).join('|'));
+ const first=await sizes();const seen=new Set([first]);for(let i=0;i<20;i++){await page.waitForTimeout(50);seen.add(await sizes());}
+ expect([...seen]).toEqual([first]);
 });

@@ -16,7 +16,7 @@ export function CardShape({layout}){
 // The collapse and customize buttons occupy the card's top-right corner (see .cloud-collapse/.cloud-edit).
 const CONTROLS_WIDTH=70,CONTROLS_HEIGHT=34;
 export const CardText=React.forwardRef(function CardText({layout,children,style},ref){
- const {left,top,width,height}=layout.content,room=top<CONTROLS_HEIGHT?Math.max(0,left+width-(layout.width-CONTROLS_WIDTH)):0;
+ const {left,top,width,height}=layout.content,room=layout.reserveControls&&top<CONTROLS_HEIGHT?Math.max(0,left+width-(layout.width-CONTROLS_WIDTH)):0;
  return <div ref={ref} className="cloud-text" data-scroll={layout.scroll||undefined} style={{position:'absolute',left,top,width,height:layout.scroll?height:undefined,...style}}>{room>0&&<span className="cloud-text-controls-room" style={{width:room,height:CONTROLS_HEIGHT-top}} aria-hidden="true"/>}{children}</div>;
 });
 export default function Annotations({editor,workspace,cards,defaultShape,selected,onSelect,onPatch,onEdit,onConnectStart}){

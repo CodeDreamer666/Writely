@@ -43,11 +43,11 @@ export function cardContentWidth(id,text,maxWidth=CARD_MAX_WIDTH){
 
 // Rectangle: clean edges with slightly rounded corners.
 const RECT_PAD_X=20,RECT_PAD_Y=16,RECT_RADIUS=10;
-// Rounded speech: a generous silhouette with a short tail beneath it.
-const SPEECH_PAD=16,SPEECH_TAIL=14;
+// Rounded speech: a generous, softly rounded silhouette.
+const SPEECH_PAD=16;
 const speechRadius=(w,h)=>Math.min(34,h*.42,w*.3);
-// Thought cloud: rounded lobes are spaced around a soft core, plus two trailing puffs.
-const CLOUD_PAD=8,CLOUD_TRAIL=26;
+// Thought cloud: rounded lobes are spaced around a soft core.
+const CLOUD_PAD=8;
 const lobeRadius=(w,h)=>Math.max(14,Math.min(28,Math.min(w,h)*.2));
 const cloudCoreRadius=(w,h)=>Math.min(w,h)*.42;
 // Keep the text's corners inside the softened core plus the fill between lobes.
@@ -67,13 +67,10 @@ function layoutRectangle(contentWidth,contentHeight){
   box:{left:(width-contentWidth)/2,top:(height-contentHeight)/2},anchors:{top:[.5,0],right:[1,.5],bottom:[.5,1],left:[0,.5]}};
 }
 function layoutSpeech(contentWidth,contentHeight){
- let width=contentWidth+SPEECH_PAD*2,body=contentHeight+SPEECH_PAD*2;
- for(let i=0;i<3;i++){const inset=SPEECH_PAD+speechRadius(width,body)*.3;width=Math.max(designs['rounded-square'].minWidth,contentWidth+inset*2);body=Math.max(designs['rounded-square'].minHeight-SPEECH_TAIL,contentHeight+inset*2);}
- const r=speechRadius(width,body),height=body+SPEECH_TAIL,x=.5,y=.5,w=width-1,h=body-1;
- // The tail leaves the lower edge a little left of centre and curls back into it.
- const tailStart=Math.max(x+r+8,w*.24),tailEnd=tailStart+Math.min(26,w*.14),tip={x:tailStart-4,y:h+SPEECH_TAIL-1};
- const path=`M ${round(x+r)} ${y} H ${round(x+w-r)} A ${r} ${r} 0 0 1 ${round(x+w)} ${round(y+r)} V ${round(y+h-r)} A ${r} ${r} 0 0 1 ${round(x+w-r)} ${round(y+h)} H ${round(tailEnd)} Q ${round(tailStart+4)} ${round(y+h+2)} ${round(tip.x)} ${round(tip.y)} Q ${round(tailStart+2)} ${round(y+h+6)} ${round(tailStart-6)} ${round(y+h)} H ${round(x+r)} A ${r} ${r} 0 0 1 ${x} ${round(y+h-r)} V ${round(y+r)} A ${r} ${r} 0 0 1 ${round(x+r)} ${y} Z`;
- return {width,height,path,decorations:[],box:{left:(width-contentWidth)/2,top:(body-contentHeight)/2},anchors:{top:[.5,0],right:[1,body/2/height],bottom:[tip.x/width,1],left:[0,body/2/height]}};
+ let width=contentWidth+SPEECH_PAD*2,height=contentHeight+SPEECH_PAD*2;
+ for(let i=0;i<3;i++){const inset=SPEECH_PAD+speechRadius(width,height)*.3;width=Math.max(designs['rounded-square'].minWidth,contentWidth+inset*2);height=Math.max(designs['rounded-square'].minHeight,contentHeight+inset*2);}
+ const r=speechRadius(width,height);
+ return {width,height,path:rectPath(.5,.5,width-1,height-1,r),decorations:[],box:{left:(width-contentWidth)/2,top:(height-contentHeight)/2},anchors:{top:[.5,0],right:[1,.5],bottom:[.5,1],left:[0,.5]}};
 }
 // Sample a point and outward normal at distance t along a rounded rectangle's perimeter.
 function roundedRectWalker(x,y,w,h,r){
@@ -90,10 +87,11 @@ function roundedRectWalker(x,y,w,h,r){
  };
  return {total,at};
 }
-function circleIntersection(a,b,center){
+// The outer meeting point of two neighbouring lobes, on the side their outward normals face.
+function circleIntersection(a,b){
  const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),along=(d*d+a.r*a.r-b.r*b.r)/(2*d),h=Math.sqrt(Math.max(0,a.r*a.r-along*along));
- const mx=a.x+along*dx/d,my=a.y+along*dy/d,p1={x:mx-h*dy/d,y:my+h*dx/d},p2={x:mx+h*dy/d,y:my-h*dx/d};
- return Math.hypot(p1.x-center.x,p1.y-center.y)>Math.hypot(p2.x-center.x,p2.y-center.y)?p1:p2;
+ const mx=a.x+along*dx/d,my=a.y+along*dy/d,p1={x:mx-h*dy/d,y:my+h*dx/d},p2={x:mx+h*dy/d,y:my-h*dx/d},nx=a.nx+b.nx,ny=a.ny+b.ny;
+ return (p1.x-mx)*nx+(p1.y-my)*ny>(p2.x-mx)*nx+(p2.y-my)*ny?p1:p2;
 }
 function layoutCloud(contentWidth,contentHeight){
  const design=designs['thought-cloud'];
@@ -101,26 +99,25 @@ function layoutCloud(contentWidth,contentHeight){
  // Lobes and the softened core depend on the core's size, so settle the size in a few passes.
  for(let i=0;i<4;i++){
   const r=lobeRadius(coreWidth,coreHeight),inset=cloudInset(coreWidth,coreHeight);
-  coreWidth=Math.max(design.minWidth-2*r,contentWidth+inset*2);coreHeight=Math.max(design.minHeight-CLOUD_TRAIL-2*r,contentHeight+inset*2);
+  coreWidth=Math.max(design.minWidth-2*r,contentWidth+inset*2);coreHeight=Math.max(design.minHeight-2*r,contentHeight+inset*2);
  }
- const r=lobeRadius(coreWidth,coreHeight),margin=r+2,width=coreWidth+margin*2,body=coreHeight+margin*2,height=body+CLOUD_TRAIL;
+ const r=lobeRadius(coreWidth,coreHeight),margin=r+2,width=coreWidth+margin*2,body=coreHeight+margin*2,height=body;
  const core={x:margin,y:margin,w:coreWidth,h:coreHeight},center={x:width/2,y:body/2};
  const walker=roundedRectWalker(core.x,core.y,core.w,core.h,cloudCoreRadius(core.w,core.h));
  // Lobes overlap enough that the dips between them stay well outside the text.
  const count=Math.max(7,Math.round(walker.total/(r*1.35))),step=walker.total/count;
- const lobes=Array.from({length:count},(_,i)=>{const p=walker.at(i*step+step*.35);const size=r*(1+.12*Math.sin(i*2.4+1));return {x:p.x,y:p.y,r:size};});
- const meets=lobes.map((lobe,i)=>circleIntersection(lobe,lobes[(i+1)%count],center));
+ const lobes=Array.from({length:count},(_,i)=>{const p=walker.at(i*step+step*.35);const size=r*(1+.12*Math.sin(i*2.4+1));return {x:p.x,y:p.y,nx:p.nx,ny:p.ny,r:size};});
+ const meets=lobes.map((lobe,i)=>circleIntersection(lobe,lobes[(i+1)%count]));
  let path=`M ${round(meets[count-1].x)} ${round(meets[count-1].y)}`;
  lobes.forEach((lobe,i)=>{
   const from=meets[(i+count-1)%count],to=meets[i];
-  const start=Math.atan2(from.y-lobe.y,from.x-lobe.x),end=Math.atan2(to.y-lobe.y,to.x-lobe.x),outward=Math.atan2(lobe.y-center.y,lobe.x-center.x);
+  const start=Math.atan2(from.y-lobe.y,from.x-lobe.x),end=Math.atan2(to.y-lobe.y,to.x-lobe.x),outward=Math.atan2(lobe.ny,lobe.nx);
   const span=((end-start)%(2*Math.PI)+2*Math.PI)%(2*Math.PI),reach=((outward-start)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
   const sweep=reach<span?1:0,length=sweep?span:2*Math.PI-span;
   path+=` A ${round(lobe.r)} ${round(lobe.r)} 0 ${length>Math.PI?1:0} ${sweep} ${round(to.x)} ${round(to.y)}`;
  });
  path+=' Z';
- const trail=Math.min(9,r*.45);
- const decorations=[{cx:width*.22,cy:body+trail*.8,r:trail},{cx:width*.22-trail*1.7,cy:body+trail*2,r:trail*.55}];
+ const decorations=[];
  const extremes={left:Math.min(...lobes.map(l=>l.x-l.r)),right:Math.max(...lobes.map(l=>l.x+l.r)),top:Math.min(...lobes.map(l=>l.y-l.r)),bottom:Math.max(...lobes.map(l=>l.y+l.r))};
  return {width,height,path,decorations,box:{left:(width-contentWidth)/2,top:(body-contentHeight)/2},
   anchors:{top:[.5,(extremes.top+r*.25)/height],right:[(extremes.right-r*.25)/width,center.y/height],bottom:[.5,(extremes.bottom-r*.25)/height],left:[(extremes.left+r*.25)/width,center.y/height]}};
@@ -136,7 +133,9 @@ export function layoutCard(id,{contentWidth,textHeight=0,maxHeight=CARD_MAX_HEIG
  let contentHeight=naturalHeight,layout=build(contentWidth,contentHeight);
  for(let i=0;i<4&&layout.height>maxHeight+.5;i++){contentHeight=Math.max(CARD_LINE_HEIGHT*2,contentHeight-(layout.height-maxHeight));layout=build(contentWidth,contentHeight);}
  const scroll=contentHeight<naturalHeight-.5;
- return {path:layout.path,width:layout.width,height:layout.height,anchors:layout.anchors,decorations:layout.decorations,scroll,
+ // Rectangle and speech text starts by the corner buttons, so it wraps around them. Clouds keep
+ // their text inside the lobes; reserving room there would let the text height feed back into its wrapping.
+ return {path:layout.path,width:layout.width,height:layout.height,anchors:layout.anchors,decorations:layout.decorations,scroll,reserveControls:shape.id!=='thought-cloud',
   content:{left:layout.box.left,top:layout.box.top,width:contentWidth,height:contentHeight}};
 }
 
