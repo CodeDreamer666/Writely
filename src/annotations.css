@@ -1,9 +1,10 @@
 .annotation-layer{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:3;overflow:visible}
 .annotation-connectors{position:absolute;top:0;left:0;overflow:visible;pointer-events:none;color:color-mix(in srgb,var(--accent) 48%,var(--muted));fill:none}
 .annotation-connectors g>path{stroke:currentColor;stroke-width:1.6;opacity:.82}.annotation-connectors circle{fill:currentColor;stroke:none;opacity:.85}.annotation-connectors .connector-active path{opacity:1;stroke-width:1.9}.annotation-connectors .connector-preview{stroke:currentColor;stroke-width:1.6;stroke-dasharray:4 5;opacity:.85}
-.annotation-cloud{position:absolute;min-height:104px;isolation:isolate;pointer-events:auto;touch-action:none;filter:drop-shadow(0 4px 8px #1f1d1a06)}
+.annotation-cloud{position:absolute;isolation:isolate;pointer-events:auto;touch-action:none;filter:drop-shadow(0 4px 8px #1f1d1a06)}
 .cloud-shape{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;fill:var(--cloud-fill);opacity:var(--cloud-opacity);z-index:-1}
 .cloud-body{padding:28px 24px 26px;min-height:104px;font-family:'Source Serif 4',Georgia,serif;font-size:15px;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap;cursor:grab;user-select:none;touch-action:none;border:0;border-radius:40%;outline:none}
+.annotation-cloud.is-selected{z-index:4}
 .annotation-cloud.is-dragging{z-index:5}.is-dragging .cloud-body{cursor:grabbing}.cloud-body:focus-visible{outline:none!important;box-shadow:0 0 0 2px var(--control-ring)}
 .cloud-edit{position:absolute;right:12px;bottom:-8px;width:28px;height:28px;min-width:28px;min-height:28px;padding:6px;border-radius:50%;color:var(--muted);background:var(--surface);opacity:0;transition:opacity 140ms}
 .cloud-anchor{position:absolute;width:12px;height:12px;min-width:12px;min-height:12px;padding:0;border:1px solid var(--control-focus);border-radius:50%;background:var(--surface);opacity:0;cursor:crosshair;touch-action:none}
@@ -37,14 +38,15 @@
 .card-preview-column{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--bg);border:1px solid var(--control-border);border-radius:10px;padding:16px}
 .card-preview-column>span{font-size:11px;color:var(--muted);margin-bottom:12px}
 .card-preview-stage{overflow:auto;min-height:0;flex:1;padding:8px 0;scrollbar-width:none;-ms-overflow-style:none}
-.card-live-preview{position:relative;isolation:isolate;width:100%;max-width:260px;margin:0 auto;flex-shrink:0;font-family:'Source Serif 4',Georgia,serif;font-size:15px;line-height:1.5}
+.card-live-preview-frame{position:relative;margin:0 auto;flex-shrink:0}
+.card-live-preview{position:absolute;top:0;left:0;transform-origin:0 0;isolation:isolate;font-family:'Source Serif 4',Georgia,serif;font-size:15px;line-height:1.5}
 .card-controls-column{min-width:0;overflow:auto;padding:0 4px 4px;scrollbar-width:none;-ms-overflow-style:none}
 .card-controls-column .card-editor{padding:0;margin:0;border:0}
 .card-controls-column .bubble-shape-picker{margin-top:0}
 .card-customization-dialog .dialog-actions{margin-top:16px}
-@media(max-width:600px){.card-customization-grid{grid-template-columns:1fr;grid-template-rows:minmax(140px,210px) minmax(0,1fr);gap:16px}.card-customization-dialog{height:calc(100dvh - 48px)}.card-preview-stage{padding:0}.card-live-preview{max-width:220px}}
+@media(max-width:600px){.card-customization-grid{grid-template-columns:1fr;grid-template-rows:minmax(140px,210px) minmax(0,1fr);gap:16px}.card-customization-dialog{height:calc(100dvh - 48px)}.card-preview-stage{padding:0}}
 
-.card-preview-stage{display:flex;flex-direction:column}.card-preview-stage>.card-live-preview{margin:auto}
+.card-preview-stage{display:flex;flex-direction:column}.card-preview-stage>.card-live-preview-frame{margin:auto}
 
 .card-customization-dialog .card-preview-stage::-webkit-scrollbar,.card-customization-dialog .card-controls-column::-webkit-scrollbar,.card-customization-dialog textarea::-webkit-scrollbar{display:none}
 .card-customization-dialog textarea{scrollbar-width:none;-ms-overflow-style:none}
@@ -65,7 +67,11 @@
 .card-customization-dialog .presets{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .card-customization-dialog .presets button{min-height:40px}
 
-/* Cap bubble text so long or unbroken input can't stretch the silhouette out of shape. */
-.cloud-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;line-clamp:5;overflow:hidden;word-break:break-word}
-.card-editor>textarea#card-text{margin-bottom:4px}
-.card-text-count{display:block;text-align:right;font-size:11px;color:var(--muted);margin-bottom:16px}
+/* Keeps the first lines of text clear of the card's corner controls. */
+.cloud-text-controls-room{float:right;display:block}
+[data-shape=thought-cloud] .cloud-text{text-align:center}
+/* Long thoughts keep the card's outline fixed and scroll inside the shape's safe column. */
+.cloud-text[data-scroll]{overflow-y:auto;overscroll-behavior:contain;pointer-events:auto;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,currentColor 28%,transparent) transparent}
+.card-editor>textarea#card-text{margin-bottom:16px;min-height:104px;max-height:220px;resize:vertical;overflow-y:auto;line-height:1.5}
+.card-customization-dialog textarea#card-text{scrollbar-width:thin}
+.card-customization-dialog textarea#card-text::-webkit-scrollbar{display:block;width:6px}
