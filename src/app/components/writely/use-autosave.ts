@@ -1,0 +1,230 @@
+"use client";
+import {
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import SuperJSON from "superjson";
+import {
+    isWritingActivity,
+    localDay,
+    workspaceChanges,
+    type WorkspaceChanges,
+} from "~/lib/writely/sync";
+import type { WorkspaceData } from "~/lib/writely/types";
+import { api } from "~/trpc/react";
+
+export type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+/** Unsaved changes are kept per document, since the editor opens one document at a time. */
+export const unsavedKey = (userId: string, documentId: string) =>
+    `writely.unsaved.v2:${userId}:${documentId}`;
+// Before documents had their own pages, the whole workspace was kept under one key.
+const workspaceUnsavedKey = (userId: string) => `writely.unsaved.v1:${userId}`;
+
+const readStored = (key: string) => {
+    try {
+        const data = JSON.parse(
+            localStorage.getItem(key) ?? "null",
+        ) as WorkspaceData | null;
+        if (data?.docs?.length && Array.isArray(data.defaultRevisionGoals))
+            return data;
+    } catch {
+        /* Unreadable leftovers are ignored. */
+    }
+    return null;
+};
+
+/**
+ * Changes the server hasn't confirmed yet for one document. They stay in this browser until a
+ * save succeeds, so a reload, a closed tab or a dropped connection never loses writing.
+ */
+export function readUnsavedWorkspace(
+    userId: string,
+    documentId: string,
+): WorkspaceData | null {
+    const data = readStored(unsavedKey(userId, documentId));
+    if (data?.docs.some((doc) => doc.id === documentId))
+        return { ...data, active: documentId };
+    // Leftovers from the single-page workspace: only this document's part applies.
+    const old = readStored(workspaceUnsavedKey(userId));
+    const doc = old?.docs.find((d) => d.id === documentId);
+    return old && doc ? { ...old, docs: [doc], active: documentId } : null;
+}
+
+export function forgetUnsavedWorkspace(userId: string, documentId?: string) {
+    try {
+        if (documentId) localStorage.removeItem(unsavedKey(userId, documentId));
+        localStorage.removeItem(workspaceUnsavedKey(userId));
+    } catch {
+        /* Storage may be unavailable. */
+    }
+}
+
+/**
+ * Saves the workspace shortly after each change, sending only what differs from the last
+ * successful save. "saving" appears while edits keep arriving for more than half a second.
+ */
+export function useAutosave(
+    data: WorkspaceData,
+    saved: WorkspaceData,
+    {
+        userId,
+        onSaved,
+        local,
+    }: {
+        userId: string;
+        onSaved?: () => void;
+        /** Keeps everything in this browser under the given key instead (the tutorial sandbox). */
+        local?: string;
+    },
+) {
+    const { mutateAsync: saveToServer } = api.workspace.save.useMutation();
+    const documentId = saved.active;
+    const storageKey = local ?? unsavedKey(userId, documentId);
+    const mutateAsync = async (changes: WorkspaceChanges) => {
+        if (!local) return saveToServer(changes);
+        localStorage.setItem(local, JSON.stringify(latest.current));
+    };
+    const forget = () => {
+        if (!local) forgetUnsavedWorkspace(userId, documentId);
+    };
+    const [status, setStatus] = useState<SaveStatus>("idle");
+    const latest = useRef(data),
+        lastSaved = useRef(saved),
+        callbacks = useRef({ mutateAsync, onSaved });
+    latest.current = data;
+    callbacks.current = { mutateAsync, onSaved };
+    const pending = useRef(false),
+        inFlight = useRef<Promise<void> | null>(null),
+        queued = useRef(false),
+        alive = useRef(true);
+    const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined),
+        delayTimer = useRef<ReturnType<typeof setTimeout>>(undefined),
+        fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+    const keepLocally = useRef(() => {
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(latest.current));
+        } catch {
+            /* Without storage, the server save is the only copy. */
+        }
+    });
+
+    const attempt = useRef((): Promise<void> => {
+        clearTimeout(saveTimer.current);
+        if (inFlight.current) {
+            queued.current = true;
+            return inFlight.current;
+        }
+        const finish = () => {
+            clearTimeout(delayTimer.current);
+            pending.current = false;
+            if (alive.current) {
+                setStatus("saved");
+                fadeTimer.current = setTimeout(() => setStatus("idle"), 1400);
+            }
+        };
+        const target = latest.current,
+            changes = withActivity(lastSaved.current, target);
+        if (!changes) {
+            forget();
+            finish();
+            return Promise.resolve();
+        }
+        keepLocally.current();
+        // As with the original local saves, "saving" marks a long run of edits, not a slow request.
+        clearTimeout(delayTimer.current);
+        pending.current = false;
+        const request = callbacks.current.mutateAsync(changes).then(
+            () => {
+                lastSaved.current = target;
+                inFlight.current = null;
+                callbacks.current.onSaved?.();
+                // A save requested meanwhile goes out now; newer edits wait for their own pause.
+                if (queued.current) {
+                    queued.current = false;
+                    return attempt.current();
+                }
+                if (latest.current !== target) return;
+                forget();
+                finish();
+            },
+            () => {
+                inFlight.current = null;
+                queued.current = false;
+                clearTimeout(delayTimer.current);
+                pending.current = false;
+                if (alive.current) setStatus("error");
+            },
+        );
+        inFlight.current = request;
+        return request;
+    });
+
+    useEffect(() => {
+        clearTimeout(saveTimer.current);
+        clearTimeout(fadeTimer.current);
+        setStatus((old) =>
+            old === "error" || old === "saving" ? old : "idle",
+        );
+        if (!pending.current) {
+            pending.current = true;
+            delayTimer.current = setTimeout(() => {
+                if (pending.current)
+                    setStatus((old) => (old === "error" ? old : "saving"));
+            }, 500);
+        }
+        saveTimer.current = setTimeout(() => void attempt.current(), 350);
+    }, [data]);
+
+    useEffect(() => {
+        alive.current = true;
+        // A closing page can't wait for a response: unsaved changes are kept locally and also sent
+        // as a keepalive request.
+        const flush = () => {
+            const changes = withActivity(lastSaved.current, latest.current);
+            if (!changes) return;
+            keepLocally.current();
+            if (local) return;
+            void fetch("/api/trpc/workspace.save", {
+                method: "POST",
+                keepalive: true,
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify(SuperJSON.serialize(changes)),
+            }).catch(() => undefined);
+        };
+        window.addEventListener("pagehide", flush);
+        return () => {
+            alive.current = false;
+            window.removeEventListener("pagehide", flush);
+            clearTimeout(saveTimer.current);
+            clearTimeout(delayTimer.current);
+            clearTimeout(fadeTimer.current);
+            // The delay timer is gone, so a remount (React Strict Mode) must be able to start a new one.
+            pending.current = false;
+        };
+    }, [local]);
+
+    return {
+        status,
+        retry: () => void attempt.current(),
+        /** Saves pending changes now; resolves to whether everything is saved. */
+        flush: async () => {
+            const unsaved = () =>
+                workspaceChanges(lastSaved.current, latest.current);
+            await attempt.current();
+            // An in-flight save may have finished without the newest edits.
+            if (unsaved()) await attempt.current();
+            return !unsaved();
+        },
+    };
+}
+
+/** Saves count as a day of writing when they change the text, keep a version or finish a revision. */
+function withActivity(prev: WorkspaceData, next: WorkspaceData) {
+    const changes = workspaceChanges(prev, next);
+    if (changes && isWritingActivity(prev, next))
+        changes.activityDay = localDay();
+    return changes;
+}

@@ -1,0 +1,104 @@
+import {
+    test,
+    expect,
+    stored,
+    openSample,
+} from "./fixtures.js";
+import { initial } from "../../src/lib/writely/model.ts";
+import { LEGACY_STORAGE_KEY as KEY } from "../../src/config/storage.ts";
+test("quiet comparison, aligned actions, colored diffs and hidden functional scrolling", async ({
+    page,
+}) => {
+    const seed = initial(),
+        doc = seed.docs[0];
+    doc.html = "<p>New wording for this essay.</p>".repeat(25);
+    doc.drafts[0].html = "<p>Old wording for this essay.</p>".repeat(25);
+    await page.addInitScript(
+        ({ key, seed }) => localStorage.setItem(key, JSON.stringify(seed)),
+        { key: KEY, seed },
+    );
+    await openSample(page);
+    await page
+        .getByRole("button", { name: "Saved drafts", exact: true })
+        .click();
+    await page.getByRole("button", { name: "Compare", exact: true }).click();
+    const compare = page.locator(".comparison");
+    await expect(
+        compare.locator("h1,.comparison-intro,.diff-header small,.no-diff"),
+    ).toHaveCount(0);
+    await expect(
+        compare.getByText("Draft comparison", { exact: true }),
+    ).toBeVisible();
+    await expect(compare.locator("select")).toHaveCount(2);
+    await expect(compare.getByRole("button")).toHaveCount(2);
+    const added = compare.locator("ins").first(),
+        removed = compare.locator("del").first();
+    await expect(added).toBeVisible();
+    expect(
+        await added.evaluate((el) => getComputedStyle(el).textDecorationLine),
+    ).toBe("none");
+    expect(
+        await removed.evaluate((el) => getComputedStyle(el).textDecorationLine),
+    ).toContain("line-through");
+    const footer = page.locator(".comparison-bottom"),
+        settings = page.locator(".sidebar-footer");
+    expect(
+        Math.abs(
+            (await footer.boundingBox()).y - (await settings.boundingBox()).y,
+        ),
+    ).toBeLessThan(1);
+    const scroller = page.locator(".comparison-scroll");
+    expect(
+        await scroller.evaluate((el) => getComputedStyle(el).scrollbarWidth),
+    ).toBe("none");
+    await scroller.hover();
+    await page.mouse.wheel(0, 600);
+    await expect
+        .poll(() => scroller.evaluate((el) => el.scrollTop))
+        .toBeGreaterThan(0);
+    await expect(
+        compare.getByRole("button", { name: "Continue editing", exact: true }),
+    ).toBeVisible();
+    await page.screenshot({ path: "evidence/draft-comparison-refined.png" });
+    await compare
+        .getByRole("button", { name: "Continue editing", exact: true })
+        .click();
+    await expect(
+        page.getByRole("textbox", { name: "Document text" }),
+    ).toBeVisible();
+    const workspace = page.locator(".workspace");
+    expect(
+        await workspace.evaluate((el) => getComputedStyle(el).scrollbarWidth),
+    ).toBe("none");
+    await workspace.hover();
+    await page.mouse.wheel(0, 400);
+    await expect
+        .poll(() => workspace.evaluate((el) => el.scrollTop))
+        .toBeGreaterThan(0);
+    await page
+        .getByRole("button", { name: "Saved drafts", exact: true })
+        .click();
+    await page.getByRole("button", { name: "Compare", exact: true }).click();
+    await compare
+        .getByRole("button", { name: "Restore this version", exact: true })
+        .click();
+    await expect(
+        page.getByRole("textbox", { name: "Document text" }),
+    ).toContainText("Old wording");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page
+        .getByRole("button", { name: "Saved drafts", exact: true })
+        .click();
+    await page
+        .getByRole("button", { name: "Compare", exact: true })
+        .first()
+        .click();
+    await expect(
+        compare.getByRole("button", { name: "Continue editing", exact: true }),
+    ).toBeVisible();
+    expect(
+        await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+    ).toBe(true);
+});

@@ -1,0 +1,188 @@
+// Writely data model. The auth tables follow Better Auth's Prisma schema:
+// https://better-auth.com/docs/concepts/database
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id
+  name          String
+  email         String
+  emailVerified Boolean        @default(false)
+  image         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  workspace     Workspace?
+  documents     Document[]
+  revisionGoals RevisionGoal[]
+  writingDays   WritingDay[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+// Per-user workspace state: the open manuscript, the next card colour and preferences.
+model Workspace {
+  userId            String    @id
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeDocumentId  String?
+  nextThoughtColour Int       @default(0)
+  // Appearance, writing, export and library preferences (see src/lib/writely/preferences.ts); unknown keys are ignored.
+  preferences       Json      @default("{}")
+  // When the first-time welcome was shown; null means the user hasn't seen it yet.
+  welcomedAt        DateTime?
+  // The last time a welcome-back message was shown, so each absence gets at most one.
+  welcomeBackAt     DateTime?
+}
+
+// One row per local calendar day ("YYYY-MM-DD") on which the user wrote or revised.
+model WritingDay {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  day    String
+  // Words added to documents that day (growth only; deleting text doesn't subtract).
+  words  Int    @default(0)
+
+  @@id([userId, day])
+}
+
+// The editor generates the `id`s below, so they are only unique within their owner; each row
+// also has its own database `key`.
+
+// Universal revision goals appear in every manuscript; completion is tracked per document.
+model RevisionGoal {
+  key      String @id @default(cuid())
+  id       String
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text     String
+  position Int
+
+  @@index([userId])
+}
+
+model Document {
+  key               String   @id @default(cuid())
+  id                String
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position          Int
+  title             String
+  html              String
+  hidden            Boolean  @default(false)
+  // The open revision as JSON text ({ checkId, goal, baseline, workingId, started }), if any.
+  session           String?
+  // Universal goal id -> completed in this document.
+  universalProgress Json
+  updated           DateTime
+  created           DateTime @default(now())
+  pinned            Boolean  @default(false)
+  // Archived documents leave All, Recent and Pinned and are listed under Archived.
+  archived          Boolean  @default(false)
+  // Plain text of `html`, kept for search, previews and word counts.
+  plainText         String   @default("")
+  wordCount         Int      @default(0)
+  drafts            Draft[]
+  checks            Check[]
+  cards             Card[]
+
+  @@unique([userId, id])
+  @@index([userId, updated])
+  // Trigram indexes (pg_trgm) for case-insensitive substring search.
+  @@index([title(ops: raw("gin_trgm_ops"))], map: "Document_title_trgm_idx", type: Gin)
+  @@index([plainText(ops: raw("gin_trgm_ops"))], map: "Document_plainText_trgm_idx", type: Gin)
+}
+
+model Draft {
+  key         String   @id @default(cuid())
+  id          String
+  documentKey String
+  document    Document @relation(fields: [documentKey], references: [key], onDelete: Cascade)
+  position    Int
+  name        String
+  title       String
+  html        String
+  time        DateTime
+  goal        String?
+  baseline    String?
+
+  @@index([documentKey])
+}
+
+model Check {
+  key             String   @id @default(cuid())
+  id              String
+  documentKey     String
+  document        Document @relation(fields: [documentKey], references: [key], onDelete: Cascade)
+  position        Int
+  text            String
+  done            Boolean  @default(false)
+  sourceDefaultId String?
+
+  @@index([documentKey])
+}
+
+// Thought cards keep their text, appearance, placement and text connections as one record.
+model Card {
+  key         String   @id @default(cuid())
+  id          String
+  documentKey String
+  document    Document @relation(fields: [documentKey], references: [key], onDelete: Cascade)
+  position    Int
+  data        Json
+
+  @@index([documentKey])
+}

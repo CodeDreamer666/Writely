@@ -1,14 +1,36 @@
+# dependencies
 node_modules/
-dist/
+
+# database and generated Prisma client
+/.data/
+*.sqlite
+*.sqlite-journal
+/generated/
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# testing
 test-results/
 playwright-report/
+/coverage
 evidence/
+
+# tooling
 .impeccable/
 .restore-backup-*/
 .before-newer-version-restore-*/
+
+# env files (commit only .env.example)
 .env
 .env.*
 !.env.example
+
+# misc
 *.log
+*.pem
 .DS_Store
 Thumbs.db

@@ -1,0 +1,235 @@
+/* Preflight stays disabled to preserve browser defaults. Component styles live in Tailwind classes. */
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme inline {
+    --color-paper: var(--bg);
+    --color-surface: var(--surface);
+    --color-ink: var(--text);
+    --color-muted: var(--muted);
+    --color-line: var(--border);
+    --color-accent: var(--accent);
+    --color-accent-hover: var(--hover);
+    --color-tint: var(--tint);
+    --color-danger: var(--danger);
+    --color-success: var(--success);
+    --font-sans: Inter, sans-serif;
+    --font-serif: "Source Serif 4", Georgia, serif;
+}
+
+/*
+ * Shared runtime color tokens and animation definitions. Every component colour comes from these,
+ * so the dark theme only redefines tokens. `data-theme` on <html> is "light", "dark" or "system".
+ */
+:root {
+    color-scheme: light;
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --raised: #ffffff;
+    --text: #1f1d1a;
+    --muted: #6b665f;
+    --border: #e7e2da;
+    --accent: #2f5d62;
+    --hover: #3e7a80;
+    --tint: #dce9ea;
+    --on-accent: #ffffff;
+    --danger: #b3402a;
+    --success: #3f7d4e;
+    --selection: #dce9ea;
+    --shadow: #1f1d1a;
+    --mark: #fcefb5;
+    /* Thought cards keep their stored pastel; dark mode blends it into the surface. */
+    --card-strength: 100%;
+    --card-base: #ffffff;
+    --card-text-override: initial;
+    --diff-add: color-mix(in srgb, var(--success) 14%, transparent);
+    --diff-remove: color-mix(in srgb, var(--danger) 12%, transparent);
+    --control-border: color-mix(in srgb, var(--border) 65%, transparent);
+    --control-hover: color-mix(in srgb, var(--accent) 6%, var(--surface));
+    --control-focus: color-mix(in srgb, var(--accent) 55%, var(--border));
+    --control-ring: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #1a1917;
+        --surface: #22211e;
+        --raised: #2a2825;
+        --text: #e8e4dc;
+        --muted: #a39d93;
+        --border: #36332e;
+        --accent: #7fb3b8;
+        --hover: #9ccacf;
+        --tint: #2a3b3d;
+        --on-accent: #142224;
+        --danger: #e08a76;
+        --success: #8fc29b;
+        --selection: #34504f;
+        --shadow: #000000;
+        --mark: #5c5326;
+        --card-strength: 26%;
+        --card-base: #24231f;
+        --card-text-override: var(--text);
+    }
+}
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1a1917;
+    --surface: #22211e;
+    --raised: #2a2825;
+    --text: #e8e4dc;
+    --muted: #a39d93;
+    --border: #36332e;
+    --accent: #7fb3b8;
+    --hover: #9ccacf;
+    --tint: #2a3b3d;
+    --on-accent: #142224;
+    --danger: #e08a76;
+    --success: #8fc29b;
+    --selection: #34504f;
+    --shadow: #000000;
+    --mark: #5c5326;
+    --card-strength: 26%;
+    --card-base: #24231f;
+    --card-text-override: var(--text);
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes utility-slide-in {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes utility-slide-out {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes utility-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes utility-fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes dialog-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes save-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Tutorial coach marks: a soft ring on the real control the current step talks about. */
+.coach-target {
+    box-shadow:
+        0 0 0 2px var(--surface),
+        0 0 0 4px color-mix(in srgb, var(--accent) 70%, transparent);
+    animation: coach-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes coach-pulse {
+    50% {
+        box-shadow:
+            0 0 0 2px var(--surface),
+            0 0 0 7px color-mix(in srgb, var(--accent) 25%, transparent);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .coach-target {
+        animation: none;
+    }
+}
+
+/*
+ * Landing page. Its sections are full-bleed fields of the thought-card pastels; dark mode blends
+ * each pastel into the dark surface the same way thought cards do.
+ */
+.landing {
+    --landing-mark: color-mix(in srgb, #fbefb5 85%, transparent);
+}
+.landing-field {
+    --field-text: #1f1d1a;
+    --field-soft: color-mix(in srgb, #1f1d1a 80%, var(--field));
+}
+.field-sky {
+    --field: #d9e6f2;
+}
+.field-butter {
+    --field: #fbefb5;
+}
+.field-sage {
+    --field: #ddebdd;
+}
+:root[data-theme="dark"] .landing {
+    --landing-mark: color-mix(in srgb, #fbefb5 28%, transparent);
+}
+:root[data-theme="dark"] .landing-field {
+    --field: color-mix(in srgb, var(--field-tone) 16%, var(--bg));
+    --field-text: var(--text);
+    --field-soft: var(--muted);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .landing {
+        --landing-mark: color-mix(in srgb, #fbefb5 28%, transparent);
+    }
+    :root:not([data-theme="light"]) .landing-field {
+        --field: color-mix(in srgb, var(--field-tone) 16%, var(--bg));
+        --field-text: var(--text);
+        --field-soft: var(--muted);
+    }
+}
+.field-sky {
+    --field-tone: #d9e6f2;
+}
+.field-butter {
+    --field-tone: #fbefb5;
+}
+.field-sage {
+    --field-tone: #ddebdd;
+}

@@ -3,11 +3,11 @@
 ## Platform
 web
 ## Stack
-React, Vite, Tiptap, Radix primitives; self-hosted Inter and Source Serif 4. Proposed location and stack accepted by the user's instruction to continue.
+T3 stack: Next.js (App Router), TypeScript, tRPC, Prisma (SQLite), Better Auth and Tailwind CSS; Tiptap editor, Radix primitives; self-hosted Inter and Source Serif 4.
 ## Users and purpose
 People writing their own essays, articles and stories. Capture unfinished thoughts and revise one whole-document goal at a time without losing versions.
 ## Capabilities and constraints
-Autosave, named drafts, comparison, safe restoration, custom checklist, independent document-level thought cards, basic formatting, focus mode, command palette and document list. Local prototype data only. No AI, collaboration, uploads, images, tables or font selectors.
+Autosave, named drafts, comparison, safe restoration, custom checklist, independent document-level thought cards, basic formatting, focus mode, command palette and document list. Email and password accounts; each account's writing is stored on the server. No AI, collaboration, uploads, images, tables or font selectors.
 ## Evidence
 All nine pages of Downloads/Writely-Product-Brief.pdf, supplied parsed text and page images. Sample prose is illustrative.
 ## Accessibility

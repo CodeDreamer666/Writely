@@ -1,0 +1,74 @@
+import {
+    test,
+    expect,
+    stored,
+    openSample,
+} from "./fixtures.js";
+const placeholder = "Begin anywhere. Every thought has somewhere to go.";
+test("empty placeholder follows editor typography, toggles instantly and never enters content or saved versions", async ({
+    page,
+}) => {
+    await openSample(page);
+    await page
+        .getByRole("button", { name: "Create draft", exact: true })
+        .click();
+    const editor = page.getByRole("textbox", { name: "Document text" }),
+        line = editor.locator(".empty-draft-line");
+    await expect(line).toHaveAttribute("data-placeholder", placeholder);
+    await expect(editor).toHaveText("");
+    const typography = await line.evaluate((el) => {
+        const base = getComputedStyle(el),
+            hint = getComputedStyle(el, "::before");
+        return {
+            font: base.fontFamily,
+            hintFont: hint.fontFamily,
+            size: base.fontSize,
+            hintSize: hint.fontSize,
+            line: base.lineHeight,
+            hintLine: hint.lineHeight,
+            content: hint.content,
+        };
+    });
+    expect(typography.hintFont).toBe(typography.font);
+    expect(typography.hintSize).toBe(typography.size);
+    expect(typography.hintLine).toBe(typography.line);
+    expect(typography.content).toContain(placeholder);
+    await page.screenshot({ path: "evidence/empty-draft-placeholder.png" });
+    await editor.click();
+    await page.keyboard.type("First thought");
+    await expect(line).toHaveCount(0);
+    await editor.press("Control+A");
+    await editor.press("Backspace");
+    await expect(line).toHaveAttribute("data-placeholder", placeholder);
+    await page
+        .getByRole("button", { name: "Writing statistics", exact: true })
+        .click();
+    await expect(
+        page.locator(".writing-statistics>div").first().locator("dd"),
+    ).toHaveText("0");
+    await page
+        .getByRole("button", { name: "Close dialog", exact: true })
+        .click();
+    await page
+        .getByRole("button", { name: "Saved drafts", exact: true })
+        .click();
+    await page
+        .getByRole("button", { name: "Save named draft", exact: true })
+        .click();
+    await page.getByLabel("Draft name").fill("Empty version");
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await page.waitForTimeout(500);
+    const saved = await stored(page),
+        doc = saved.docs.find((d) => d.id === saved.active);
+    expect(doc.html).toBe("<p></p>");
+    expect(doc.drafts[0].html).toBe("<p></p>");
+    expect(JSON.stringify(saved)).not.toContain(placeholder);
+    await page.reload();
+    await expect(line).toHaveAttribute("data-placeholder", placeholder);
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+        await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+    ).toBe(true);
+});
