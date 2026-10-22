@@ -272,7 +272,7 @@ Warm paper neutrals, one deep teal, and a small set of pale pastels from the pro
 
 ### Hierarchy
 - **Display** (400, clamp(44px, 5.4vw, 68px), 1.04, -0.035em): landing hero line only. Welcome uses clamp(38px, 6vw, 64px) and sign-in clamp(36px, 3.6vw, 54px) in the same spirit.
-- **Headline** (400, 32px, 1.1, -0.03em): landing section headings. The closing blank page sets its prompt at 30px.
+- **Headline** (400, 32px, 1.1, -0.03em): landing section headings. The closing prompt is 36px.
 - **Page title** (400, 44px, 1, -0.03em; 36px on phones): the library's "Documents". The draft comparison heading uses 26px.
 - **Title** (400, 19px, 1.25): library page titles. Drawer rows (thoughts, drafts) set their serif text at 15px.
 - **Prose** (400, 18px, 1.7; paragraph gap 24px): the essay. Size (16–22px), family (serif / sans / mono), line height (1.5 / 1.7 / 1.9) and width are user preferences. Headings in prose are 34px/600 (h1), 28px/600 (h2) and 22px (h3).
@@ -293,7 +293,7 @@ Warm paper neutrals, one deep teal, and a small set of pale pastels from the pro
 
 **Library.** A left column (page title, weekly writing dots, New document, All / Recent / Pinned, sort and view switch) beside a search field and a grid of page cards. At ≤1023px the navigation becomes a segmented row.
 
-**Landing.** One paper ground, designed phone-first: a 1120px inner width with 24px side padding and 112–128px between sections. The hero is the headline, one line, the CTA and a drawn editor with thought cards stuck to unfinished phrases (two columns from 1024px). "You know this moment" follows one paragraph through six numbered steps on a hairline rail in a 640px column. A row of swipeable settings cards lets the visitor try font, size, spacing, width, theme and typewriter mode. A blank page with the editor's empty prompt closes the page.
+**Landing.** One paper ground, designed phone-first: a 1120px inner width with 24px side padding and 112–128px between sections. The hero is the headline, one line, the CTA and a drawn editor with thought cards stuck to unfinished phrases (two columns from 1024px). "You know this moment" follows one paragraph through six numbered steps on a hairline rail in a 640px column. A row of swipeable settings cards lets the visitor try font, size, spacing, width and typewriter mode (previews scroll, without a scrollbar, when the text outgrows them). The editor's empty prompt and the CTA, set straight on the paper, close the page.
 
 **Rhythm.** Spacing steps of 4, 8, 12, 16, 20, 24 and 32px. Drawer bodies use 20px side padding; dialogs 24px.
 
