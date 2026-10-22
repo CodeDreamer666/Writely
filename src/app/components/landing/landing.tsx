@@ -182,7 +182,7 @@ function EditorDrawing() {
                 <span>‹ Documents</span>
                 <span>Saved</span>
             </div>
-            {/* The thoughts sit in the flow under their phrases, so no screen width can hide the text. */}
+            {/* The thoughts follow their phrases in the flow and only tuck over the end of the last line. */}
             <div className="flex flex-col px-6 pt-7 font-serif">
                 <p className="text-[24px] tracking-[-0.01em]">
                     On Unfinished Things
@@ -195,19 +195,21 @@ function EditorDrawing() {
                     , and that is where the work starts.
                 </p>
                 <p
-                    className={`${THOUGHT} field-butter mt-3 w-[min(180px,70%)] rotate-2 self-end px-3.5 py-3`}
+                    className={`${THOUGHT} field-butter relative -mt-2 w-[min(176px,62%)] rotate-2 self-end px-3.5 py-3`}
                 >
                     Close. Not quite it yet.
                 </p>
-                <p className="mt-6 text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_55%,var(--surface))]">
+                <p className="mt-3 text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_70%,var(--surface))]">
+                    So I write it down anyway,{" "}
                     <mark className="landing-field field-sky rounded-[2px] bg-[var(--field)] text-inherit">
-                        Maybe revising is listening.
+                        and trust the right words to find me later
                     </mark>
+                    .
                 </p>
                 <p
-                    className={`${THOUGHT} field-sky mt-3 w-[min(180px,70%)] -rotate-2 self-start px-3.5 py-3`}
+                    className={`${THOUGHT} field-sky relative -mt-2 mr-6 w-[min(176px,62%)] -rotate-2 self-end px-3.5 py-3`}
                 >
-                    The ending? Come back to this.
+                    Too soft an ending? Come back to this.
                 </p>
             </div>
             <div className="absolute inset-x-0 bottom-0 h-[110px] bg-[linear-gradient(to_bottom,transparent,var(--surface)_55%)]" />
