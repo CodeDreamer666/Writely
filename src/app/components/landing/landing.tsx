@@ -190,8 +190,7 @@ function EditorDrawing() {
             aria-label="The Writely editor with two thought cards left under unfinished phrases, and the tool dock at the bottom."
             className="border-line bg-surface relative overflow-hidden rounded-[18px] border pb-[104px] [box-shadow:0_40px_80px_-48px_color-mix(in_srgb,var(--shadow)_45%,transparent)]"
         >
-            <div className="text-muted flex h-12 items-center justify-between border-b border-[color-mix(in_srgb,var(--border)_60%,transparent)] px-4 text-[12px]">
-                <span>‹ Documents</span>
+            <div className="text-muted flex h-12 items-center justify-end border-b border-[color-mix(in_srgb,var(--border)_60%,transparent)] px-4 text-[12px]">
                 <span>Saved</span>
             </div>
             {/* The thoughts follow their phrases in the flow and only tuck over the end of the last line. */}
