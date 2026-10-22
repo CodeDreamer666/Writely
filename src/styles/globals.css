@@ -187,8 +187,9 @@ body {
 }
 
 /*
- * Landing page. Its sections are full-bleed fields of the thought-card pastels; dark mode blends
- * each pastel into the dark surface the same way thought cards do.
+ * Landing, sign-in and welcome pages. The thought-card pastels colour the drawn thought cards and
+ * the sign-in and welcome fields; dark mode blends each pastel into the dark surface the same way
+ * thought cards do.
  */
 .landing {
     --landing-mark: color-mix(in srgb, #fbefb5 85%, transparent);
@@ -232,4 +233,10 @@ body {
 }
 .field-sage {
     --field-tone: #ddebdd;
+}
+/* The blinking caret on the landing page's closing blank page. */
+@keyframes caret-blink {
+    50% {
+        opacity: 0;
+    }
 }

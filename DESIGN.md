@@ -30,8 +30,6 @@ colors:
   field-sky: "#D9E6F2"
   field-butter: "#FBEFB5"
   field-sage: "#DDEBDD"
-  slate: "#2B2926"
-  slate-ink: "#F4F1EC"
 typography:
   display:
     fontFamily: "Source Serif 4, Georgia, serif"
@@ -213,9 +211,6 @@ components:
     backgroundColor: "{colors.field-butter}"
     textColor: "{colors.ink}"
     typography: "{typography.thought}"
-  landing-closing-band:
-    backgroundColor: "{colors.slate}"
-    textColor: "{colors.slate-ink}"
 ---
 
 # Design System: Writely
@@ -226,7 +221,7 @@ components:
 
 The writing sits alone in the middle of a warm paper ground, and everything else waits beneath it. The editor has one slim floating dock at the bottom centre: Documents, Thoughts, Checklist, Drafts and Stats as Inter labels with line icons, on a white surface with a hairline border. Each tool opens a drawer that rises out of the dock. There is no document rail, side panel or floating tool pill. When a revision is open, the dock gets a teal-tinted strip on top that names the goal and holds Save draft and Finish revision, so the dock always shows where the revision stands.
 
-Serif writes and sans operates. Source Serif 4 carries everything a person wrote or reads as writing: the essay, thoughts, document titles, library page excerpts, statistics numerals, and display lines on the landing, welcome and sign-in pages. Inter carries every control. Colour stays quiet. Teal marks action and the active tool, and the PDF thought-card pastels are the only warm colour. In the app they sit on thought cards. On the landing page they grow into page-wide colour fields (sky, butter, sage), and a slate band closes the page.
+Serif writes and sans operates. Source Serif 4 carries everything a person wrote or reads as writing: the essay, thoughts, document titles, library page excerpts, statistics numerals, and display lines on the landing, welcome and sign-in pages. Inter carries every control. Colour stays quiet. Teal marks action and the active tool, and the PDF thought-card pastels are the only warm colour. In the app they sit on thought cards. The landing page keeps one paper ground from top to bottom and uses the pastels only on the thought cards it draws; the sign-in and welcome pages grow them into colour fields.
 
 Depth is soft and tinted, never hard. Surfaces lift with long, negative-spread shadows mixed from the theme's shadow colour. Dark mode only redefines tokens; components read the same variables in both themes.
 
@@ -234,7 +229,7 @@ Depth is soft and tinted, never hard. Surfaces lift with long, negative-spread s
 - One centred serif column (680px standard; 600 / 800 by preference) with nothing beside it but the writer's own thoughts.
 - One bottom dock; drawers rise from it (200ms) and close on Escape or a click outside.
 - Teal only for primary actions, the pressed tool, the open revision, links and the caret.
-- Pastels belong to thoughts and landing fields, never to controls.
+- Pastels belong to thoughts and the sign-in and welcome fields, never to controls.
 - Hairline borders, soft tinted lift, ring-style focus, 44px targets.
 
 ## Colors
@@ -246,8 +241,7 @@ Warm paper neutrals, one deep teal, and a small set of pale pastels from the pro
 - **Teal Mist** (tint): the pressed dock tool's background, the revision strip, active library navigation, pressed toolbar toggles, inline code and code blocks. The default text selection uses the same value.
 
 ### Secondary
-- **Brief Pastels** (field-sky, field-butter, field-sage): the landing page's full-width section fields and the thought-card colours in landing, sign-in and welcome demos. In dark mode each field is mixed 16% into the night paper. App thought cards store their own pastel (Butter Yellow, Sage Green, Powder Blue, Soft Blush presets). Dark mode blends that pastel at 26% into a dark card base and switches card text to night ink.
-- **Slate** with **Slate Ink**: the landing page's closing band only. Its CTA inverts to a slate-ink fill with slate text.
+- **Brief Pastels** (field-sky, field-butter, field-sage): the thought cards drawn on the landing page and the sign-in and welcome fields. In dark mode each field is mixed 16% into the night paper. App thought cards store their own pastel (Butter Yellow, Sage Green, Powder Blue, Soft Blush presets). Dark mode blends that pastel at 26% into a dark card base and switches card text to night ink.
 
 ### Tertiary
 - **Brick** (danger) and **Garden** (success): removal and addition in diffs (as 12% / 14% washes behind struck and underlined text), destructive menu items and buttons, and the not-saved state.
@@ -264,7 +258,7 @@ Warm paper neutrals, one deep teal, and a small set of pale pastels from the pro
 ### Named Rules
 **The Teal Means Act Rule.** Teal appears only where something can be done or is in progress: primary buttons, the pressed tool, the open revision, links, the caret. Decoration, headings and empty states never use it.
 
-**The Pastel Belongs to Thought Rule.** Pastels colour thoughts and the landing fields that demonstrate them. Never use them for a control, a status or a navigation state.
+**The Pastel Belongs to Thought Rule.** Pastels colour thoughts and the fields that demonstrate them. Never use them for a control, a status or a navigation state.
 
 **The Token Theme Rule.** Theme colours come from the shared variables (`--bg`, `--surface`, `--text`, `--accent`, ...). Dark mode redefines the variables and nothing else. A component that needs a tone mixes it from those variables with `color-mix`.
 
@@ -277,8 +271,8 @@ Warm paper neutrals, one deep teal, and a small set of pale pastels from the pro
 **Character:** A bookish serif for anything that is writing, and a small, plain Inter for anything you click. Display lines are large and set tight; controls are small and quiet.
 
 ### Hierarchy
-- **Display** (400, clamp(46px, 6.4vw, 92px), 0.98, -0.035em): landing hero line only. Welcome uses clamp(38px, 6vw, 64px) and sign-in clamp(36px, 3.6vw, 54px) in the same spirit.
-- **Headline** (400, clamp(40px, 5.4vw, 76px), 1, -0.035em): landing field headings and the closing band (which goes larger, clamp(80px, 11vw, 144px)).
+- **Display** (400, clamp(44px, 5.4vw, 68px), 1.04, -0.035em): landing hero line only. Welcome uses clamp(38px, 6vw, 64px) and sign-in clamp(36px, 3.6vw, 54px) in the same spirit.
+- **Headline** (400, 32px, 1.1, -0.03em): landing section headings. The closing blank page sets its prompt at 30px.
 - **Page title** (400, 44px, 1, -0.03em; 36px on phones): the library's "Documents". The draft comparison heading uses 26px.
 - **Title** (400, 19px, 1.25): library page titles. Drawer rows (thoughts, drafts) set their serif text at 15px.
 - **Prose** (400, 18px, 1.7; paragraph gap 24px): the essay. Size (16–22px), family (serif / sans / mono), line height (1.5 / 1.7 / 1.9) and width are user preferences. Headings in prose are 34px/600 (h1), 28px/600 (h2) and 22px (h3).
@@ -299,7 +293,7 @@ Warm paper neutrals, one deep teal, and a small set of pale pastels from the pro
 
 **Library.** A left column (page title, weekly writing dots, New document, All / Recent / Pinned, sort and view switch) beside a search field and a grid of page cards. At ≤1023px the navigation becomes a segmented row.
 
-**Landing.** Full-bleed fields with a 1280px inner width, 24px side padding (16px on phones) and clamp(72px, 10vw, 128px) vertical padding. Content sits on a 12-column grid with a 40px column gap. The heading takes six columns and the copy starts at column 8. Everything collapses to one column at ≤960px.
+**Landing.** One paper ground, designed phone-first: a 1120px inner width with 24px side padding and 112–128px between sections. The hero is the headline, one line, the CTA and a drawn editor with thought cards stuck to unfinished phrases (two columns from 1024px). "You know this moment" follows one paragraph through six numbered steps on a hairline rail in a 640px column. A row of swipeable settings cards lets the visitor try font, size, spacing, width, theme and typewriter mode. A blank page with the editor's empty prompt closes the page.
 
 **Rhythm.** Spacing steps of 4, 8, 12, 16, 20, 24 and 32px. Drawer bodies use 20px side padding; dialogs 24px.
 
@@ -332,7 +326,7 @@ Small and quiet; most buttons are ghosts until touched.
 - **Primary:** teal fill, on-accent text; hover moves to Lit Teal. Used for one main action per drawer or dialog (New thought, Save named draft, Finish revision, New document).
 - **Ghost (default):** transparent, Stone text, transparent border. Hover shows ink text, a 6% teal wash and a 65% hairline border. Active shows Teal Mist with teal text. Disabled is 45% opacity with a not-allowed cursor.
 - **Danger:** Brick fill; hover mixes 12% ink into it. Destructive menu items are Brick text only.
-- **Landing CTA:** 48px tall, 10px radius, 15px Inter 500; it moves down 1px when pressed. The quiet companion link underlines on hover.
+- **Landing CTA:** 52px tall (full width on phones), 10px radius, 16px Inter 500; it moves down 1px when pressed. The quiet companion link underlines on hover.
 - **Transitions:** background, border, shadow and colour over 140ms.
 
 ### Inputs / Fields
