@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
         : {
               title: "Writely · A quiet place to write, and rewrite",
               description:
-                  "Keep unfinished thoughts beside the essay, revise toward one goal at a time, and keep every version you name.",
+                  "Every good sentence was once unfinished. Leave notes for later, rewrite when the words come, and keep every version.",
           };
 }
 

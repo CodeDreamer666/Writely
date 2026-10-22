@@ -2,39 +2,34 @@
 import {
     ArrowRight,
     Check,
-    ChevronDown,
-    Clock,
-    CloudCheck,
-    Feather,
-    FileDown,
+    ChartColumn,
     FileText,
-    FolderOpen,
-    GraduationCap,
+    Feather,
     History,
-    Lock,
-    Monitor,
-    Moon,
-    NotebookPen,
-    PenLine,
-    Pin,
+    ListChecks,
     Plus,
-    Search,
-    Sparkles,
     StickyNote,
-    Briefcase,
-    BookOpen,
-    Microscope,
-    Undo2,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import {
+    useEffect,
+    useState,
+    type CSSProperties,
+    type ReactNode,
+} from "react";
 import DiffText from "../writely/diff-text";
-import { diffWords } from "~/lib/writely/model";
+import {
+    EDITOR_WIDTHS,
+    FONT_FAMILIES,
+    FONT_SIZE_RANGE,
+    LINE_SPACINGS,
+} from "~/config/preferences";
+import type { DiffChunk } from "~/lib/writely/model";
 
 /**
- * The signed-out front door: what Writely is, how it works and what it's for, with real product
- * pieces drawn in HTML. Every passage of prose here is illustrative sample writing; there are no
- * prices, ratings or quotes, because Writely has none to show.
+ * The signed-out front door. It follows one paragraph from first draft to the version a writer
+ * keeps, then lets the visitor try a few appearance settings. Every passage of prose here is
+ * illustrative sample writing; there are no prices, ratings or quotes, because Writely has none.
  */
 
 /**
@@ -57,99 +52,35 @@ const SIGN_UP = "/sign-in?mode=sign-up";
  * buttons.
  */
 const PRIMARY =
-    "inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] bg-accent px-6 text-[15px] font-medium text-[var(--on-accent)] no-underline [box-shadow:0_10px_24px_-14px_color-mix(in_srgb,var(--accent)_90%,transparent)] transition-[background-color,translate] duration-150 hover:bg-[var(--hover)] active:translate-y-px focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--bg),0_0_0_4px_var(--hover)]";
+    "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[10px] bg-accent px-6 text-[16px] font-medium text-[var(--on-accent)] no-underline [box-shadow:0_10px_24px_-14px_color-mix(in_srgb,var(--accent)_90%,transparent)] transition-[background-color,translate] duration-150 hover:bg-[var(--hover)] active:translate-y-px focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--bg),0_0_0_4px_var(--hover)]";
 /**
- * What: The look of the home page's outlined secondary buttons
- * (such as "See how it works").
+ * What: The look of the white surfaces that hold product drawings.
  *
  * Used in:
- * - src/app/components/landing/landing.tsx (Hero, FinalCta)
+ * - src/app/components/landing/landing.tsx (Steps, Customize)
  *
- * Effect: Changes the size and hover style of the home page's secondary
- * buttons.
+ * Effect: Changes the border, corners and fill of every drawing on the page.
  */
-const SECONDARY =
-    "inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] border border-line bg-surface px-6 text-[15px] font-medium text-ink no-underline transition-colors duration-150 hover:border-[var(--control-focus)] focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--hover)]";
-/**
- * What: The look of the small rounded label above each section title
- * (such as "KEY FEATURES").
- *
- * Used in:
- * - src/app/components/landing/landing.tsx (Eyebrow)
- *
- * Effect: Changes every section label on the home page.
- */
-const EYEBROW =
-    "inline-flex items-center rounded-full bg-tint px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-accent uppercase";
-/**
- * What: The look of the white panels that hold product drawings and cards.
- *
- * Used in:
- * - src/app/components/landing/landing.tsx (most sections)
- *
- * Effect: Changes the border, corners and shadow of every panel.
- */
-const PANEL =
-    "rounded-2xl border border-line bg-surface [box-shadow:0_1px_2px_color-mix(in_srgb,var(--shadow)_4%,transparent)]";
-const WIDTH = "mx-auto w-full max-w-[1200px] px-6 max-sm:px-4";
-
-/**
- * What: The sections listed in the header and footer, as the anchor and label.
- *
- * Used in:
- * - src/app/components/landing/landing.tsx (Landing)
- *
- * Effect: Changes the page's navigation links. Each anchor must match a
- * section id below.
- */
-const NAV = [
-    ["features", "Features"],
-    ["how-it-works", "How it works"],
-    ["customize", "Customize"],
-    ["faq", "FAQ"],
-] as const;
+const PANEL = "rounded-xl border border-line bg-surface";
+const WIDTH = "mx-auto w-full max-w-[1120px] px-6";
+const SERIF_TITLE =
+    "font-serif text-[32px] leading-[1.1] font-normal tracking-[-0.03em] text-balance";
+/** A thought card, in one of the landing pastels; dark mode blends it into the page. */
+const THOUGHT =
+    "landing-field bg-[var(--field)] font-serif text-[14px] leading-[1.4] text-[var(--field-text)] [box-shadow:0_12px_24px_-14px_color-mix(in_srgb,var(--shadow)_45%,transparent)]";
+const CARET =
+    "bg-accent ml-0.5 inline-block h-[1.05em] w-[1.5px] translate-y-[0.15em]";
+const FOCUS =
+    "focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--hover)]";
 
 function Wordmark() {
     return (
-        <span className="text-accent flex items-center gap-2.5">
-            <Feather size={22} strokeWidth={1.5} aria-hidden="true" />
-            <span className="text-ink text-[20px] font-semibold tracking-[-0.04em]">
+        <span className="text-accent flex items-center gap-2">
+            <Feather size={20} strokeWidth={1.6} aria-hidden="true" />
+            <span className="text-ink text-[18px] font-semibold tracking-[-0.04em]">
                 Writely
             </span>
         </span>
-    );
-}
-
-function Eyebrow({ children }: { children: ReactNode }) {
-    return <p className={EYEBROW}>{children}</p>;
-}
-
-function SectionTitle({
-    id,
-    eyebrow,
-    title,
-    body,
-}: {
-    id: string;
-    eyebrow: string;
-    title: ReactNode;
-    body?: ReactNode;
-}) {
-    return (
-        <div className="mx-auto mb-12 flex max-w-[640px] flex-col items-center text-center max-sm:mb-8">
-            <Eyebrow>{eyebrow}</Eyebrow>
-            <h2
-                id={id}
-                className="mt-4 font-serif text-[clamp(30px,3.6vw,44px)] leading-[1.12] font-normal tracking-[-0.025em] text-balance"
-            >
-                {title}
-            </h2>
-            {body && (
-                <p className="text-muted mt-4 text-[16px] leading-[1.65] text-balance">
-                    {body}
-                </p>
-            )}
-        </div>
     );
 }
 
@@ -170,45 +101,33 @@ export default function Landing() {
                 Skip to content
             </a>
             <header
-                className={`sticky top-0 z-40 transition-[background-color,box-shadow,border-color] duration-200 ${scrolled ? "border-line border-b bg-[color-mix(in_srgb,var(--bg)_88%,transparent)] backdrop-blur-md" : "border-b border-transparent"}`}
+                className={`sticky top-0 z-40 transition-[background-color,border-color] duration-200 ${scrolled ? "border-line border-b bg-[color-mix(in_srgb,var(--bg)_88%,transparent)] backdrop-blur-md" : "border-b border-transparent"}`}
             >
-                <div className={`${WIDTH} flex h-[72px] items-center gap-8`}>
+                <div
+                    className={`${WIDTH} flex h-16 items-center justify-between pr-3`}
+                >
                     <Link
                         href="/"
                         aria-label="Writely home"
-                        className="rounded-md no-underline focus-visible:[box-shadow:0_0_0_2px_var(--hover)] focus-visible:outline-none"
+                        className={`rounded-md no-underline ${FOCUS}`}
                     >
                         <Wordmark />
                     </Link>
                     <nav
-                        aria-label="Sections"
-                        className="flex items-center gap-1 max-md:hidden"
-                    >
-                        {NAV.map(([id, label]) => (
-                            <a
-                                key={id}
-                                href={`#${id}`}
-                                className="text-muted hover:text-ink rounded-lg px-3 py-2 text-[14px] no-underline focus-visible:[box-shadow:0_0_0_2px_var(--hover)] focus-visible:outline-none"
-                            >
-                                {label}
-                            </a>
-                        ))}
-                    </nav>
-                    <nav
                         aria-label="Account"
-                        className="ml-auto flex items-center gap-2"
+                        className="flex items-center gap-2"
                     >
                         <Link
                             href="/sign-in"
-                            className="text-ink hover:bg-surface rounded-lg px-3 py-2 text-[14px] font-medium no-underline focus-visible:[box-shadow:0_0_0_2px_var(--hover)] focus-visible:outline-none"
+                            className={`text-ink flex min-h-11 items-center rounded-lg px-3 text-[15px] font-medium no-underline ${FOCUS}`}
                         >
                             Sign in
                         </Link>
                         <Link
                             href={SIGN_UP}
-                            className={`${PRIMARY} min-h-10 px-4 text-[14px] max-[380px]:hidden`}
+                            className={`${PRIMARY} min-h-10 px-4 text-[14px] max-sm:hidden`}
                         >
-                            Get started
+                            Start writing
                         </Link>
                     </nav>
                 </div>
@@ -216,888 +135,735 @@ export default function Landing() {
 
             <main id="main">
                 <Hero />
-                <Writers />
-                <Features />
-                <HowItWorks />
-                <Showcase />
+                <Steps />
                 <Customize />
-                <Trust />
-                <Faq />
                 <FinalCta />
             </main>
 
             <footer className="border-line border-t">
                 <div
-                    className={`${WIDTH} text-muted flex flex-wrap items-center gap-x-8 gap-y-4 py-10 text-[13.5px]`}
+                    className={`${WIDTH} text-muted flex items-center justify-between pt-7 pb-10 text-[13px]`}
                 >
-                    <Wordmark />
-                    <span>A quieter place to write, rethink, and refine.</span>
-                    <nav
-                        aria-label="Footer"
-                        className="ml-auto flex flex-wrap gap-x-6 gap-y-2"
+                    <span>© {new Date().getFullYear()} Writely</span>
+                    <Link
+                        href="/sign-in"
+                        className="text-muted hover:text-ink flex min-h-11 items-center no-underline"
                     >
-                        {NAV.map(([id, label]) => (
-                            <a
-                                key={id}
-                                href={`#${id}`}
-                                className="text-muted hover:text-ink no-underline underline-offset-4 hover:underline"
-                            >
-                                {label}
-                            </a>
-                        ))}
-                        <Link
-                            href="/sign-in"
-                            className="text-muted hover:text-ink no-underline underline-offset-4 hover:underline"
-                        >
-                            Sign in
-                        </Link>
-                    </nav>
-                    <span className="w-full text-[12.5px]">
-                        © {new Date().getFullYear()} Writely
-                    </span>
+                        Sign in
+                    </Link>
                 </div>
             </footer>
         </div>
     );
 }
 
-/* ——— Product drawing: a calm Writely window with thoughts beside the text ——— */
+/* ——— Hero: the editor with thoughts left on unfinished phrases ——— */
 
 /**
- * What: The thought cards drawn in the product pictures, as the colour of
- * their dot, their title and their note.
+ * What: The tools drawn in the hero's dock, in order. The second is shown
+ * pressed, because the hero is about thoughts.
  *
  * Used in:
- * - src/app/components/landing/landing.tsx (AppWindow)
+ * - src/app/components/landing/landing.tsx (EditorDrawing)
  *
- * Effect: Changes the sample thoughts beside the sample text.
+ * Effect: Changes the icons in the drawn dock. Keep them in the same order
+ * as the real editor dock.
  */
-const SAMPLE_THOUGHTS = [
-    ["#d0566b", "Use more descriptive words", "Make the setting feel real and vivid."],
-    ["#d9a03a", "Simplify this sentence", "It runs on; try two shorter ones."],
-    ["#5f8f6b", "Add a stronger ending", "Leave a lasting impression."],
-] as const;
+const DOCK = [FileText, StickyNote, ListChecks, History, ChartColumn];
 
-function AppWindow({ sidebar = true }: { sidebar?: boolean }) {
+function EditorDrawing() {
     return (
-        <div
-            role="img"
-            aria-label="Writely's editor: a document called A Quiet Afternoon, with highlighted phrases connected to revision thoughts in the margin."
-            className={`${PANEL} overflow-hidden rounded-[18px] [box-shadow:0_40px_80px_-40px_color-mix(in_srgb,var(--shadow)_35%,transparent),0_2px_6px_color-mix(in_srgb,var(--shadow)_5%,transparent)]`}
-        >
-            <div className="border-line flex h-12 items-center gap-3 border-b px-4">
-                <span className="text-accent flex items-center gap-2 text-[13px] font-semibold">
-                    <Feather size={15} strokeWidth={1.6} aria-hidden="true" />
-                    <span className="text-ink">Writely</span>
-                </span>
-                <span className="text-muted ml-3 flex items-center gap-1 text-[11.5px] max-sm:hidden">
-                    <Check size={12} aria-hidden="true" />
-                    Saved
-                </span>
-                <span className="text-muted ml-auto flex items-center gap-3">
-                    <Undo2 size={14} aria-hidden="true" />
-                    <span className="bg-accent rounded-md px-2.5 py-1 text-[11px] font-medium text-[var(--on-accent)]">
-                        Finish revision
-                    </span>
-                </span>
-            </div>
+        <div className="relative pb-6">
             <div
-                className={`grid ${sidebar ? "grid-cols-[150px_minmax(0,1fr)_210px] max-[900px]:grid-cols-[minmax(0,1fr)_190px]" : "grid-cols-[minmax(0,1fr)_210px]"} max-[560px]:grid-cols-1`}
+                role="img"
+                aria-label="The Writely editor with two thought cards left on unfinished phrases, and the tool dock at the bottom."
+                className="border-line bg-surface relative h-[440px] overflow-hidden rounded-[18px] border [box-shadow:0_40px_80px_-48px_color-mix(in_srgb,var(--shadow)_45%,transparent)]"
             >
-                {sidebar && (
-                    <div className="border-line bg-paper border-r p-3 max-[900px]:hidden">
-                        <span className="border-line bg-surface text-muted flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-[10.5px]">
-                            <Search size={11} aria-hidden="true" />
-                            Search
-                        </span>
-                        <span className="text-muted mt-3 flex items-center gap-1.5 px-1 text-[11px]">
-                            <Plus size={11} aria-hidden="true" />
-                            New document
-                        </span>
-                        {[
-                            "A Quiet Afternoon",
-                            "Essay ideas",
-                            "Chapter one",
-                            "Research notes",
-                            "Journal",
-                        ].map((title, i) => (
-                            <span
-                                key={title}
-                                className={`mt-1 block truncate rounded-md px-2 py-1.5 text-[11px] ${i === 0 ? "bg-tint text-accent font-medium" : "text-muted"}`}
-                            >
-                                {title}
-                            </span>
-                        ))}
-                    </div>
-                )}
-                <div className="min-w-0 px-7 pt-7 pb-8 max-sm:px-5">
-                    <p className="font-serif text-[22px] leading-tight tracking-[-0.01em]">
-                        A Quiet Afternoon
-                    </p>
-                    <div className="mt-4 flex flex-col gap-3 font-serif text-[13.5px] leading-[1.75] text-[color-mix(in_srgb,var(--text)_85%,var(--surface))]">
-                        <p>
-                            I went to a small library on Saturday afternoon.{" "}
-                            <mark className="rounded-[2px] bg-[color-mix(in_srgb,#d0566b_16%,var(--surface))] text-inherit">
-                                It was a nice place with many nice books
-                            </mark>
-                            , and I liked how quiet it was.
-                        </p>
-                        <p>
-                            <mark className="rounded-[2px] bg-[color-mix(in_srgb,#d9a03a_20%,var(--surface))] text-inherit">
-                                I walked around for a while because I wanted to
-                                find something interesting, but I did not know
-                                what to read.
-                            </mark>
-                        </p>
-                        <p className="text-[color-mix(in_srgb,var(--text)_55%,var(--surface))]">
-                            After looking at several books, I picked one and sat
-                            near a window…
-                        </p>
-                    </div>
+                <div className="text-muted flex h-12 items-center justify-between border-b border-[color-mix(in_srgb,var(--border)_60%,transparent)] px-4 text-[12px]">
+                    <span>‹ Documents</span>
+                    <span>Saved</span>
                 </div>
-                <div className="border-line bg-paper flex flex-col gap-2.5 border-l p-3 max-[560px]:border-t max-[560px]:border-l-0">
-                    <span className="text-muted px-1 text-[10.5px] font-semibold tracking-[0.06em] uppercase">
-                        Thoughts
-                    </span>
-                    {SAMPLE_THOUGHTS.map(([colour, title, note]) => (
+                <div className="px-6 pt-7 font-serif">
+                    <p className="text-[24px] tracking-[-0.01em]">
+                        On Unfinished Things
+                    </p>
+                    <p className="mt-3.5 text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_85%,var(--surface))]">
+                        Every sentence begins as a guess.{" "}
+                        <mark className="rounded-[2px] bg-[var(--landing-mark)] text-inherit">
+                            Most of what I write is not yet what I mean
+                        </mark>
+                        , and that is where the work starts.
+                    </p>
+                    <p className="mt-[72px] text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_55%,var(--surface))]">
+                        <mark className="landing-field field-sky rounded-[2px] bg-[var(--field)] text-inherit">
+                            Maybe revising is listening.
+                        </mark>
+                    </p>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 h-[110px] bg-[linear-gradient(to_bottom,transparent,var(--surface)_55%)]" />
+                <div className="border-line bg-surface text-muted absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-0.5 rounded-2xl border p-1.5 [box-shadow:0_12px_32px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent),0_1px_2px_color-mix(in_srgb,var(--shadow)_6%,transparent)]">
+                    {DOCK.map((Icon, i) => (
                         <span
-                            key={title}
-                            className="border-line bg-surface block rounded-[10px] border p-2.5 [box-shadow:0_6px_14px_-12px_color-mix(in_srgb,var(--shadow)_50%,transparent)]"
+                            key={i}
+                            className={`flex size-11 items-center justify-center rounded-[10px] ${i === 1 ? "bg-tint text-accent" : ""}`}
                         >
-                            <span className="flex items-center gap-1.5 text-[11px] font-medium">
-                                <span
-                                    className="size-2 shrink-0 rounded-full"
-                                    style={{ background: colour }}
-                                />
-                                {title}
-                            </span>
-                            <span className="text-muted mt-1 block text-[10px] leading-[1.45]">
-                                {note}
-                            </span>
+                            <Icon size={18} strokeWidth={1.7} />
                         </span>
                     ))}
-                    <span className="text-muted flex items-center gap-1.5 px-1 text-[10.5px]">
-                        <Plus size={11} aria-hidden="true" />
-                        Add thought
-                    </span>
                 </div>
             </div>
+            <p
+                aria-hidden="true"
+                className={`${THOUGHT} field-butter absolute top-[214px] right-2 w-[164px] rotate-3 px-3.5 py-3`}
+            >
+                Close. Not quite it yet.
+            </p>
+            <p
+                aria-hidden="true"
+                className={`${THOUGHT} field-sky absolute top-[306px] left-1.5 w-[160px] -rotate-4 px-3.5 py-3`}
+            >
+                The ending? Come back to this.
+            </p>
         </div>
     );
 }
-
-/* ——— Hero ——— */
 
 function Hero() {
     return (
         <section
             aria-labelledby="hero-title"
-            className="relative isolate overflow-hidden"
+            className={`${WIDTH} grid items-center gap-14 pt-12 pb-6 max-sm:px-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:pt-20`}
         >
-            <div
-                aria-hidden="true"
-                className="absolute inset-0 -z-10 bg-[radial-gradient(60%_55%_at_78%_35%,color-mix(in_srgb,var(--tint)_75%,transparent),transparent_70%),radial-gradient(40%_40%_at_10%_90%,color-mix(in_srgb,#fbefb5_35%,transparent),transparent_70%)]"
-            />
-            <div
-                className={`${WIDTH} grid grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] items-center gap-14 pt-16 pb-24 max-[1000px]:grid-cols-1 max-sm:gap-10 max-sm:pt-8 max-sm:pb-16`}
-            >
-                <div className="max-w-[560px]">
-                    <Eyebrow>A quieter way to write</Eyebrow>
-                    <h1
-                        id="hero-title"
-                        className="mt-6 font-serif text-[clamp(44px,5.6vw,72px)] leading-[1.02] font-normal tracking-[-0.035em] text-balance"
-                    >
-                        A quieter place to write, rethink, and refine.
-                    </h1>
-                    <p className="text-muted mt-6 max-w-[32em] text-[18px] leading-[1.65] max-sm:text-[16.5px]">
-                        Writely is a clean, text-focused writing app with
-                        thoughtful revision tools. Write freely, keep your
-                        thoughts beside the page, and make your words better —
-                        one goal at a time.
-                    </p>
-                    <div className="mt-9 flex flex-wrap items-center gap-3">
-                        <Link href={SIGN_UP} className={PRIMARY}>
-                            Get started
-                            <ArrowRight size={17} aria-hidden="true" />
-                        </Link>
-                        <a href="#how-it-works" className={SECONDARY}>
-                            See how it works
-                        </a>
-                    </div>
-                    <ul className="text-muted m-0 mt-8 flex list-none flex-wrap gap-x-6 gap-y-2 p-0 text-[14px]">
-                        {[
-                            "Distraction-free editor",
-                            "Revision tools built in",
-                            "Works in your browser",
-                        ].map((item) => (
-                            <li key={item} className="flex items-center gap-2">
-                                <Check
-                                    size={15}
-                                    strokeWidth={2.2}
-                                    className="text-accent"
-                                    aria-hidden="true"
-                                />
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <div className="relative">
-                    <p
-                        aria-hidden="true"
-                        className="text-muted absolute -top-10 right-6 rotate-[-4deg] font-serif text-[15px] italic max-sm:hidden"
-                    >
-                        Your ideas, more clearly.
-                    </p>
-                    <AppWindow />
-                </div>
-            </div>
-        </section>
-    );
-}
-
-/* ——— Who it's for (no counts or ratings: just the kinds of writing it suits) ——— */
-
-function Writers() {
-    return (
-        <section aria-labelledby="writers-title" className="py-16 max-sm:py-12">
-            <div className={WIDTH}>
-                <div className={`${PANEL} px-8 py-10 text-center max-sm:px-5`}>
-                    <Eyebrow>For every kind of writer</Eyebrow>
-                    <h2
-                        id="writers-title"
-                        className="mt-4 font-serif text-[clamp(26px,3vw,36px)] leading-tight font-normal tracking-[-0.02em]"
-                    >
-                        Whether it’s a paper or a novel, there’s room to think.
-                    </h2>
-                    <ul className="text-muted m-0 mt-8 grid list-none grid-cols-5 gap-4 p-0 text-[14.5px] max-md:grid-cols-3 max-sm:grid-cols-2">
-                        {(
-                            [
-                                [GraduationCap, "Students"],
-                                [Microscope, "Researchers"],
-                                [Briefcase, "Professionals"],
-                                [BookOpen, "Authors"],
-                                [NotebookPen, "Journalers"],
-                            ] as const
-                        ).map(([Icon, label]) => (
-                            <li
-                                key={label}
-                                className="flex items-center justify-center gap-2.5"
-                            >
-                                <Icon
-                                    size={20}
-                                    strokeWidth={1.5}
-                                    aria-hidden="true"
-                                />
-                                {label}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-        </section>
-    );
-}
-
-/* ——— Features ——— */
-
-function Features() {
-    return (
-        <section
-            id="features"
-            aria-labelledby="features-title"
-            className="scroll-mt-20 py-20 max-sm:py-14"
-        >
-            <div className={WIDTH}>
-                <SectionTitle
-                    id="features-title"
-                    eyebrow="Key features"
-                    title="Simple to write. Powerful to improve."
-                    body="Everything you need for focused writing, with a few unique tools that help you make it better."
-                />
-                <ul className="m-0 grid list-none grid-cols-4 gap-5 p-0 max-[1000px]:grid-cols-2 max-sm:grid-cols-1">
-                    {(
-                        [
-                            [
-                                PenLine,
-                                "A clean writing space",
-                                "A calm page, with every tool tucked into one slim dock beneath it.",
-                            ],
-                            [
-                                StickyNote,
-                                "Thought cards",
-                                "Note what you want to improve and connect it to the exact words it’s about.",
-                            ],
-                            [
-                                History,
-                                "Compare and restore",
-                                "Name drafts, see every change word by word, and go back whenever you like.",
-                            ],
-                            [
-                                FolderOpen,
-                                "Organize with ease",
-                                "Search titles and text, pin what matters, and archive what’s done.",
-                            ],
-                        ] as const
-                    ).map(([Icon, title, body]) => (
-                        <li
-                            key={title}
-                            className={`${PANEL} p-7 transition-[translate,box-shadow] duration-200 hover:-translate-y-0.5 hover:[box-shadow:0_20px_36px_-24px_color-mix(in_srgb,var(--shadow)_35%,transparent)] motion-reduce:hover:translate-y-0`}
-                        >
-                            <span
-                                aria-hidden="true"
-                                className="bg-tint text-accent flex size-11 items-center justify-center rounded-xl"
-                            >
-                                <Icon size={20} strokeWidth={1.6} />
-                            </span>
-                            <h3 className="mt-5 text-[16.5px] font-semibold">
-                                {title}
-                            </h3>
-                            <p className="text-muted mt-2 text-[14.5px] leading-[1.6]">
-                                {body}
-                            </p>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </section>
-    );
-}
-
-/* ——— How it works: four small product moments ——— */
-
-function HowItWorks() {
-    const steps: [string, string, ReactNode][] = [
-        [
-            "Write",
-            "Start with a clean, focused page. Notes, essays, stories — whatever you’re working on.",
-            <div key="write" className="px-4 pt-4">
-                <p className="font-serif text-[15px]">A new piece</p>
-                <p className="text-muted mt-2 font-serif text-[12px] italic">
-                    Begin anywhere…
+            <div className="max-w-[520px] max-sm:px-2">
+                <h1
+                    id="hero-title"
+                    className="font-serif text-[clamp(44px,5.4vw,68px)] leading-[1.04] font-normal tracking-[-0.035em] text-balance"
+                >
+                    Every good sentence was once{" "}
+                    <em className="italic">unfinished.</em>
+                </h1>
+                <p className="text-muted mt-5 text-[17px] leading-[1.6] lg:text-[18px]">
+                    A quiet place to leave notes for later, rewrite when the
+                    words come, and keep every version.
                 </p>
-                <span className="bg-accent mt-1 block h-4 w-px animate-pulse motion-reduce:animate-none" />
-            </div>,
-        ],
-        [
-            "Add thoughts",
-            "Select a phrase and connect a thought to it: what to improve, and why.",
-            <div key="thought" className="px-4 pt-4 font-serif text-[12px] leading-[1.6]">
-                <span className="bg-tint rounded-[2px]">
-                    Start writing your story
-                </span>{" "}
-                and keep going.
-                <span className="border-line bg-surface mt-3 ml-6 flex w-max items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-sans text-[11px] [box-shadow:0_8px_16px_-12px_color-mix(in_srgb,var(--shadow)_50%,transparent)]">
-                    <span className="size-2 rounded-full bg-[#5b7fd0]" />
-                    Make the opening vivid
-                </span>
-            </div>,
-        ],
-        [
-            "Revise with a goal",
-            "Pick one goal from your checklist. Writely keeps the text from before you start.",
-            <div key="goal" className="flex flex-col gap-1.5 px-4 pt-4 text-[11.5px]">
-                {[
-                    ["Improve the introduction", true],
-                    ["Strengthen the argument", false],
-                    ["Tighten the ending", false],
-                ].map(([goal, done], i) => (
-                    <span
-                        key={goal as string}
-                        className={`flex items-center gap-2 rounded-md px-2 py-1.5 ${i === 1 ? "bg-tint text-accent font-medium" : ""}`}
+                <div className="mt-8 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+                    <Link href={SIGN_UP} className={PRIMARY}>
+                        Start writing
+                        <ArrowRight size={17} aria-hidden="true" />
+                    </Link>
+                    <a
+                        href="#how"
+                        className={`text-muted hover:text-ink flex min-h-11 items-center justify-center rounded-lg px-3 text-[15px] font-medium no-underline ${FOCUS}`}
                     >
-                        <span
-                            className={`flex size-3.5 items-center justify-center rounded-[4px] border ${done ? "border-success bg-success text-[var(--on-accent)]" : i === 1 ? "border-accent" : "border-line"}`}
-                        >
-                            {done && <Check size={10} strokeWidth={3} />}
-                        </span>
-                        {goal}
-                    </span>
-                ))}
-            </div>,
-        ],
-        [
-            "Compare and refine",
-            "Save a draft and see exactly what changed. Keep what works and keep improving.",
-            <div key="compare" className="grid grid-cols-2 gap-3 px-4 pt-4 font-serif text-[11.5px] leading-[1.55]">
-                <span>
-                    <span className="text-muted block font-sans text-[10px] font-semibold">
-                        Before
-                    </span>
-                    It was a{" "}
-                    <s className="text-danger decoration-[1.5px]">very long</s>{" "}
-                    journey.
-                </span>
-                <span>
-                    <span className="text-muted block font-sans text-[10px] font-semibold">
-                        After
-                    </span>
-                    It was a{" "}
-                    <u className="text-success decoration-[1.5px]">quiet</u>{" "}
-                    journey.
-                </span>
-            </div>,
-        ],
-    ];
-    return (
-        <section
-            id="how-it-works"
-            aria-labelledby="how-title"
-            className="scroll-mt-20 bg-[color-mix(in_srgb,var(--tint)_45%,var(--bg))] py-20 max-sm:py-14"
-        >
-            <div className={WIDTH}>
-                <SectionTitle
-                    id="how-title"
-                    eyebrow="From first draft to final version"
-                    title="A simple way to write and improve."
-                />
-                <ol className="m-0 grid list-none grid-cols-4 gap-5 p-0 max-[1000px]:grid-cols-2 max-sm:grid-cols-1">
-                    {steps.map(([title, body, picture], i) => (
-                        <li key={title} className="flex flex-col">
-                            <div
-                                aria-hidden="true"
-                                className={`${PANEL} h-[150px] overflow-hidden`}
-                            >
-                                {picture}
-                            </div>
-                            <h3 className="mt-5 flex items-center gap-2.5 text-[16.5px] font-semibold">
-                                <span className="bg-accent flex size-6 items-center justify-center rounded-full text-[12px] text-[var(--on-accent)]">
-                                    {i + 1}
-                                </span>
-                                {title}
-                            </h3>
-                            <p className="text-muted mt-2 text-[14.5px] leading-[1.6]">
-                                {body}
-                            </p>
-                        </li>
-                    ))}
-                </ol>
+                        See how it works
+                    </a>
+                </div>
             </div>
+            <EditorDrawing />
         </section>
     );
 }
 
-/* ——— Showcase: the real word-by-word comparison, to try ——— */
+/* ——— Steps: one paragraph, from first draft to the version you keep ——— */
 
 /**
- * What: The sample drafts compared word by word in the showcase, in order.
+ * What: The sample paragraph followed through the steps: as first written,
+ * and as rewritten once the words arrive.
  *
  * Used in:
- * - src/app/components/landing/landing.tsx (Showcase)
+ * - src/app/components/landing/landing.tsx (Steps)
  *
- * Effect: Changes the text and draft names the showcase compares. Each draft
- * is compared with the one after it.
+ * Effect: Changes the writing shown in every step, including the word-by-word
+ * comparison, which is worked out from these two.
  */
-const VERSIONS = [
+const FIRST_DRAFT =
+    "My grandmother kept every letter she was sent. They were very important to her.";
+const SECOND_DRAFT =
+    "My grandmother kept every letter she was sent, each one still folded along its first crease.";
+const [OPENING, VAGUE] = FIRST_DRAFT.split(". ") as [string, string];
+/** The comparison, phrase by phrase: a word-by-word diff of a rewrite this size reads as noise. */
+const CHANGES: DiffChunk[] = [
+    { value: OPENING, type: "same", added: false, removed: false },
+    { value: `. ${VAGUE}`, type: "remove", added: false, removed: true },
     {
-        id: "first",
-        name: "First thoughts",
-        text: "I went to a small library on Saturday afternoon. It was a nice place with many nice books, and I liked how quiet it was.",
+        value: SECOND_DRAFT.slice(OPENING.length),
+        type: "add",
+        added: true,
+        removed: false,
     },
-    {
-        id: "draft",
-        name: "Draft 2",
-        text: "On Saturday afternoon I found a small library. Its shelves were crowded with worn paperbacks, and the quiet felt almost solid.",
-    },
-    {
-        id: "final",
-        name: "Final",
-        text: "On Saturday afternoon I found a small library, its shelves crowded with worn paperbacks. The quiet felt almost solid.",
-    },
+];
+
+/**
+ * What: The goals shown in the polishing step, and whether each is done.
+ * The one marked current is the goal being revised.
+ *
+ * Used in:
+ * - src/app/components/landing/landing.tsx (Steps)
+ *
+ * Effect: Changes the sample checklist.
+ */
+const POLISH_GOALS = [
+    ["Show, don’t tell", "done"],
+    ["Cut what isn’t needed", "current"],
+    ["Read it out loud", "todo"],
 ] as const;
 
-function Showcase() {
-    const [before, setBefore] = useState(0);
-    const after = Math.min(before + 1, VERSIONS.length - 1);
-    const parts = diffWords(VERSIONS[before]!.text, VERSIONS[after]!.text);
+function Step({
+    n,
+    last,
+    title,
+    body,
+    children,
+}: {
+    n: number;
+    last?: boolean;
+    title: string;
+    body: string;
+    children: ReactNode;
+}) {
     return (
-        <section aria-labelledby="showcase-title" className="py-24 max-sm:py-16">
-            <div
-                className={`${WIDTH} grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] items-center gap-14 max-[1000px]:grid-cols-1 max-sm:gap-10`}
+        <li className="relative">
+            <span
+                aria-hidden="true"
+                className={`absolute top-[-2px] -left-[45px] flex size-[26px] items-center justify-center rounded-full border-[1.5px] text-[12px] font-semibold ${last ? "bg-ink text-paper border-ink" : "bg-paper border-ink"}`}
             >
-                <div className={`${PANEL} overflow-hidden rounded-[18px]`}>
-                    <div
-                        role="radiogroup"
-                        aria-label="Versions to compare"
-                        className="border-line bg-paper flex flex-wrap items-center gap-1 border-b p-2"
+                {n}
+            </span>
+            <h3 className="m-0 text-[17px] font-semibold">{title}</h3>
+            <p className="text-muted mt-1.5 text-[15px] leading-[1.55]">
+                {body}
+            </p>
+            <div className="mt-4">{children}</div>
+        </li>
+    );
+}
+
+function Steps() {
+    return (
+        <section
+            id="how"
+            aria-labelledby="how-title"
+            className="mx-auto w-full max-w-[640px] scroll-mt-20 px-6 pt-28"
+        >
+            <h2 id="how-title" className={SERIF_TITLE}>
+                You know this moment.
+            </h2>
+            <p className="text-muted mt-3 mb-12 text-[16px] leading-[1.6]">
+                One paragraph, from first draft to the version you keep.
+            </p>
+            <ol className="border-line m-0 ml-3 flex list-none flex-col gap-16 border-l pl-8">
+                <Step
+                    n={1}
+                    title="Write it down"
+                    body="Get the thought out first. Don’t stop to fix it."
+                >
+                    <p
+                        className={`${PANEL} p-[18px] font-serif text-[17px] leading-[1.6]`}
                     >
-                        {VERSIONS.slice(0, -1).map((v, i) => (
-                            <button
-                                key={v.id}
-                                role="radio"
-                                aria-checked={before === i}
-                                onClick={() => setBefore(i)}
-                                className={`h-10! min-h-10! gap-2! rounded-lg! px-3! text-[13px]! ${before === i ? "bg-surface! text-ink! font-medium [box-shadow:0_1px_3px_color-mix(in_srgb,var(--shadow)_12%,transparent)]" : "text-muted"}`}
-                            >
-                                {v.name}
-                                <ArrowRight size={13} aria-hidden="true" />
-                                {VERSIONS[i + 1]!.name}
-                            </button>
-                        ))}
+                        {FIRST_DRAFT}
+                        <span aria-hidden="true" className={CARET} />
+                    </p>
+                </Step>
+                <Step
+                    n={2}
+                    title="Something feels off"
+                    body="You can’t say what yet. Leave a thought on it and keep going."
+                >
+                    <div
+                        className={`${PANEL} relative px-[18px] pt-[18px] pb-[54px] font-serif text-[17px] leading-[1.6]`}
+                    >
+                        {OPENING}.{" "}
+                        <mark className="rounded-[2px] bg-[var(--landing-mark)] text-inherit">
+                            {VAGUE}
+                        </mark>
+                        <span
+                            aria-hidden="true"
+                            className={`${THOUGHT} field-butter absolute right-3.5 -bottom-[18px] -rotate-2 px-3.5 py-2.5`}
+                        >
+                            Says it. Doesn’t show it.
+                        </span>
                     </div>
-                    <div className="grid grid-cols-2 max-[640px]:grid-cols-1">
+                </Step>
+                <Step
+                    n={3}
+                    title="The words arrive"
+                    body="Maybe tomorrow. Your note is still there, right where you left it. Rewrite, then save it as a draft."
+                >
+                    <div
+                        className={`${PANEL} p-[18px] font-serif text-[17px] leading-[1.6]`}
+                    >
+                        <p>
+                            {SECOND_DRAFT}
+                            <span aria-hidden="true" className={CARET} />
+                        </p>
+                        <p className="text-muted mt-3.5 flex items-center justify-between border-t border-[color-mix(in_srgb,var(--border)_60%,transparent)] pt-3 font-sans text-[13px]">
+                            Draft 2
+                            <span className="text-success flex items-center gap-1.5">
+                                <Check
+                                    size={14}
+                                    strokeWidth={2.5}
+                                    aria-hidden="true"
+                                />
+                                Saved
+                            </span>
+                        </p>
+                    </div>
+                </Step>
+                <Step
+                    n={4}
+                    title="Polish, one thing at a time"
+                    body="Once it says what you mean, review it. Pick one goal from your checklist and read only for that."
+                >
+                    <div className={`${PANEL} overflow-hidden`}>
+                        <p className="bg-tint text-accent flex items-center gap-2 px-4 py-2.5 text-[13px]">
+                            <span className="bg-accent size-2 rounded-full" />
+                            <span className="font-semibold">Revising</span>· Cut
+                            what isn’t needed
+                        </p>
+                        <ul className="m-0 flex list-none flex-col gap-0.5 p-2 text-[15px]">
+                            {POLISH_GOALS.map(([goal, state]) => (
+                                <li
+                                    key={goal}
+                                    className={`flex min-h-11 items-center gap-3 rounded-lg px-3 ${state === "current" ? "bg-[color-mix(in_srgb,var(--text)_5%,transparent)] font-medium" : ""} ${state === "done" ? "text-muted" : ""}`}
+                                >
+                                    <span
+                                        className={`flex size-4 items-center justify-center rounded-[4px] border-[1.5px] ${state === "done" ? "border-success bg-success text-[var(--on-accent)]" : state === "current" ? "border-accent" : "border-line"}`}
+                                    >
+                                        {state === "done" && (
+                                            <Check
+                                                size={11}
+                                                strokeWidth={3.5}
+                                                aria-hidden="true"
+                                            />
+                                        )}
+                                    </span>
+                                    {state === "done" ? <s>{goal}</s> : goal}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </Step>
+                <Step
+                    n={5}
+                    title="See exactly what changed"
+                    body="Set two drafts side by side, word by word."
+                >
+                    <div
+                        className={`${PANEL} p-[18px] pl-2 font-serif text-[19px] leading-[1.65] tracking-[-0.01em] [overflow-wrap:anywhere]`}
+                    >
+                        <DiffText chunks={CHANGES} />
+                    </div>
+                </Step>
+                <Step
+                    n={6}
+                    last
+                    title="Keep the one you like"
+                    body="Every version stays. Choose one and carry on. Nothing is lost."
+                >
+                    <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
                         {(
                             [
+                                ["Draft 1", VAGUE, false],
                                 [
-                                    "Before",
-                                    VERSIONS[before]!.name,
-                                    parts.filter((p) => !p.added),
-                                ],
-                                [
-                                    "After",
-                                    VERSIONS[after]!.name,
-                                    parts.filter((p) => !p.removed),
+                                    "Draft 2 · In use",
+                                    SECOND_DRAFT.slice(OPENING.length + 2),
+                                    true,
                                 ],
                             ] as const
-                        ).map(([label, name, chunks], i) => (
-                            <div
-                                key={label}
-                                className={`min-w-0 px-8 pt-6 pb-9 max-sm:px-5 ${i ? "border-line border-l max-[640px]:border-t max-[640px]:border-l-0" : ""}`}
+                        ).map(([name, text, chosen]) => (
+                            <li
+                                key={name}
+                                className={`bg-surface flex items-start gap-3 rounded-xl px-4 py-3.5 ${chosen ? "border-accent border-[1.5px]" : "border-line border"}`}
                             >
-                                <p className="text-muted mb-4 flex items-baseline justify-between gap-2 text-[12px]">
-                                    <span className="font-semibold">{label}</span>
-                                    <span className="truncate">{name}</span>
-                                </p>
-                                <div className="landing-diff font-serif text-[17px] leading-[1.7] [overflow-wrap:anywhere] max-sm:text-[16px]">
-                                    <DiffText chunks={chunks} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <div>
-                    <Eyebrow>A closer look</Eyebrow>
-                    <h2
-                        id="showcase-title"
-                        className="mt-4 font-serif text-[clamp(30px,3.6vw,44px)] leading-[1.12] font-normal tracking-[-0.025em]"
-                    >
-                        Write and revise in one place.
-                    </h2>
-                    <p className="text-muted mt-4 text-[16px] leading-[1.65]">
-                        Name a draft whenever it matters, then compare any two
-                        versions word by word. Try it: pick the drafts to
-                        compare.
-                    </p>
-                    <ul className="m-0 mt-7 flex list-none flex-col gap-3.5 p-0 text-[15px]">
-                        {[
-                            "Connect thoughts directly to your words",
-                            "Keep revisions organized by goal",
-                            "Compare versions side by side",
-                            "Restoring an old draft saves your current text first",
-                        ].map((item) => (
-                            <li key={item} className="flex items-start gap-3">
-                                <span className="bg-tint text-accent mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full">
-                                    <Check
-                                        size={12}
-                                        strokeWidth={2.6}
-                                        aria-hidden="true"
-                                    />
+                                <span
+                                    aria-hidden="true"
+                                    className={`mt-[3px] size-[18px] shrink-0 rounded-full ${chosen ? "border-accent border-[5px]" : "border-line border-[1.5px]"}`}
+                                />
+                                <span>
+                                    <span
+                                        className={`block text-[12px] ${chosen ? "text-accent font-semibold" : "text-muted"}`}
+                                    >
+                                        {name}
+                                    </span>
+                                    <span
+                                        className={`font-serif text-[16px] leading-[1.55] ${chosen ? "" : "text-muted"}`}
+                                    >
+                                        …{text}
+                                    </span>
                                 </span>
-                                {item}
                             </li>
                         ))}
                     </ul>
-                </div>
-            </div>
+                </Step>
+            </ol>
         </section>
     );
 }
 
-/* ——— Customize: the same sample page in light and dark ——— */
+/* ——— Customize: swipe through a few appearance settings and try them ——— */
 
-function SamplePage({ dark }: { dark: boolean }) {
+/**
+ * What: The sentence every appearance card previews.
+ *
+ * Used in:
+ * - src/app/components/landing/landing.tsx (Customize)
+ *
+ * Effect: Changes the sample text in the swipeable settings cards.
+ */
+const SAMPLE =
+    "We don’t write what we think. We write to find out what we think.";
+/**
+ * What: How far in from each side the page-width card draws its text column,
+ * for each editor width.
+ *
+ * Used in:
+ * - src/app/components/landing/landing.tsx (Customize)
+ *
+ * Effect: Changes how narrow or wide each page-width choice looks in its card.
+ */
+const WIDTH_INSET: Record<keyof typeof EDITOR_WIDTHS, number> = {
+    narrow: 40,
+    standard: 24,
+    wide: 8,
+};
+/**
+ * What: The goals drawn in the "Your own goals" card.
+ *
+ * Used in:
+ * - src/app/components/landing/landing.tsx (Customize)
+ *
+ * Effect: Changes the sample checklist.
+ */
+const OWN_GOALS = [
+    "Cut every “very”",
+    "Read it out loud",
+    "Does the ending earn it?",
+];
+
+function Segmented<K extends string>({
+    label,
+    options,
+    value,
+    onChange,
+}: {
+    label: string;
+    options: readonly (readonly [K, string])[];
+    value: K;
+    onChange: (value: K) => void;
+}) {
     return (
         <div
-            className="flex-1 px-8 pt-7 pb-9 max-sm:px-5"
-            style={
-                dark
-                    ? { background: "#22211e", color: "#e8e4dc" }
-                    : { background: "#ffffff", color: "#1f1d1a" }
-            }
+            role="group"
+            aria-label={label}
+            className="flex rounded-lg bg-[color-mix(in_srgb,var(--text)_5%,var(--surface))] p-[3px]"
         >
-            <p className="text-[20px] font-semibold tracking-[-0.01em]">
-                Finding the Right Words
-            </p>
-            <p className="mt-3 text-[14.5px] leading-[1.75] opacity-85">
-                Writing is often a process of discovering what we really want to
-                say. Sometimes the first draft is only the beginning.
-            </p>
+            {options.map(([key, name]) => (
+                <button
+                    key={key}
+                    type="button"
+                    aria-pressed={value === key}
+                    onClick={() => onChange(key)}
+                    className={`min-h-10! flex-1 rounded-md! px-1! text-[12.5px]! ${value === key ? "bg-surface! text-ink! [box-shadow:0_1px_2px_color-mix(in_srgb,var(--shadow)_12%,transparent)]" : "text-muted!"}`}
+                >
+                    {name}
+                </button>
+            ))}
         </div>
     );
 }
 
-function Customize() {
+function SettingCard({
+    title,
+    index,
+    total,
+    preview,
+    previewStyle,
+    dark,
+    children,
+}: {
+    title: string;
+    index: number;
+    total: number;
+    preview: ReactNode;
+    previewStyle?: CSSProperties;
+    dark?: boolean;
+    children: ReactNode;
+}) {
     return (
-        <section
-            id="customize"
-            aria-labelledby="customize-title"
-            className="scroll-mt-20 bg-[color-mix(in_srgb,var(--surface)_55%,var(--bg))] py-24 max-sm:py-16"
-        >
+        <li className="border-line bg-surface flex w-[282px] shrink-0 snap-center flex-col gap-4 rounded-[18px] border p-[18px]">
+            <p className="flex justify-between text-[13px]">
+                <span className="font-semibold">{title}</span>
+                <span className="text-muted">
+                    {index} / {total}
+                </span>
+            </p>
             <div
-                className={`${WIDTH} grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] items-center gap-14 max-[1000px]:grid-cols-1 max-sm:gap-10`}
+                aria-hidden="true"
+                className={`h-[132px] overflow-hidden rounded-[10px] px-4 py-3.5 ${dark ? "bg-[#22211e] text-[#e8e4dc]" : "bg-paper"}`}
+                style={previewStyle}
             >
-                <div>
-                    <Eyebrow>Make it yours</Eyebrow>
-                    <h2
-                        id="customize-title"
-                        className="mt-4 font-serif text-[clamp(30px,3.6vw,44px)] leading-[1.12] font-normal tracking-[-0.025em]"
-                    >
-                        A writing space that feels like yours.
-                    </h2>
-                    <p className="text-muted mt-4 text-[16px] leading-[1.65]">
-                        Choose light or dark, a sans-serif, serif or monospace
-                        font, your text size, line spacing and how wide the page
-                        is. Changes show instantly and follow you to every
-                        device you sign in on.
-                    </p>
-                    <ul className="m-0 mt-7 grid list-none grid-cols-2 gap-3 p-0 text-[14.5px] max-sm:grid-cols-1">
-                        {(
-                            [
-                                [Moon, "Light, dark or system"],
-                                [PenLine, "Three font styles"],
-                                [Sparkles, "Text size and spacing"],
-                                [Monitor, "Narrow to wide pages"],
-                            ] as const
-                        ).map(([Icon, label]) => (
-                            <li key={label} className="flex items-center gap-2.5">
-                                <Icon
-                                    size={17}
-                                    strokeWidth={1.6}
-                                    className="text-accent"
-                                    aria-hidden="true"
-                                />
-                                {label}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <div
-                    role="img"
-                    aria-label="The same page shown in the light theme with a sans-serif font and in the dark theme."
-                    className="border-line flex overflow-hidden rounded-[18px] border [box-shadow:0_30px_60px_-36px_color-mix(in_srgb,var(--shadow)_40%,transparent)] max-sm:flex-col"
-                >
-                    <div className="flex flex-1 flex-col">
-                        <span className="border-b border-[#e7e2da] bg-[#faf8f5] px-4 py-2 text-[11.5px] font-medium text-[#6b665f]">
-                            Light
-                        </span>
-                        <SamplePage dark={false} />
-                    </div>
-                    <div className="flex flex-1 flex-col border-l border-[#36332e] max-sm:border-t max-sm:border-l-0">
-                        <span className="border-b border-[#36332e] bg-[#1a1917] px-4 py-2 text-[11.5px] font-medium text-[#a39d93]">
-                            Dark
-                        </span>
-                        <SamplePage dark />
-                    </div>
-                </div>
+                {preview}
             </div>
-        </section>
+            {children}
+        </li>
     );
 }
 
-/* ——— Trust: plain facts about where the writing lives, in place of testimonials ——— */
-
-function Trust() {
+function Customize() {
+    const [font, setFont] = useState<keyof typeof FONT_FAMILIES>("serif");
+    const [size, setSize] = useState(20);
+    const [spacing, setSpacing] =
+        useState<keyof typeof LINE_SPACINGS>("spacious");
+    const [width, setWidth] = useState<keyof typeof EDITOR_WIDTHS>("narrow");
+    const [dark, setDark] = useState(true);
+    const [typewriter, setTypewriter] = useState(true);
+    const [card, setCard] = useState(0);
+    const total = 7;
+    const pick = <T extends Record<string, { label: string }>>(choices: T) =>
+        Object.entries(choices).map(
+            ([key, choice]) => [key as keyof T & string, choice.label] as const,
+        );
     return (
-        <section aria-labelledby="trust-title" className="py-24 max-sm:py-16">
+        <section aria-labelledby="customize-title" className="pt-30">
             <div className={WIDTH}>
-                <SectionTitle
-                    id="trust-title"
-                    eyebrow="Your writing, your way"
-                    title="Calm about the things that matter."
-                    body="A writing tool should be the last thing you worry about. Here’s what Writely does with your work."
-                />
-                <ul className="m-0 grid list-none grid-cols-3 gap-5 p-0 max-[1000px]:grid-cols-1">
-                    {(
-                        [
-                            [
-                                CloudCheck,
-                                "Saved as you type",
-                                "Every change saves to your account. If the connection drops, unsaved text stays in your browser and is sent when you’re back.",
-                            ],
-                            [
-                                FileDown,
-                                "Take it with you",
-                                "Export any document as a Microsoft Word (.docx) file or a print-ready PDF — just your writing, none of the tools.",
-                            ],
-                            [
-                                Lock,
-                                "Private to your account",
-                                "Your documents, thoughts and drafts are only visible when you’re signed in. Nothing is published or shared.",
-                            ],
-                        ] as const
-                    ).map(([Icon, title, body]) => (
-                        <li key={title} className={`${PANEL} p-7`}>
-                            <Icon
-                                size={22}
-                                strokeWidth={1.6}
-                                className="text-accent"
-                                aria-hidden="true"
-                            />
-                            <h3 className="mt-4 text-[16.5px] font-semibold">
-                                {title}
-                            </h3>
-                            <p className="text-muted mt-2 text-[14.5px] leading-[1.6]">
-                                {body}
-                            </p>
-                        </li>
-                    ))}
-                </ul>
-                <div
-                    aria-hidden="true"
-                    className="mt-10 flex flex-wrap items-center justify-center gap-3 text-[13px]"
+                <h2 id="customize-title" className={SERIF_TITLE}>
+                    Set it up the way you write.
+                </h2>
+                <p className="text-muted mt-3 text-[16px] leading-[1.6]">
+                    Almost everything is yours to change. Swipe to try a few.
+                </p>
+            </div>
+            <ul
+                onScroll={(e) =>
+                    setCard(Math.round(e.currentTarget.scrollLeft / (282 + 12)))
+                }
+                className="mt-7 mb-0 flex snap-x snap-mandatory [scrollbar-width:none] list-none gap-3 overflow-x-auto px-[max(24px,calc((100%-1072px)/2))] pb-2 [&::-webkit-scrollbar]:hidden"
+            >
+                <SettingCard
+                    title="Font"
+                    index={1}
+                    total={total}
+                    previewStyle={{
+                        fontFamily: FONT_FAMILIES[font].css,
+                        fontSize: 16,
+                        lineHeight: 1.6,
+                    }}
+                    preview={SAMPLE}
                 >
-                    {[
-                        [FileText, "Microsoft Word (.docx)"],
-                        [FileDown, "PDF (.pdf)"],
-                        [Pin, "Pinned & archived"],
-                        [Clock, "Every named draft"],
-                    ].map(([Icon, label]) => {
-                        const I = Icon as typeof FileText;
-                        return (
-                            <span
-                                key={label as string}
-                                className="border-line bg-surface text-muted flex items-center gap-2 rounded-full border px-3.5 py-1.5"
-                            >
-                                <I size={14} strokeWidth={1.6} />
-                                {label as string}
-                            </span>
-                        );
-                    })}
-                </div>
-            </div>
-        </section>
-    );
-}
-
-/* ——— FAQ ——— */
-
-/**
- * What: The home page's questions and answers. Answers describe only what
- * Writely really does today.
- *
- * Used in:
- * - src/app/components/landing/landing.tsx (Faq)
- *
- * Effect: Changes the FAQ list.
- */
-const QUESTIONS = [
-    [
-        "What is Writely?",
-        "A clean, text-focused writing app with revision tools. You write on a calm page, keep thoughts beside your text, revise toward one goal at a time, and compare the drafts you name.",
-    ],
-    [
-        "What makes it different from a regular document editor?",
-        "Writely is built around revising. Thought cards hold what you want to improve and connect to the exact words; a checklist keeps you on one goal at a time; and named drafts can be compared word by word and restored safely.",
-    ],
-    [
-        "Is my writing private?",
-        "Yes. Your documents belong to your account and are only shown to you when you’re signed in. Writely doesn’t publish or share anything.",
-    ],
-    [
-        "Can I export my documents?",
-        "Yes — any document can be exported as a Microsoft Word (.docx) file or a PDF, from Settings or from the document’s ⋯ menu. Exports contain only your writing, never the thought cards or checklists.",
-    ],
-    [
-        "Can I use Writely on multiple devices?",
-        "Writely runs in any modern web browser on a computer, tablet or phone. Sign in and your documents and appearance settings are there.",
-    ],
-    [
-        "What happens if I lose my connection?",
-        "Changes that couldn’t be saved stay in your browser and are sent as soon as you’re back online. Writely tells you when something isn’t saved yet.",
-    ],
-] as const;
-
-function Faq() {
-    return (
-        <section
-            id="faq"
-            aria-labelledby="faq-title"
-            className="scroll-mt-20 pb-24 max-sm:pb-16"
-        >
-            <div className={`${WIDTH} max-w-[820px]!`}>
-                <SectionTitle
-                    id="faq-title"
-                    eyebrow="Questions"
-                    title="Frequently asked questions."
-                />
-                <div className="flex flex-col gap-3">
-                    {QUESTIONS.map(([question, answer], i) => (
-                        <details
-                            key={question}
-                            open={i === 0}
-                            className={`${PANEL} group px-6 open:pb-5 max-sm:px-4`}
+                    <Segmented
+                        label="Font"
+                        options={pick(FONT_FAMILIES)}
+                        value={font}
+                        onChange={setFont}
+                    />
+                </SettingCard>
+                <SettingCard
+                    title="Text size"
+                    index={2}
+                    total={total}
+                    previewStyle={{ fontSize: size, lineHeight: 1.5 }}
+                    preview={<span className="font-serif">{SAMPLE}</span>}
+                >
+                    <label className="flex min-h-10 items-center gap-3 font-serif">
+                        <span className="sr-only">Text size</span>
+                        <span aria-hidden="true" className="text-[13px]">
+                            A
+                        </span>
+                        <input
+                            type="range"
+                            min={FONT_SIZE_RANGE.min}
+                            max={FONT_SIZE_RANGE.max}
+                            value={size}
+                            onChange={(e) => setSize(Number(e.target.value))}
+                            className="accent-accent min-h-0! flex-1 border-0! bg-transparent! p-0!"
+                        />
+                        <span aria-hidden="true" className="text-[20px]">
+                            A
+                        </span>
+                        <span className="text-muted w-11 text-right font-sans text-[13px] tabular-nums">
+                            {size} px
+                        </span>
+                    </label>
+                </SettingCard>
+                <SettingCard
+                    title="Line spacing"
+                    index={3}
+                    total={total}
+                    previewStyle={{
+                        fontSize: 16,
+                        lineHeight: LINE_SPACINGS[spacing].value,
+                    }}
+                    preview={<span className="font-serif">{SAMPLE}</span>}
+                >
+                    <Segmented
+                        label="Line spacing"
+                        options={pick(LINE_SPACINGS)}
+                        value={spacing}
+                        onChange={setSpacing}
+                    />
+                </SettingCard>
+                <SettingCard
+                    title="Page width"
+                    index={4}
+                    total={total}
+                    previewStyle={{
+                        paddingInline: WIDTH_INSET[width],
+                    }}
+                    preview={
+                        <span className="border-line block h-full border-x border-dashed px-2.5 font-serif text-[14px] leading-[1.6]">
+                            {SAMPLE}
+                        </span>
+                    }
+                >
+                    <Segmented
+                        label="Page width"
+                        options={pick(EDITOR_WIDTHS)}
+                        value={width}
+                        onChange={setWidth}
+                    />
+                </SettingCard>
+                <SettingCard
+                    title="Theme"
+                    index={5}
+                    total={total}
+                    dark={dark}
+                    preview={
+                        <span className="font-serif text-[16px] leading-[1.6]">
+                            {SAMPLE}
+                        </span>
+                    }
+                >
+                    <Segmented
+                        label="Theme"
+                        options={[
+                            ["light", "Light"],
+                            ["dark", "Dark"],
+                        ]}
+                        value={dark ? "dark" : "light"}
+                        onChange={(v) => setDark(v === "dark")}
+                    />
+                </SettingCard>
+                <SettingCard
+                    title="Typewriter mode"
+                    index={6}
+                    total={total}
+                    preview={
+                        <span className="flex h-full flex-col justify-center font-serif text-[15px] leading-[1.7]">
+                            {[
+                                "We don’t write what we think.",
+                                "We write to find out what",
+                                "we think, one line at a time",
+                            ].map((line, i) => (
+                                <span
+                                    key={line}
+                                    className={
+                                        typewriter && i < 2
+                                            ? "text-[color-mix(in_srgb,var(--text)_30%,var(--bg))]"
+                                            : ""
+                                    }
+                                >
+                                    {line}
+                                    {i === 2 && <span className={CARET} />}
+                                </span>
+                            ))}
+                            <span>&nbsp;</span>
+                        </span>
+                    }
+                >
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={typewriter}
+                        onClick={() => setTypewriter((on) => !on)}
+                        className="text-muted! min-h-10! w-full justify-between! bg-transparent! px-0! text-[14px]! hover:bg-transparent!"
+                    >
+                        Keep my line centred
+                        <span
+                            aria-hidden="true"
+                            className={`relative h-6 w-10 rounded-full transition-colors ${typewriter ? "bg-accent" : "bg-line"}`}
                         >
-                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-medium focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--hover)] [&::-webkit-details-marker]:hidden">
-                                {question}
-                                <ChevronDown
-                                    size={18}
-                                    aria-hidden="true"
-                                    className="text-muted shrink-0 transition-transform duration-200 group-open:rotate-180"
-                                />
-                            </summary>
-                            <p className="text-muted -mt-1 text-[15px] leading-[1.65]">
-                                {answer}
-                            </p>
-                        </details>
-                    ))}
-                </div>
+                            <span
+                                className={`bg-surface absolute top-[3px] size-[18px] rounded-full transition-[left] ${typewriter ? "left-[19px]" : "left-[3px]"}`}
+                            />
+                        </span>
+                    </button>
+                </SettingCard>
+                <SettingCard
+                    title="Your own goals"
+                    index={7}
+                    total={total}
+                    preview={
+                        <span className="flex h-full flex-col justify-center gap-0.5 text-[14px]">
+                            {OWN_GOALS.map((goal) => (
+                                <span
+                                    key={goal}
+                                    className="flex min-h-[34px] items-center gap-2.5"
+                                >
+                                    <span className="border-line size-3.5 rounded-[4px] border-[1.5px]" />
+                                    {goal}
+                                </span>
+                            ))}
+                        </span>
+                    }
+                >
+                    <p className="text-muted flex min-h-10 items-center gap-2 text-[14px]">
+                        <Plus size={16} aria-hidden="true" />
+                        Write the goals you revise for, in Settings.
+                    </p>
+                </SettingCard>
+            </ul>
+            <div
+                aria-hidden="true"
+                className="mt-4 flex justify-center gap-1.5"
+            >
+                {Array.from({ length: total }, (_, i) => (
+                    <span
+                        key={i}
+                        className={`h-1.5 rounded-full transition-[width] ${i === card ? "bg-ink w-[18px]" : "bg-line w-1.5"}`}
+                    />
+                ))}
             </div>
         </section>
     );
 }
 
-/* ——— Final call to action ——— */
+/* ——— Final call to action: a blank page, as the editor shows it ——— */
 
 function FinalCta() {
     return (
-        <section aria-labelledby="cta-title" className="pb-24 max-sm:pb-16">
-            <div className={WIDTH}>
-                <div className="relative isolate overflow-hidden rounded-[24px] bg-[#244a4e] px-8 py-20 text-center text-[#f4f1ec] max-sm:px-5 max-sm:py-14">
-                    <Feather
+        <section
+            aria-labelledby="cta-title"
+            className="mx-auto w-full max-w-[592px] px-4 pt-32 pb-28"
+        >
+            <div className="border-line bg-surface rounded-md border px-6 pt-10 pb-6 [box-shadow:0_30px_60px_-36px_color-mix(in_srgb,var(--shadow)_35%,transparent)]">
+                <p className="text-muted text-[12px]">A new piece</p>
+                <h2
+                    id="cta-title"
+                    className="mt-3.5 font-serif text-[30px] leading-[1.15] font-normal tracking-[-0.025em]"
+                >
+                    Begin anywhere.
+                    <br />
+                    <span className="text-muted">
+                        Every thought has somewhere to go.
+                    </span>
+                    <span
                         aria-hidden="true"
-                        strokeWidth={0.6}
-                        className="absolute -right-6 -bottom-10 -z-10 size-[260px] rotate-[-18deg] text-[color-mix(in_srgb,#f4f1ec_9%,transparent)]"
+                        className="bg-accent ml-1 inline-block h-7 w-0.5 translate-y-1 animate-[caret-blink_1.1s_steps(1)_infinite] motion-reduce:animate-none"
                     />
-                    <p className="text-[11px] font-semibold tracking-[0.14em] text-[color-mix(in_srgb,#f4f1ec_70%,#244a4e)] uppercase">
-                        Ready to write better?
-                    </p>
-                    <h2
-                        id="cta-title"
-                        className="mt-4 font-serif text-[clamp(32px,4.4vw,52px)] leading-[1.08] font-normal tracking-[-0.03em] text-balance"
+                </h2>
+                <Link href={SIGN_UP} className={`${PRIMARY} mt-14 w-full`}>
+                    Start your first piece
+                    <ArrowRight size={17} aria-hidden="true" />
+                </Link>
+                <p className="text-muted mt-3.5 text-center text-[14px]">
+                    Already writing here?{" "}
+                    <Link
+                        href="/sign-in"
+                        className="text-ink font-medium underline-offset-3"
                     >
-                        Give your writing the space it deserves.
-                    </h2>
-                    <p className="mx-auto mt-4 max-w-[34em] text-[16px] leading-[1.6] text-[color-mix(in_srgb,#f4f1ec_78%,#244a4e)]">
-                        A cleaner page. A clearer process. Better writing.
-                    </p>
-                    <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-                        <Link
-                            href={SIGN_UP}
-                            className={`${PRIMARY} bg-[#f4f1ec]! text-[#1f3d40]! [box-shadow:none]! hover:bg-white! focus-visible:[box-shadow:0_0_0_2px_#244a4e,0_0_0_4px_#f4f1ec]!`}
-                        >
-                            Get started
-                            <ArrowRight size={17} aria-hidden="true" />
-                        </Link>
-                        <Link
-                            href="/sign-in"
-                            className="inline-flex min-h-12 items-center rounded-[10px] border border-[color-mix(in_srgb,#f4f1ec_35%,transparent)] px-6 text-[15px] font-medium text-[#f4f1ec] no-underline hover:bg-[color-mix(in_srgb,#f4f1ec_10%,transparent)] focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_#f4f1ec]"
-                        >
-                            Sign in
-                        </Link>
-                    </div>
-                    <ul className="m-0 mt-8 flex list-none flex-wrap justify-center gap-x-6 gap-y-2 p-0 text-[13.5px] text-[color-mix(in_srgb,#f4f1ec_78%,#244a4e)]">
-                        {[
-                            "Works in any modern browser",
-                            "Export to Word and PDF",
-                            "Light and dark themes",
-                        ].map((item) => (
-                            <li key={item} className="flex items-center gap-2">
-                                <Check size={14} strokeWidth={2.4} aria-hidden="true" />
-                                {item}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                        Sign in
+                    </Link>
+                </p>
             </div>
         </section>
     );
