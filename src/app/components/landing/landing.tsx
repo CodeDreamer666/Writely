@@ -173,57 +173,54 @@ const DOCK = [FileText, StickyNote, ListChecks, History, ChartColumn];
 
 function EditorDrawing() {
     return (
-        <div className="relative pb-6">
-            <div
-                role="img"
-                aria-label="The Writely editor with two thought cards left on unfinished phrases, and the tool dock at the bottom."
-                className="border-line bg-surface relative h-[440px] overflow-hidden rounded-[18px] border [box-shadow:0_40px_80px_-48px_color-mix(in_srgb,var(--shadow)_45%,transparent)]"
-            >
-                <div className="text-muted flex h-12 items-center justify-between border-b border-[color-mix(in_srgb,var(--border)_60%,transparent)] px-4 text-[12px]">
-                    <span>‹ Documents</span>
-                    <span>Saved</span>
-                </div>
-                <div className="px-6 pt-7 font-serif">
-                    <p className="text-[24px] tracking-[-0.01em]">
-                        On Unfinished Things
-                    </p>
-                    <p className="mt-3.5 text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_85%,var(--surface))]">
-                        Every sentence begins as a guess.{" "}
-                        <mark className="rounded-[2px] bg-[var(--landing-mark)] text-inherit">
-                            Most of what I write is not yet what I mean
-                        </mark>
-                        , and that is where the work starts.
-                    </p>
-                    <p className="mt-[72px] text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_55%,var(--surface))]">
-                        <mark className="landing-field field-sky rounded-[2px] bg-[var(--field)] text-inherit">
-                            Maybe revising is listening.
-                        </mark>
-                    </p>
-                </div>
-                <div className="absolute inset-x-0 bottom-0 h-[110px] bg-[linear-gradient(to_bottom,transparent,var(--surface)_55%)]" />
-                <div className="border-line bg-surface text-muted absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-0.5 rounded-2xl border p-1.5 [box-shadow:0_12px_32px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent),0_1px_2px_color-mix(in_srgb,var(--shadow)_6%,transparent)]">
-                    {DOCK.map((Icon, i) => (
-                        <span
-                            key={i}
-                            className={`flex size-11 items-center justify-center rounded-[10px] ${i === 1 ? "bg-tint text-accent" : ""}`}
-                        >
-                            <Icon size={18} strokeWidth={1.7} />
-                        </span>
-                    ))}
-                </div>
+        <div
+            role="img"
+            aria-label="The Writely editor with two thought cards left under unfinished phrases, and the tool dock at the bottom."
+            className="border-line bg-surface relative overflow-hidden rounded-[18px] border pb-[104px] [box-shadow:0_40px_80px_-48px_color-mix(in_srgb,var(--shadow)_45%,transparent)]"
+        >
+            <div className="text-muted flex h-12 items-center justify-between border-b border-[color-mix(in_srgb,var(--border)_60%,transparent)] px-4 text-[12px]">
+                <span>‹ Documents</span>
+                <span>Saved</span>
             </div>
-            <p
-                aria-hidden="true"
-                className={`${THOUGHT} field-butter absolute top-[214px] right-2 w-[164px] rotate-3 px-3.5 py-3`}
-            >
-                Close. Not quite it yet.
-            </p>
-            <p
-                aria-hidden="true"
-                className={`${THOUGHT} field-sky absolute top-[306px] left-1.5 w-[160px] -rotate-4 px-3.5 py-3`}
-            >
-                The ending? Come back to this.
-            </p>
+            {/* The thoughts sit in the flow under their phrases, so no screen width can hide the text. */}
+            <div className="flex flex-col px-6 pt-7 font-serif">
+                <p className="text-[24px] tracking-[-0.01em]">
+                    On Unfinished Things
+                </p>
+                <p className="mt-3.5 text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_85%,var(--surface))]">
+                    Every sentence begins as a guess.{" "}
+                    <mark className="rounded-[2px] bg-[var(--landing-mark)] text-inherit">
+                        Most of what I write is not yet what I mean
+                    </mark>
+                    , and that is where the work starts.
+                </p>
+                <p
+                    className={`${THOUGHT} field-butter mt-3 w-[min(180px,70%)] rotate-2 self-end px-3.5 py-3`}
+                >
+                    Close. Not quite it yet.
+                </p>
+                <p className="mt-6 text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_55%,var(--surface))]">
+                    <mark className="landing-field field-sky rounded-[2px] bg-[var(--field)] text-inherit">
+                        Maybe revising is listening.
+                    </mark>
+                </p>
+                <p
+                    className={`${THOUGHT} field-sky mt-3 w-[min(180px,70%)] -rotate-2 self-start px-3.5 py-3`}
+                >
+                    The ending? Come back to this.
+                </p>
+            </div>
+            <div className="absolute inset-x-0 bottom-0 h-[110px] bg-[linear-gradient(to_bottom,transparent,var(--surface)_55%)]" />
+            <div className="border-line bg-surface text-muted absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-0.5 rounded-2xl border p-1.5 [box-shadow:0_12px_32px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent),0_1px_2px_color-mix(in_srgb,var(--shadow)_6%,transparent)]">
+                {DOCK.map((Icon, i) => (
+                    <span
+                        key={i}
+                        className={`flex size-11 items-center justify-center rounded-[10px] ${i === 1 ? "bg-tint text-accent" : ""}`}
+                    >
+                        <Icon size={18} strokeWidth={1.7} />
+                    </span>
+                ))}
+            </div>
         </div>
     );
 }
@@ -578,7 +575,6 @@ function SettingCard({
     total,
     preview,
     previewStyle,
-    dark,
     children,
 }: {
     title: string;
@@ -586,7 +582,6 @@ function SettingCard({
     total: number;
     preview: ReactNode;
     previewStyle?: CSSProperties;
-    dark?: boolean;
     children: ReactNode;
 }) {
     return (
@@ -599,7 +594,7 @@ function SettingCard({
             </p>
             <div
                 aria-hidden="true"
-                className={`h-[132px] overflow-hidden rounded-[10px] px-4 py-3.5 ${dark ? "bg-[#22211e] text-[#e8e4dc]" : "bg-paper"}`}
+                className="bg-paper h-[132px] [scrollbar-width:none] overflow-y-auto overscroll-contain rounded-[10px] px-4 py-3.5 [&::-webkit-scrollbar]:hidden"
                 style={previewStyle}
             >
                 {preview}
@@ -615,10 +610,9 @@ function Customize() {
     const [spacing, setSpacing] =
         useState<keyof typeof LINE_SPACINGS>("spacious");
     const [width, setWidth] = useState<keyof typeof EDITOR_WIDTHS>("narrow");
-    const [dark, setDark] = useState(true);
     const [typewriter, setTypewriter] = useState(true);
     const [card, setCard] = useState(0);
-    const total = 7;
+    const total = 6;
     const pick = <T extends Record<string, { label: string }>>(choices: T) =>
         Object.entries(choices).map(
             ([key, choice]) => [key as keyof T & string, choice.label] as const,
@@ -723,29 +717,8 @@ function Customize() {
                     />
                 </SettingCard>
                 <SettingCard
-                    title="Theme"
-                    index={5}
-                    total={total}
-                    dark={dark}
-                    preview={
-                        <span className="font-serif text-[16px] leading-[1.6]">
-                            {SAMPLE}
-                        </span>
-                    }
-                >
-                    <Segmented
-                        label="Theme"
-                        options={[
-                            ["light", "Light"],
-                            ["dark", "Dark"],
-                        ]}
-                        value={dark ? "dark" : "light"}
-                        onChange={(v) => setDark(v === "dark")}
-                    />
-                </SettingCard>
-                <SettingCard
                     title="Typewriter mode"
-                    index={6}
+                    index={5}
                     total={total}
                     preview={
                         <span className="flex h-full flex-col justify-center font-serif text-[15px] leading-[1.7]">
@@ -790,7 +763,7 @@ function Customize() {
                 </SettingCard>
                 <SettingCard
                     title="Your own goals"
-                    index={7}
+                    index={6}
                     total={total}
                     preview={
                         <span className="flex h-full flex-col justify-center gap-0.5 text-[14px]">
@@ -808,7 +781,7 @@ function Customize() {
                 >
                     <p className="text-muted flex min-h-10 items-center gap-2 text-[14px]">
                         <Plus size={16} aria-hidden="true" />
-                        Write the goals you revise for, in Settings.
+                        Set your own goals
                     </p>
                 </SettingCard>
             </ul>
@@ -833,38 +806,29 @@ function FinalCta() {
     return (
         <section
             aria-labelledby="cta-title"
-            className="mx-auto w-full max-w-[592px] px-4 pt-32 pb-28"
+            className="mx-auto w-full max-w-[592px] px-6 pt-32 pb-28"
         >
-            <div className="border-line bg-surface rounded-md border px-6 pt-10 pb-6 [box-shadow:0_30px_60px_-36px_color-mix(in_srgb,var(--shadow)_35%,transparent)]">
-                <p className="text-muted text-[12px]">A new piece</p>
-                <h2
-                    id="cta-title"
-                    className="mt-3.5 font-serif text-[30px] leading-[1.15] font-normal tracking-[-0.025em]"
-                >
-                    Begin anywhere.
-                    <br />
-                    <span className="text-muted">
-                        Every thought has somewhere to go.
-                    </span>
-                    <span
-                        aria-hidden="true"
-                        className="bg-accent ml-1 inline-block h-7 w-0.5 translate-y-1 animate-[caret-blink_1.1s_steps(1)_infinite] motion-reduce:animate-none"
-                    />
-                </h2>
-                <Link href={SIGN_UP} className={`${PRIMARY} mt-14 w-full`}>
-                    Start your first piece
-                    <ArrowRight size={17} aria-hidden="true" />
-                </Link>
-                <p className="text-muted mt-3.5 text-center text-[14px]">
-                    Already writing here?{" "}
-                    <Link
-                        href="/sign-in"
-                        className="text-ink font-medium underline-offset-3"
-                    >
-                        Sign in
-                    </Link>
-                </p>
-            </div>
+            <h2
+                id="cta-title"
+                className="font-serif text-[36px] leading-[1.12] font-normal tracking-[-0.03em] text-balance"
+            >
+                Begin anywhere.
+                <br />
+                <span className="text-muted">
+                    Every thought has somewhere to go.
+                </span>
+                <span
+                    aria-hidden="true"
+                    className="bg-accent ml-1 inline-block h-8 w-0.5 translate-y-1.5 animate-[caret-blink_1.1s_steps(1)_infinite] motion-reduce:animate-none"
+                />
+            </h2>
+            <Link
+                href={SIGN_UP}
+                className={`${PRIMARY} mt-10 w-full sm:w-auto`}
+            >
+                Start your first piece
+                <ArrowRight size={17} aria-hidden="true" />
+            </Link>
         </section>
     );
 }
