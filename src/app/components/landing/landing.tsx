@@ -1,5 +1,6 @@
 "use client";
 import {
+    ArrowDown,
     ArrowRight,
     Check,
     ChartColumn,
@@ -53,6 +54,17 @@ const SIGN_UP = "/sign-in?mode=sign-up";
  */
 const PRIMARY =
     "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[10px] bg-accent px-6 text-[16px] font-medium text-[var(--on-accent)] no-underline [box-shadow:0_10px_24px_-14px_color-mix(in_srgb,var(--accent)_90%,transparent)] transition-[background-color,translate] duration-150 hover:bg-[var(--hover)] active:translate-y-px focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--bg),0_0_0_4px_var(--hover)]";
+/**
+ * What: The look of the home page's outlined secondary button
+ * ("See how it works").
+ *
+ * Used in:
+ * - src/app/components/landing/landing.tsx (Hero)
+ *
+ * Effect: Changes the size, border and hover style of the secondary button.
+ */
+const SECONDARY =
+    "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[10px] border border-line bg-surface px-6 text-[16px] font-medium text-ink no-underline transition-[border-color,translate] duration-150 hover:border-[var(--control-focus)] active:translate-y-px focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--bg),0_0_0_4px_var(--hover)]";
 /**
  * What: The look of the white surfaces that hold product drawings.
  *
@@ -245,16 +257,18 @@ function Hero() {
                     A quiet place to leave notes for later, rewrite when the
                     words come, and keep every version.
                 </p>
-                <div className="mt-8 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                     <Link href={SIGN_UP} className={PRIMARY}>
                         Start writing
                         <ArrowRight size={17} aria-hidden="true" />
                     </Link>
-                    <a
-                        href="#how"
-                        className={`text-muted hover:text-ink flex min-h-11 items-center justify-center rounded-lg px-3 text-[15px] font-medium no-underline ${FOCUS}`}
-                    >
+                    <a href="#how" className={SECONDARY}>
                         See how it works
+                        <ArrowDown
+                            size={17}
+                            className="text-muted"
+                            aria-hidden="true"
+                        />
                     </a>
                 </div>
             </div>
