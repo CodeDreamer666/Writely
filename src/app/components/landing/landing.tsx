@@ -105,7 +105,7 @@ export default function Landing() {
         return () => window.removeEventListener("scroll", sync);
     }, []);
     return (
-        <div className="landing bg-paper text-ink min-h-dvh overflow-x-clip scroll-smooth">
+        <div className="landing bg-paper text-ink min-h-dvh overflow-x-clip">
             <a
                 href="#main"
                 className="bg-surface text-ink sr-only z-50 rounded-lg px-4 py-2 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
@@ -154,15 +154,9 @@ export default function Landing() {
 
             <footer className="border-line border-t">
                 <div
-                    className={`${WIDTH} text-muted flex items-center justify-between pt-7 pb-10 text-[13px]`}
+                    className={`${WIDTH} text-muted flex items-center justify-end pt-7 pb-10 text-[13px]`}
                 >
                     <span>© {new Date().getFullYear()} Writely</span>
-                    <Link
-                        href="/sign-in"
-                        className="text-muted hover:text-ink flex min-h-11 items-center no-underline"
-                    >
-                        Sign in
-                    </Link>
                 </div>
             </footer>
         </div>
@@ -261,7 +255,22 @@ function Hero() {
                         Start writing
                         <ArrowRight size={17} aria-hidden="true" />
                     </Link>
-                    <a href="#how" className={SECONDARY}>
+                    <a
+                        href="#how"
+                        onClick={(e) => {
+                            // The page scrolls on the document, so glide there by hand rather than jump.
+                            e.preventDefault();
+                            document.getElementById("how")?.scrollIntoView({
+                                behavior: matchMedia(
+                                    "(prefers-reduced-motion: reduce)",
+                                ).matches
+                                    ? "auto"
+                                    : "smooth",
+                            });
+                            history.replaceState(null, "", "#how");
+                        }}
+                        className={SECONDARY}
+                    >
                         See how it works
                         <ArrowDown
                             size={17}
@@ -817,30 +826,64 @@ function Customize() {
 
 /* ——— Final call to action: a blank page, as the editor shows it ——— */
 
+/**
+ * What: The three things the closing page promises, each with its icon,
+ * thought-card pastel and spot around the headline.
+ *
+ * Used in:
+ * - src/app/components/landing/landing.tsx (FinalCta)
+ *
+ * Effect: Changes the tilted chips scattered around the closing headline.
+ */
+const PROMISES = [
+    [StickyNote, "Leave a thought", "field-butter", "top-0 left-0 -rotate-6"],
+    [History, "Keep every draft", "field-sky", "top-7 right-0 rotate-3"],
+    [
+        ListChecks,
+        "Polish one goal at a time",
+        "field-sage",
+        "bottom-0 left-6 rotate-2 sm:right-12 sm:left-auto",
+    ],
+] as const;
+
 function FinalCta() {
     return (
         <section
             aria-labelledby="cta-title"
             className="mx-auto w-full max-w-[592px] px-6 pt-32 pb-28"
         >
-            <h2
-                id="cta-title"
-                className="font-serif text-[36px] leading-[1.12] font-normal tracking-[-0.03em] text-balance"
-            >
-                Begin anywhere.
-                <br />
-                <span className="text-muted">
-                    Every thought has somewhere to go.
-                </span>
-                <span
-                    aria-hidden="true"
-                    className="bg-accent ml-1 inline-block h-8 w-0.5 translate-y-1.5 animate-[caret-blink_1.1s_steps(1)_infinite] motion-reduce:animate-none"
-                />
-            </h2>
-            <Link
-                href={SIGN_UP}
-                className={`${PRIMARY} mt-10 w-full sm:w-auto`}
-            >
+            <div className="relative py-[72px]">
+                <h2
+                    id="cta-title"
+                    className="font-serif text-[32px] leading-[1.12] font-normal tracking-[-0.03em] text-balance sm:text-[36px]"
+                >
+                    Begin anywhere.
+                    <br />
+                    <span className="text-muted">
+                        Every thought has somewhere to&nbsp;go.
+                    </span>
+                    <span
+                        aria-hidden="true"
+                        className="bg-accent ml-1 inline-block h-8 w-0.5 translate-y-1.5 animate-[caret-blink_1.1s_steps(1)_infinite] motion-reduce:animate-none"
+                    />
+                </h2>
+                <ul className="m-0 list-none p-0">
+                    {PROMISES.map(([Icon, label, field, spot]) => (
+                        <li
+                            key={label}
+                            className={`landing-field ${field} absolute flex min-h-9 items-center gap-2 rounded-lg bg-[var(--field)] px-3 text-[13px] font-medium text-[var(--field-text)] [box-shadow:0_8px_16px_-12px_color-mix(in_srgb,var(--shadow)_45%,transparent)] ${spot}`}
+                        >
+                            <Icon
+                                size={15}
+                                strokeWidth={1.8}
+                                aria-hidden="true"
+                            />
+                            {label}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+            <Link href={SIGN_UP} className={`${PRIMARY} mt-6 w-full sm:w-auto`}>
                 Start your first piece
                 <ArrowRight size={17} aria-hidden="true" />
             </Link>

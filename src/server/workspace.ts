@@ -1,15 +1,10 @@
 import type { Prisma } from "../../generated/prisma/client";
-import {
-    initial,
-    makeDoc,
-} from "~/lib/writely/model";
+import { makeDoc } from "~/lib/writely/model";
 import {
     countWords,
     htmlToPlainText,
 } from "~/lib/writely/plain-text";
-import { migrateRevisions } from "~/lib/writely/revision-model";
 import { DEFAULT_GOAL_TEXTS } from "~/config/revisions";
-import { workspaceChanges } from "~/lib/writely/sync";
 import type {
     Card,
     RevisionSession,
@@ -119,29 +114,12 @@ export async function loadWorkspace(
  * remote database, so a whole workspace can outlast Prisma's 5s default.
  *
  * Used in:
- * - src/server/workspace.ts (ensureWorkspace, resetWorkspace, createDocuments,
- *   saveWorkspace)
+ * - src/server/workspace.ts (ensureWorkspace, createDocuments, saveWorkspace)
  *
  * Effect: Raising them lets very large saves finish on slow connections.
  * Lowering them makes slow saves fail sooner with an error.
  */
 const TRANSACTION_OPTIONS = { maxWait: 10_000, timeout: 30_000 };
-
-/**
- * What: A workspace with nothing in it, used as the starting point when the
- * sample documents are added back.
- *
- * Used in:
- * - src/server/workspace.ts (resetWorkspace)
- *
- * Effect: Nothing to tune. Everything in the sample is added as a change
- * from this empty starting point.
- */
-const EMPTY_WORKSPACE: WorkspaceData = {
-    docs: [],
-    active: "",
-    defaultRevisionGoals: [],
-};
 
 /**
  * The user's workspace row, created on first visit with the default universal goals and no
@@ -182,22 +160,6 @@ export async function loadDocumentWorkspace(
     await ensureWorkspace(userId);
     const workspace = await loadWorkspace(userId, documentId);
     return workspace && { ...workspace, active: documentId };
-}
-
-/** Replaces all of the user's writing and goals with the sample manuscripts. */
-export function resetWorkspace(userId: string) {
-    return queueSave(userId, () =>
-        db.$transaction(async (tx) => {
-            await tx.document.deleteMany({ where: { userId } });
-            await tx.revisionGoal.deleteMany({ where: { userId } });
-            const samples = migrateRevisions(initial());
-            await applyChanges(tx, userId, {
-                ...workspaceChanges(EMPTY_WORKSPACE, samples)!,
-                nextThoughtColour: 0,
-            });
-            return samples.active;
-        }, TRANSACTION_OPTIONS),
-    );
 }
 
 /** Adds complete documents (a new piece, a saved tutorial sample or imported prototype writing). */

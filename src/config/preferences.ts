@@ -27,7 +27,7 @@ export const THEMES = ["light", "dark", "system"] as const;
  * - src/app/components/writely/appearance-settings.tsx (AppearanceSettings)
  *
  * Effect: Changing a px value makes that column narrower or wider in the
- * editor and in the Settings preview. Removing an option makes accounts
+ * editor and in its drawing in Settings. Removing an option makes accounts
  * that chose it fall back to the default width.
  */
 export const EDITOR_WIDTHS = {
@@ -82,9 +82,9 @@ export const FONT_FAMILIES = {
  * for that choice; a smaller one packs lines closer together.
  */
 export const LINE_SPACINGS = {
-    compact: { label: "Compact", value: 1.4 },
-    comfortable: { label: "Comfortable", value: 1.7 },
-    spacious: { label: "Spacious", value: 2.0 },
+    compact: { label: "Tight", value: 1.4 },
+    comfortable: { label: "Balanced", value: 1.7 },
+    spacious: { label: "Airy", value: 2.0 },
 } as const;
 
 /**
@@ -100,9 +100,9 @@ export const LINE_SPACINGS = {
  * quotes keep their own spacing.
  */
 export const PARAGRAPH_SPACINGS = {
-    compact: { label: "Compact", value: 0.6 },
-    comfortable: { label: "Comfortable", value: 1.25 },
-    spacious: { label: "Spacious", value: 2 },
+    compact: { label: "Tight", value: 0.6 },
+    comfortable: { label: "Balanced", value: 1.25 },
+    spacious: { label: "Airy", value: 2 },
 } as const;
 
 /**

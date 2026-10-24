@@ -36,9 +36,7 @@ test("a new account can be created from the sign-in page and starts with the sam
     const page = await context.newPage();
     const errors = errorsFor(page);
     await page.goto("/sign-in");
-    await page
-        .getByRole("button", { name: "New to Writely? Create an account" })
-        .click();
+    await page.getByRole("tab", { name: "Create account" }).click();
     await page.getByLabel("Name").fill("Sam Writer");
     await page.getByLabel("Email").fill(`ui-${Date.now()}@example.com`);
     await page.getByLabel("Password").fill("a-long-password");

@@ -6,7 +6,6 @@ import {
 } from "~/server/api/trpc";
 import {
     getOrCreateWorkspace,
-    resetWorkspace,
     saveWorkspace,
 } from "~/server/workspace";
 
@@ -131,9 +130,4 @@ export const workspaceRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             await saveWorkspace(ctx.session.user.id, input);
         }),
-
-    /** Replaces all writing with the sample manuscripts; returns the document to open. */
-    reset: protectedProcedure.mutation(({ ctx }) =>
-        resetWorkspace(ctx.session.user.id),
-    ),
 });

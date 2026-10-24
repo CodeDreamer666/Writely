@@ -2,6 +2,8 @@ import {
     test as base,
     expect,
 } from "@playwright/test";
+import { initial } from "../../src/lib/writely/model.ts";
+import { migrateRevisions } from "../../src/lib/writely/revision-model.ts";
 
 let accounts = 0;
 
@@ -58,11 +60,18 @@ const trpc = (page, path, input) =>
  */
 export async function openSample(page) {
     await page.goto("/welcome");
-    const id = await trpc(page, "workspace.reset");
+    // The account's own universal goals, so sample checks become progress on them.
+    const { defaultRevisionGoals } = await stored(page);
+    const sample = migrateRevisions({ ...initial(), defaultRevisionGoals });
+    await trpc(page, "documents.create", { documents: sample.docs });
+    await trpc(page, "workspace.save", {
+        active: sample.active,
+        nextThoughtColour: 0,
+    });
     await trpc(page, "account.markWelcomed");
-    await page.goto(`/d/${id}`);
+    await page.goto(`/d/${sample.active}`);
     await page.getByRole("textbox", { name: "Document text" }).waitFor();
-    return id;
+    return sample.active;
 }
 
 export { trpc };

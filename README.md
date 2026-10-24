@@ -15,7 +15,7 @@ Built on the [T3 stack](https://create.t3.gg): Next.js (App Router), TypeScript,
 - Universal revision goals managed in Settings, with independent completion for each manuscript and separate manuscript-specific goals.
 - Movable thought cards with inline editing, collapsed leaf markers, and automatic pastel colours that cycle Yellow → Blue → Green → Pink. Double-click card text or use its pencil button to edit; click outside to save, or press Escape to cancel.
 - Select manuscript text and choose **Connect to thought**, then click a card to connect it. Each card has one visible connection; multiple cards can share a text range, with accurate arrows and overlapping highlights that follow edits.
-- A full-page Settings view with account details, log out, account deletion and a confirmed **Reset prototype** action.
+- A full-page Settings view with account details, log out and account deletion.
 
 ## Run locally
 
@@ -64,7 +64,7 @@ Writing, saved versions, thought cards, revision goals and preferences belong to
 
 Writing created in the earlier browser-only prototype (stored in `localStorage` under `writely.local.v1`) moves into the first account created in that browser.
 
-**Reset prototype** restores the original sample manuscripts, thought cards, goals, and preferences in the account after confirmation. **Delete account** permanently removes the account and all of its writing.
+**Delete account** permanently removes the account and all of its writing.
 
 The empty editor prompt and annotation highlights are visual decorations, not manuscript text, and do not enter saved versions or writing statistics.
 

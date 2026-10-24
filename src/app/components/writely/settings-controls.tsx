@@ -80,6 +80,7 @@ export function SettingRow({
     hint,
     value,
     stacked = false,
+    compact = false,
     children,
 }: {
     id: string;
@@ -88,8 +89,28 @@ export function SettingRow({
     /** The current value, shown beside the label (for sliders). */
     value?: ReactNode;
     stacked?: boolean;
+    /** Keep a switch beside its title, with supporting text on a second row. */
+    compact?: boolean;
     children: ReactNode;
 }) {
+    if (compact) {
+        return (
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0 px-4 py-5">
+                <span id={id} className="text-[14px] leading-5 font-medium">
+                    {label}
+                </span>
+                <div className="flex h-5 items-center">{children}</div>
+                {hint && (
+                    <p
+                        id={`${id}-hint`}
+                        className="text-muted col-span-2 m-0 text-[12px] leading-5"
+                    >
+                        {hint}
+                    </p>
+                )}
+            </div>
+        );
+    }
     return (
         <div
             className={`flex gap-x-6 gap-y-3 px-5 py-4 ${stacked ? "flex-col" : "items-center justify-between max-sm:flex-col max-sm:items-stretch"}`}
@@ -129,6 +150,8 @@ export function Segmented<T extends string>({
         label: ReactNode;
         style?: CSSProperties;
         detail?: string;
+        /** A small drawing of the choice's effect, shown above its label. */
+        preview?: ReactNode;
     }[];
     onChange: (value: T) => void;
 }) {
@@ -136,7 +159,7 @@ export function Segmented<T extends string>({
         <div
             role="radiogroup"
             aria-labelledby={labelledBy}
-            className="border-line bg-paper grid min-w-[260px] auto-cols-fr grid-flow-col gap-0.5 rounded-xl border p-1 max-sm:min-w-0"
+            className="border-line bg-paper grid min-w-[300px] auto-cols-fr grid-flow-col gap-0.5 rounded-xl border p-1 max-sm:min-w-0"
             onKeyDown={(e) => {
                 const step =
                     e.key === "ArrowRight" || e.key === "ArrowDown"
@@ -171,13 +194,23 @@ export function Segmented<T extends string>({
                         tabIndex={checked ? 0 : -1}
                         onClick={() => onChange(option.value)}
                         style={option.style}
-                        className={`min-h-10! min-w-0! flex-col! gap-0! rounded-lg! border-0! px-2.5! py-1.5! text-[13px]! leading-tight shadow-none! transition-colors duration-150 ${
+                        className={`min-h-10! min-w-0! flex-col! rounded-lg! border-0! px-2.5! text-[13px]! leading-tight shadow-none! transition-colors duration-150 ${option.preview ? "gap-1.5! py-2!" : "gap-0! py-1.5!"} ${
                             checked
                                 ? "bg-tint! text-accent! font-medium"
                                 : "text-muted! hover:text-ink! bg-transparent! hover:bg-[var(--control-hover)]!"
                         }`}
                     >
-                        <span className="truncate">{option.label}</span>
+                        {option.preview && (
+                            <span
+                                aria-hidden="true"
+                                className="flex h-7 w-full items-center justify-center"
+                            >
+                                {option.preview}
+                            </span>
+                        )}
+                        <span className="max-w-full truncate">
+                            {option.label}
+                        </span>
                         {option.detail && (
                             <span
                                 className={`text-[10.5px] font-normal tabular-nums ${checked ? "text-accent" : "text-muted"}`}

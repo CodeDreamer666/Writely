@@ -5,15 +5,11 @@ import {
     ArrowLeft,
     ArrowUp,
     AudioLines,
-    Check,
-    CloudOff,
     Eye,
     ListChecks,
-    LoaderCircle,
     Mail,
     Pencil,
     Plus,
-    RotateCcw,
     Scissors,
     Sparkles,
     Trash2,
@@ -38,10 +34,7 @@ import {
     type AccountUser,
 } from "../app-header";
 import { EmptyState } from "../empty-state";
-import {
-    usePreferences,
-    type PreferenceSaveState,
-} from "../preferences";
+import { usePreferences } from "../preferences";
 import { AppearanceSettings } from "./appearance-settings";
 import { ExportSettings } from "./export-settings";
 import {
@@ -61,32 +54,6 @@ import {
 } from "~/config/ui";
 
 export type { AccountUser };
-
-/**
- * What: The icon, message and colour shown beside the Settings title for
- * each save state (saved, saving, failed).
- *
- * Used in:
- * - src/app/components/writely/settings-page.tsx (SettingsPage)
- *
- * Effect: Changes what the writer is told while their choices are saved.
- */
-const SAVE_STATUS: Record<
-    PreferenceSaveState,
-    { icon: typeof Check; text: string; className: string }
-> = {
-    idle: {
-        icon: Check,
-        text: "Saved to your account",
-        className: "text-muted",
-    },
-    saving: { icon: LoaderCircle, text: "Saving…", className: "text-muted" },
-    error: {
-        icon: CloudOff,
-        text: "Couldn’t save. Your choices still apply here and will be saved with your next change.",
-        className: "text-danger",
-    },
-};
 
 /**
  * What: The starter goals offered when the universal checklist is empty: an
@@ -113,9 +80,7 @@ export default function SettingsPage({
     initialGoals: RevisionGoal[];
 }) {
     const router = useRouter();
-    const [preferences, setPreferences, preferenceSave] =
-        usePreferences(initialPreferences);
-    const status = SAVE_STATUS[preferenceSave];
+    const [preferences, setPreferences] = usePreferences(initialPreferences);
     const heading = useRef<HTMLHeadingElement>(null);
     useEffect(() => {
         heading.current?.focus({ preventScroll: true });
@@ -176,24 +141,10 @@ export default function SettingsPage({
         setGoalDialog(null);
     };
 
-    const [dialog, setDialog] = useState<"reset" | "delete-account" | null>(
-        null,
-    );
+    const [dialog, setDialog] = useState<"delete-account" | null>(null);
     const [confirmation, setConfirmation] = useState("");
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
-    const reset = api.workspace.reset.useMutation();
-    const resetPrototype = async () => {
-        setBusy(true);
-        try {
-            await reset.mutateAsync();
-            router.push("/");
-        } catch {
-            setBusy(false);
-            setDialog(null);
-            setError("Couldn’t reset. Please try again.");
-        }
-    };
     const deleteAccount = async () => {
         if (confirmation !== "delete") return;
         setBusy(true);
@@ -237,43 +188,20 @@ export default function SettingsPage({
                             <ArrowLeft size={15} aria-hidden="true" />
                             Back
                         </button>
-                        <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-                            <div>
-                                <h1
-                                    id="settings-title"
-                                    tabIndex={-1}
-                                    ref={heading}
-                                    className="font-serif text-[44px] leading-none font-normal tracking-[-0.03em] outline-none focus-visible:border-transparent! focus-visible:shadow-none! max-sm:text-[36px]"
-                                >
-                                    Settings
-                                </h1>
-                                <p className="text-muted mt-3 text-[14px]">
-                                    Your choices are kept with your account and
-                                    apply on every device.
-                                </p>
-                            </div>
-                            <span
-                                role="status"
-                                className={`flex max-w-[360px] items-center gap-1.5 text-[12px] ${status.className}`}
-                            >
-                                <status.icon
-                                    size={13}
-                                    aria-hidden="true"
-                                    className={`shrink-0 ${
-                                        preferenceSave === "saving"
-                                            ? "animate-[save-spin_900ms_linear_infinite] motion-reduce:animate-none"
-                                            : ""
-                                    }`}
-                                />
-                                {status.text}
-                            </span>
-                        </div>
+                        <h1
+                            id="settings-title"
+                            tabIndex={-1}
+                            ref={heading}
+                            className="mt-4 font-serif text-[44px] leading-none font-normal tracking-[-0.03em] outline-none focus-visible:border-transparent! focus-visible:shadow-none! max-sm:text-[36px]"
+                        >
+                            Settings
+                        </h1>
                     </header>
 
                     <SettingsSection
                         id="appearance-title"
                         title="Appearance"
-                        hint="How the page looks while you write. Changes show in the preview and in every document straight away."
+                        hint="How the page looks while you write. Each choice shows its effect, and changes apply to every document straight away."
                     >
                         <AppearanceSettings
                             preferences={preferences}
@@ -487,30 +415,6 @@ export default function SettingsPage({
                                 </button>
                             </div>
                         </SettingsCard>
-                    </SettingsSection>
-
-                    <SettingsSection
-                        id="sample-title"
-                        title="Sample data"
-                        hint="Start over with Writely’s sample manuscripts."
-                    >
-                        <SettingsCard
-                            divided={false}
-                            className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
-                        >
-                            <p className="text-muted max-w-[420px] text-[13px] leading-relaxed">
-                                Replaces every document, saved draft, thought
-                                card and revision in your account. This can’t be
-                                undone.
-                            </p>
-                            <button
-                                className="text-danger! h-9! min-h-9! gap-1.5! px-3! text-[13px]!"
-                                onClick={() => setDialog("reset")}
-                            >
-                                <RotateCcw size={14} aria-hidden="true" />
-                                Reset prototype
-                            </button>
-                        </SettingsCard>
                         {error && (
                             <p role="alert" className="text-danger text-[13px]">
                                 {error}
@@ -554,30 +458,6 @@ export default function SettingsPage({
                                 </button>
                             </div>
                         </form>
-                    </Dialog>
-                )}
-                {dialog === "reset" && (
-                    <Dialog
-                        title="Reset prototype?"
-                        onClose={() => setDialog(null)}
-                    >
-                        <p>
-                            This replaces all writing, saved versions, thought
-                            cards and revision progress in your account with the
-                            original sample data. This cannot be undone.
-                        </p>
-                        <div className={DIALOG_ACTIONS}>
-                            <button onClick={() => setDialog(null)}>
-                                Cancel
-                            </button>
-                            <button
-                                className={DANGER_BUTTON}
-                                disabled={busy}
-                                onClick={() => void resetPrototype()}
-                            >
-                                Reset prototype
-                            </button>
-                        </div>
                     </Dialog>
                 )}
                 {dialog === "delete-account" && (

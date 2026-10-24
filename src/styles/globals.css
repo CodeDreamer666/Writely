@@ -234,6 +234,18 @@ body {
 .field-sage {
     --field-tone: #ddebdd;
 }
+/* Sign-in: the sage highlights on the drawn revision above the form, blended into the page in dark mode. */
+.auth-hero {
+    --hero-mark: #ddebdd;
+}
+:root[data-theme="dark"] .auth-hero {
+    --hero-mark: color-mix(in srgb, #ddebdd 22%, var(--surface));
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .auth-hero {
+        --hero-mark: color-mix(in srgb, #ddebdd 22%, var(--surface));
+    }
+}
 /* The blinking caret on the landing page's closing blank page. */
 @keyframes caret-blink {
     50% {

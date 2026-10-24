@@ -1,6 +1,7 @@
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "~/server/better-auth/server";
+import { googleEnabled } from "~/server/better-auth/config";
 import Link from "next/link";
 import {
     ArrowLeft,
@@ -23,7 +24,7 @@ export default async function SignInPage(props: {
                 : "/",
         );
     return (
-        <main className="bg-paper text-ink grid min-h-dvh grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-[900px]:grid-cols-1">
+        <main className="auth-hero bg-paper text-ink grid min-h-dvh grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-[900px]:grid-cols-1">
             <aside
                 aria-hidden="true"
                 className="landing-field field-butter relative flex flex-col justify-between overflow-hidden bg-[var(--field)] px-12 py-10 text-[var(--field-text)] max-[900px]:hidden"
@@ -50,17 +51,19 @@ export default async function SignInPage(props: {
                     account
                 </span>
             </aside>
-            <div className="flex min-h-dvh flex-col px-6 py-6 max-sm:px-4">
+            {/* Phones get the full-screen layout from AuthForm; this frame is for wider screens only. */}
+            <div className="flex min-h-dvh flex-col px-6 py-6 max-[900px]:p-0">
                 <Link
                     href="/"
-                    className="text-muted hover:text-ink inline-flex min-h-10 items-center gap-2 self-start rounded-md px-1 text-[13px] no-underline focus-visible:[box-shadow:0_0_0_2px_var(--hover)] focus-visible:outline-none"
+                    className="text-muted hover:text-ink inline-flex min-h-10 items-center gap-2 self-start rounded-md px-1 text-[13px] no-underline focus-visible:[box-shadow:0_0_0_2px_var(--hover)] focus-visible:outline-none max-[900px]:hidden"
                 >
                     <ArrowLeft size={15} aria-hidden="true" />
                     Writely home
                 </Link>
-                <div className="flex flex-1 items-center justify-center py-10">
+                <div className="flex flex-1 items-center justify-center py-10 max-[900px]:block max-[900px]:py-0">
                     <AuthForm
                         initialMode={mode === "sign-up" ? "sign-up" : "sign-in"}
+                        googleEnabled={googleEnabled}
                     />
                 </div>
             </div>

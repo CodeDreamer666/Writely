@@ -17,7 +17,11 @@ const preferences = (page) =>
     });
 // Preference saves wait for the last change to settle before they are sent.
 const settled = (page) =>
-    expect(page.getByText("Saved to your account")).toBeVisible();
+    page.waitForResponse(
+        (response) =>
+            response.url().includes("account.updatePreferences") &&
+            response.ok(),
+    );
 
 test("settings lists every section without a section menu and keeps writing and export choices", async ({
     page,
@@ -39,7 +43,6 @@ test("settings lists every section without a section menu and keeps writing and 
         "Keyboard shortcuts",
         "Help",
         "Account",
-        "Sample data",
     ])
         await expect(
             page.getByRole("heading", { name, level: 2, exact: true }),
@@ -65,7 +68,7 @@ test("settings lists every section without a section menu and keeps writing and 
     await page.getByRole("switch", { name: "Typewriter scrolling" }).click();
     await page
         .getByRole("radiogroup", { name: "Paragraph spacing" })
-        .getByRole("radio", { name: /Spacious/ })
+        .getByRole("radio", { name: /Airy/ })
         .click();
     await page
         .getByRole("radiogroup", { name: "Paper size" })

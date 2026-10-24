@@ -11,6 +11,12 @@ export const env = createEnv({
                 ? z.string()
                 : z.string().optional(),
         BETTER_AUTH_URL: z.string().url().optional(),
+        // Both set: the sign-in page offers "Continue with Google".
+        GOOGLE_CLIENT_ID: z.string().optional(),
+        GOOGLE_CLIENT_SECRET: z.string().optional(),
+        // Sends the 6-digit password reset codes through Resend. Without it, codes are only logged in development.
+        RESEND_API_KEY: z.string().optional(),
+        EMAIL_FROM: z.string().optional(),
         DATABASE_URL: z
             .url()
             .regex(
@@ -33,6 +39,10 @@ export const env = createEnv({
     runtimeEnv: {
         BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
         BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+        RESEND_API_KEY: process.env.RESEND_API_KEY,
+        EMAIL_FROM: process.env.EMAIL_FROM,
         DATABASE_URL: process.env.DATABASE_URL,
         NODE_ENV: process.env.NODE_ENV,
     },

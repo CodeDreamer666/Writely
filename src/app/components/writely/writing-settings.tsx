@@ -15,11 +15,12 @@ export function WritingSettings({
     setPreferences: (changes: Partial<Preferences>) => void;
 }) {
     return (
-        <SettingsCard>
+        <SettingsCard className="rounded-xl">
             <SettingRow
                 id="setting-paragraph-highlight"
                 label="Paragraph highlighting"
-                hint="In focus mode, fades every paragraph except the one you’re writing in. Start focus mode from the editor’s ⋯ menu, or Ctrl/⌘ + Shift + F."
+                hint="Fade other paragraphs so the current one stands out."
+                compact
             >
                 <Switch
                     labelledBy="setting-paragraph-highlight"
@@ -33,7 +34,8 @@ export function WritingSettings({
             <SettingRow
                 id="setting-typewriter"
                 label="Typewriter scrolling"
-                hint="Keeps the line you’re typing near the middle of the window."
+                hint="Keep the active line near the middle of the screen."
+                compact
             >
                 <Switch
                     labelledBy="setting-typewriter"
@@ -45,7 +47,8 @@ export function WritingSettings({
             <SettingRow
                 id="setting-punctuation"
                 label="Smart punctuation"
-                hint="Turns straight quotes into curly ones, -- into an em dash and ... into an ellipsis as you type."
+                hint="Use curly quotes, em dashes, and ellipses automatically."
+                compact
             >
                 <Switch
                     labelledBy="setting-punctuation"
@@ -59,7 +62,8 @@ export function WritingSettings({
             <SettingRow
                 id="setting-spellcheck"
                 label="Check spelling"
-                hint="Your browser underlines words it doesn’t know, in its own language settings."
+                hint="Underline possible spelling mistakes using browser support."
+                compact
             >
                 <Switch
                     labelledBy="setting-spellcheck"
