@@ -138,14 +138,22 @@ export function ActionMenu({
         const dismiss = (e: PointerEvent) => {
             if (!container.current?.contains(e.target as Node)) setOpen(false);
         };
-        const dismissScroll = () => setOpen(false);
+        const anchor = trigger.current?.getBoundingClientRect();
+        const dismissScroll = () => {
+            const current = trigger.current?.getBoundingClientRect();
+            // A click can finish scrolling the trigger into view just as the menu opens.
+            // Only dismiss when scrolling actually moves the anchor after opening.
+            if (current?.top !== anchor?.top || current?.left !== anchor?.left)
+                setOpen(false);
+        };
+        const dismissResize = () => setOpen(false);
         document.addEventListener("pointerdown", dismiss);
         document.addEventListener("scroll", dismissScroll, true);
-        window.addEventListener("resize", dismissScroll);
+        window.addEventListener("resize", dismissResize);
         return () => {
             document.removeEventListener("pointerdown", dismiss);
             document.removeEventListener("scroll", dismissScroll, true);
-            window.removeEventListener("resize", dismissScroll);
+            window.removeEventListener("resize", dismissResize);
         };
     }, [open]);
     const menuItems = () => [

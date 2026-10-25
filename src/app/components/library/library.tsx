@@ -191,7 +191,6 @@ const FOCUS_RING =
     "focus-visible:outline-none focus-visible:[box-shadow:0_0_0_2px_var(--control-ring)] focus-visible:[border-color:var(--control-focus)]";
 
 export default function Library({
-    user,
     initialPreferences,
 }: {
     user: AccountUser;
@@ -340,7 +339,6 @@ export default function Library({
     };
 
     const menuFor = (doc: DocumentSummary) => [
-        { label: "Open", onSelect: () => router.push(`/d/${doc.id}`) },
         {
             label: "Rename",
             onSelect: () => {
@@ -431,7 +429,6 @@ export default function Library({
         <Tooltip.Provider delayDuration={450}>
             <div className="bg-paper text-ink min-h-dvh">
                 <AppHeader
-                    user={user}
                     search={
                         <div role="search" className="relative">
                             <Search
@@ -445,7 +442,7 @@ export default function Library({
                                 type="search"
                                 aria-label="Search documents"
                                 aria-keyshortcuts="Control+K Meta+K"
-                                placeholder="Search documents, content, or keywords..."
+                                placeholder="Search your writing…"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => {
@@ -455,7 +452,7 @@ export default function Library({
                                         setParams({ q: null });
                                     }
                                 }}
-                                className="placeholder:text-muted min-h-12! rounded-xl! border-transparent! bg-[color-mix(in_srgb,var(--text)_4%,var(--bg))]! pr-20! pl-12! text-[14.5px]! shadow-none! focus:border-[var(--control-focus)]! focus:bg-[var(--surface)]! [&::-webkit-search-cancel-button]:hidden"
+                                className="placeholder:text-muted min-h-12! rounded-xl! border-transparent! bg-[color-mix(in_srgb,var(--text)_4%,var(--bg))]! pr-20! pl-12! text-[14.5px]! shadow-none! focus:border-[var(--control-focus)]! focus:bg-[var(--surface)]! max-sm:pr-12! max-xl:text-[16px]! [&::-webkit-search-cancel-button]:hidden"
                             />
                             {input ? (
                                 <button
@@ -481,18 +478,18 @@ export default function Library({
                         </div>
                     }
                 />
-                <div className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(260px,330px)_minmax(0,1fr)] max-[1023px]:grid-cols-1">
-                    <aside className="border-line flex flex-col gap-8 self-stretch border-r px-8 pt-9 pb-10 max-[1023px]:gap-4 max-[1023px]:border-r-0 max-[1023px]:border-b max-[1023px]:px-4 max-[1023px]:pt-4 max-[1023px]:pb-4">
+                <div className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(260px,330px)_minmax(0,1fr)] max-[1279px]:grid-cols-1 max-[1279px]:content-start">
+                    <aside className="border-line flex min-w-0 flex-col gap-8 self-stretch border-r px-8 pt-9 pb-10 max-[1279px]:gap-4 max-[1279px]:border-r-0 max-[1279px]:border-b max-[1279px]:px-6 max-[1279px]:pt-5 max-[1279px]:pb-5 min-[1024px]:max-xl:flex-row min-[1024px]:max-xl:items-center max-sm:px-4 max-sm:pt-4 max-sm:pb-4">
                         <Button
-                            className={`${PRIMARY_BUTTON} h-[52px]! w-full! gap-2.5! rounded-xl! text-[15px]! font-semibold [box-shadow:0_10px_22px_-14px_color-mix(in_srgb,var(--accent)_80%,transparent)] max-[1023px]:h-11! max-[1023px]:w-auto! max-[1023px]:self-start`}
+                            className={`${PRIMARY_BUTTON} h-[52px]! w-full! gap-2.5! rounded-xl! text-[15px]! font-semibold [box-shadow:0_10px_22px_-14px_color-mix(in_srgb,var(--accent)_80%,transparent)] max-[1279px]:h-11! max-[1279px]:w-auto! max-[1279px]:self-start min-[1024px]:max-xl:order-last min-[1024px]:max-xl:shrink-0 max-sm:w-full!`}
                             icon={creating ? LoaderCircle : Plus}
                             onClick={() => void newDocument()}
                             disabled={creating}
                         >
                             New document
                         </Button>
-                        <nav aria-label="Library">
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1023px]:flex-row max-[1023px]:overflow-x-auto">
+                        <nav aria-label="Library" className="min-w-0 min-[1024px]:max-xl:flex-1">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1279px]:grid max-[1279px]:grid-cols-4 max-[1279px]:gap-2 max-sm:grid-cols-2 max-sm:gap-1.5">
                                 {FILTERS.map(([value, label, Icon]) => {
                                     const current = filter === value;
                                     const count = counts.data?.[value];
@@ -510,7 +507,7 @@ export default function Library({
                                                                 : value,
                                                     })
                                                 }
-                                                className={`h-[50px]! min-h-[50px]! w-full! justify-start! gap-3.5! rounded-xl! border-0! px-4! text-[15px]! shadow-none! max-[1023px]:h-10! max-[1023px]:min-h-10! max-[1023px]:px-3! max-[1023px]:text-[13.5px]! ${
+                                                className={`h-[50px]! min-h-[50px]! w-full! justify-start! gap-3.5! rounded-xl! border-0! px-4! text-[15px]! shadow-none! max-[1279px]:h-11! max-[1279px]:min-h-11! max-[1279px]:gap-2! max-[1279px]:px-3! max-[1279px]:text-[13.5px]! max-sm:px-2.5! max-sm:text-[13px]! ${
                                                     current
                                                         ? "bg-tint! text-ink! font-semibold"
                                                         : "text-muted! hover:text-ink! bg-transparent! hover:bg-[var(--control-hover)]!"
@@ -543,16 +540,16 @@ export default function Library({
                                 })}
                             </ul>
                         </nav>
-                        <div className="border-line border-t pt-7 max-[1023px]:hidden">
+                        <div className="border-line border-t pt-7 max-[1279px]:hidden">
                             <WritingWeek />
                         </div>
                     </aside>
 
-                    <main className="min-w-0 px-10 pt-11 pb-24 max-[1023px]:px-4 max-[1023px]:pt-6">
+                    <main className="min-w-0 px-10 pt-11 pb-24 max-[1279px]:px-6 max-[1279px]:pt-8 max-sm:px-4 max-sm:pt-6">
                         <WelcomeBack />
                         <div className="mb-9 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 max-sm:mb-6">
                             <div className="min-w-0">
-                                <h1 className="m-0 font-serif text-[52px] leading-[1.05] font-normal tracking-[-0.03em] max-sm:text-[38px]">
+                                <h1 className="m-0 font-serif text-[52px] leading-[1.05] font-normal tracking-[-0.03em] max-xl:text-[44px] max-sm:text-[38px]">
                                     {searching
                                         ? "Search results"
                                         : filter === "all"
@@ -562,7 +559,7 @@ export default function Library({
                                             )![1]}
                                 </h1>
                                 <p
-                                    className="text-muted m-0 mt-2 text-[16px] max-sm:text-[14px]"
+                                    className="text-muted m-0 mt-2 text-[16px] max-sm:text-[14px] max-sm:leading-relaxed"
                                     role="status"
                                     aria-live="polite"
                                 >
@@ -584,7 +581,7 @@ export default function Library({
                                         )}
                                 </p>
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 max-sm:w-full max-sm:gap-2">
                                 <label className="sr-only" htmlFor="library-sort">
                                     Sort by
                                 </label>
@@ -599,7 +596,7 @@ export default function Library({
                                                     : e.target.value,
                                         })
                                     }
-                                    className="border-line! bg-surface! h-[52px]! min-h-[52px]! w-auto! rounded-xl! py-2! pr-10! pl-4! text-[14px]! max-sm:h-11! max-sm:min-h-11!"
+                                    className="border-line! bg-surface! h-[52px]! min-h-[52px]! w-auto! rounded-xl! py-2! pr-10! pl-4! text-[14px]! max-sm:h-12! max-sm:min-h-12! max-sm:min-w-0! max-sm:flex-1! max-sm:text-[16px]!"
                                 >
                                     {SORTS.map(([value, label]) => (
                                         <option key={value} value={value}>
@@ -610,7 +607,7 @@ export default function Library({
                                 <div
                                     role="radiogroup"
                                     aria-label="Layout"
-                                    className="border-line bg-surface flex gap-1 rounded-xl border p-1"
+                                    className="border-line bg-surface flex shrink-0 gap-1 rounded-xl border p-1"
                                 >
                                     {(
                                         [
@@ -629,7 +626,7 @@ export default function Library({
                                                     libraryView: value,
                                                 })
                                             }
-                                            className={`size-11! min-h-11! min-w-11! rounded-lg! border-0! p-0! shadow-none! max-sm:size-9! max-sm:min-h-9! max-sm:min-w-9! ${
+                                            className={`size-11! min-h-11! min-w-11! rounded-lg! border-0! p-0! shadow-none! ${
                                                 view === value
                                                     ? "bg-tint! text-ink!"
                                                     : "text-muted! bg-transparent! hover:bg-[var(--control-hover)]!"
@@ -742,7 +739,7 @@ export default function Library({
                             (view === "cards" ? (
                                 <ul
                                     aria-label="Documents"
-                                    className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-7 p-0 max-sm:grid-cols-1 max-sm:gap-4"
+                                    className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-7 p-0 max-xl:grid-cols-2 max-xl:gap-5 max-sm:grid-cols-1 max-sm:gap-4"
                                 >
                                     {items.map((doc) => (
                                         <li
@@ -790,7 +787,7 @@ export default function Library({
                                                     </span>
                                                 </Link>
                                             </TitleTooltip>
-                                            <div className="absolute top-6 right-5 flex items-center gap-1 max-sm:top-4 max-sm:right-3 [&_.document-menu-trigger]:pointer-events-auto! [&_.document-menu-trigger]:size-9! [&_.document-menu-trigger]:min-h-9! [&_.document-menu-trigger]:min-w-9! [&_.document-menu-trigger]:rounded-lg! [&_.document-menu-trigger]:text-[var(--muted)]! [&_.document-menu-trigger]:opacity-100! [&_.document-menu-trigger:hover]:text-[var(--text)]!">
+                                            <div className="absolute top-6 right-5 flex items-center gap-1 max-sm:top-4 max-sm:right-3 [&_.document-menu-trigger]:pointer-events-auto! [&_.document-menu-trigger]:size-9! [&_.document-menu-trigger]:min-h-9! [&_.document-menu-trigger]:min-w-9! [&_.document-menu-trigger]:rounded-lg! max-xl:[&_.document-menu-trigger]:size-11! max-xl:[&_.document-menu-trigger]:min-h-11! max-xl:[&_.document-menu-trigger]:min-w-11! [&_.document-menu-trigger]:text-[var(--muted)]! [&_.document-menu-trigger]:opacity-100! [&_.document-menu-trigger:hover]:text-[var(--text)]!">
                                                 {doc.pinned && (
                                                     <Pin
                                                         size={17}
@@ -821,14 +818,14 @@ export default function Library({
                                             <TitleTooltip title={doc.title}>
                                                 <Link
                                                     href={`/d/${doc.id}`}
-                                                    className={`text-ink grid min-h-[68px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 py-3 pr-24 pl-5 no-underline hover:bg-[var(--control-hover)] max-sm:pr-14 max-sm:pl-3 ${FOCUS_RING}`}
+                                                    className={`text-ink grid min-h-[68px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 py-3 pr-24 pl-5 no-underline hover:bg-[var(--control-hover)] max-sm:grid-cols-[auto_minmax(0,1fr)] max-sm:gap-x-3 max-sm:gap-y-1 max-sm:py-4 max-sm:pr-20 max-sm:pl-3 ${FOCUS_RING}`}
                                                 >
                                                     <DocumentIcon
                                                         id={doc.id}
                                                         size={34}
                                                     />
                                                     <span className="min-w-0">
-                                                        <span className="block truncate font-serif text-[17px]">
+                                                        <span className="block truncate font-serif text-[17px] max-sm:line-clamp-2 max-sm:whitespace-normal max-sm:leading-snug">
                                                             <Highlighted
                                                                 text={
                                                                     doc.title ||
@@ -848,12 +845,12 @@ export default function Library({
                                                             </span>
                                                         )}
                                                     </span>
-                                                    <span className="text-muted flex gap-6 text-[13px] whitespace-nowrap">
-                                                        <span className="tabular-nums max-md:hidden">
+                                                    <span className="text-muted flex gap-6 text-[13px] whitespace-nowrap max-sm:col-start-2 max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-0.5 max-sm:text-[12px]">
+                                                        <span className="tabular-nums max-md:hidden max-sm:inline">
                                                             {doc.wordCount.toLocaleString()}{" "}
                                                             words
                                                         </span>
-                                                        <span className="max-sm:hidden">
+                                                        <span>
                                                             Edited{" "}
                                                             {formatCardEdited(
                                                                 doc.updated,
@@ -862,7 +859,7 @@ export default function Library({
                                                     </span>
                                                 </Link>
                                             </TitleTooltip>
-                                            <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1 [&_.document-menu-trigger]:pointer-events-auto! [&_.document-menu-trigger]:opacity-100! [&_.document-menu-trigger]:rounded-lg!">
+                                            <div className="absolute inset-y-0 right-3 flex items-center gap-1 max-sm:right-2 [&_.document-menu-trigger]:pointer-events-auto! [&_.document-menu-trigger]:opacity-100! [&_.document-menu-trigger]:rounded-lg! max-xl:[&_.document-menu-trigger]:size-11! max-xl:[&_.document-menu-trigger]:min-h-11! max-xl:[&_.document-menu-trigger]:min-w-11!">
                                                 {doc.pinned && (
                                                     <Pin
                                                         size={15}

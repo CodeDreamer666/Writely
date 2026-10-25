@@ -96,6 +96,7 @@ export function EmptyState({
     actions,
     cards,
     compact = false,
+    inlineHeader = false,
     className = "",
 }: {
     icon: LucideIcon;
@@ -104,30 +105,42 @@ export function EmptyState({
     actions?: ReactNode;
     cards?: EmptyCard[];
     compact?: boolean;
+    /** Place the icon beside a left-aligned title and description. */
+    inlineHeader?: boolean;
     className?: string;
 }) {
     return (
         <div
             className={`empty-state border-line flex [animation:appear_200ms_ease-out] flex-col items-center rounded-2xl border bg-[color-mix(in_srgb,var(--surface)_60%,transparent)] text-center motion-reduce:animate-none ${compact ? "px-4 py-6" : "px-6 py-12 max-sm:px-4 max-sm:py-8"} ${className}`}
         >
-            <span
-                aria-hidden="true"
-                className={`bg-tint text-accent flex items-center justify-center rounded-2xl ${compact ? "mb-3 size-11" : "mb-4 size-14"}`}
+            <div
+                className={
+                    inlineHeader
+                        ? "flex w-full items-center gap-3 text-left"
+                        : "flex flex-col items-center"
+                }
             >
-                <Icon size={compact ? 20 : 24} strokeWidth={1.6} />
-            </span>
-            <p
-                className={`text-ink m-0! font-serif leading-[1.3] ${compact ? "text-[17px]" : "text-[24px] tracking-[-0.01em]"}`}
-            >
-                {title}
-            </p>
-            {body && (
-                <p
-                    className={`text-muted m-0! mt-1.5! max-w-[42ch] leading-[1.6] ${compact ? "text-[12.5px]" : "text-[14px]"}`}
+                <span
+                    aria-hidden="true"
+                    className={`bg-tint text-accent flex shrink-0 items-center justify-center rounded-2xl ${compact ? "size-11" : "size-14"} ${inlineHeader ? "" : compact ? "mb-3" : "mb-4"}`}
                 >
-                    {body}
-                </p>
-            )}
+                    <Icon size={compact ? 20 : 24} strokeWidth={1.6} />
+                </span>
+                <div className="min-w-0">
+                    <p
+                        className={`text-ink m-0! font-serif leading-[1.3] ${compact ? "text-[17px]" : "text-[24px] tracking-[-0.01em]"}`}
+                    >
+                        {title}
+                    </p>
+                    {body && (
+                        <p
+                            className={`text-muted m-0! mt-1.5! max-w-[42ch] leading-[1.6] ${compact ? "text-[12.5px]" : "text-[14px]"}`}
+                        >
+                            {body}
+                        </p>
+                    )}
+                </div>
+            </div>
             {actions && (
                 <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
                     {actions}

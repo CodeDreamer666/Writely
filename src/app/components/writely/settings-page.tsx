@@ -1,9 +1,6 @@
 "use client";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
-    ArrowDown,
-    ArrowLeft,
-    ArrowUp,
     AudioLines,
     Eye,
     ListChecks,
@@ -16,7 +13,6 @@ import {
     UserRound,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
     useEffect,
     useRef,
@@ -67,7 +63,7 @@ export type { AccountUser };
 const STARTER_GOALS = [
     [Scissors, "Cut filler words", "Trim “very”, “really” and “just”."],
     [AudioLines, "Vary sentence length", "Mix short lines with longer ones."],
-    [Eye, "Show, don’t tell", "Swap labels for concrete detail."],
+    [Eye, "Show, not tell", "Swap labels for concrete detail."],
 ] as const;
 
 export default function SettingsPage({
@@ -79,7 +75,6 @@ export default function SettingsPage({
     initialPreferences: Preferences;
     initialGoals: RevisionGoal[];
 }) {
-    const router = useRouter();
     const [preferences, setPreferences] = usePreferences(initialPreferences);
     const heading = useRef<HTMLHeadingElement>(null);
     useEffect(() => {
@@ -105,24 +100,6 @@ export default function SettingsPage({
                 },
             },
         );
-    };
-    const moveGoal = (index: number, step: -1 | 1) => {
-        const next = [...goals];
-        const [goal] = next.splice(index, 1);
-        next.splice(index + step, 0, goal!);
-        changeGoals(next);
-        // Focus follows the goal, so it can keep moving; at the end of the list it moves to the other arrow.
-        requestAnimationFrame(() => {
-            const row = document.querySelector(`[data-goal="${goal!.id}"]`);
-            (
-                row?.querySelector<HTMLButtonElement>(
-                    `[data-move="${step}"]:not(:disabled)`,
-                ) ??
-                row?.querySelector<HTMLButtonElement>(
-                    "[data-move]:not(:disabled)",
-                )
-            )?.focus();
-        });
     };
     const [goalDialog, setGoalDialog] = useState<{
         goal: RevisionGoal | null;
@@ -171,23 +148,12 @@ export default function SettingsPage({
     return (
         <Tooltip.Provider delayDuration={450}>
             <div className="bg-paper text-ink min-h-dvh">
-                <AppHeader user={user} />
+                <AppHeader />
                 <main
                     className="mx-auto w-full max-w-[1000px] px-6 pb-24 max-sm:px-4"
                     aria-labelledby="settings-title"
                 >
                     <header className="border-line border-b pt-2 pb-8">
-                        <button
-                            className="-ml-3 gap-1.5! text-[13px]!"
-                            onClick={() =>
-                                window.history.length > 1
-                                    ? router.back()
-                                    : router.push("/")
-                            }
-                        >
-                            <ArrowLeft size={15} aria-hidden="true" />
-                            Back
-                        </button>
                         <h1
                             id="settings-title"
                             tabIndex={-1}
@@ -237,7 +203,7 @@ export default function SettingsPage({
                         hint="Universal goals appear in every draft, in this order. Completion stays with each draft."
                         action={
                             <button
-                                className="border-line! h-9! min-h-9! gap-1.5! rounded-lg! border! px-3! text-[12.5px]!"
+                                className="border-line! h-9! min-h-9! gap-1.5! rounded-lg! border! px-3! text-[12.5px]! max-sm:w-full!"
                                 onClick={() => {
                                     setGoalText("");
                                     setGoalDialog({ goal: null });
@@ -267,22 +233,6 @@ export default function SettingsPage({
                                                 {goal.text}
                                             </span>
                                             <Button
-                                                icon={ArrowUp}
-                                                label={`Move up: ${goal.text}`}
-                                                data-move={-1}
-                                                disabled={i === 0}
-                                                onClick={() => moveGoal(i, -1)}
-                                            />
-                                            <Button
-                                                icon={ArrowDown}
-                                                label={`Move down: ${goal.text}`}
-                                                data-move={1}
-                                                disabled={
-                                                    i === goals.length - 1
-                                                }
-                                                onClick={() => moveGoal(i, 1)}
-                                            />
-                                            <Button
                                                 icon={Pencil}
                                                 label={`Edit universal goal: ${goal.text}`}
                                                 onClick={() => {
@@ -311,6 +261,7 @@ export default function SettingsPage({
                         ) : (
                             <EmptyState
                                 compact
+                                inlineHeader
                                 icon={ListChecks}
                                 title="No universal goals yet"
                                 body="Start with one of these, or add your own. Each goal shows up in every draft’s checklist."
@@ -356,7 +307,7 @@ export default function SettingsPage({
                                 className="text-accent shrink-0"
                                 aria-hidden="true"
                             />
-                            <span>
+                            <span className="flex flex-col gap-1.5">
                                 <span className="block text-[14px] font-medium">
                                     How Writely works
                                 </span>
@@ -397,7 +348,7 @@ export default function SettingsPage({
                                     </div>
                                 ))}
                             </dl>
-                            <div className="flex flex-wrap gap-2 px-5 py-4">
+                            <div className="flex flex-wrap justify-end gap-2 px-5 py-4">
                                 <button
                                     className="border-line! text-ink! h-9! min-h-9! border! px-3.5! text-[13px]!"
                                     onClick={() => void logOut()}
@@ -405,7 +356,7 @@ export default function SettingsPage({
                                     Log out
                                 </button>
                                 <button
-                                    className="text-danger! h-9! min-h-9! px-3.5! text-[13px]!"
+                                    className="border-line! text-danger! h-9! min-h-9! border! px-3.5! text-[13px]!"
                                     onClick={() => {
                                         setConfirmation("");
                                         setDialog("delete-account");
