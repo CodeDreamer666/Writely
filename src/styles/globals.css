@@ -180,6 +180,41 @@ body {
     }
 }
 
+/*
+ * On smaller screens the tutorial's captions sit over the lower page, and cards without side
+ * margins stack below the page's bottom space. The tutorial moves that space below the cards, so
+ * its card stays next to the text, and gives the page and the comparison room to scroll clear of
+ * the captions.
+ */
+@media (max-width: 1399px) {
+    .app:has(.tutorial-coach) .paper {
+        --flow-bottom-space: 0px;
+    }
+    .app:has(.tutorial-coach) .workspace::after {
+        content: "";
+        display: block;
+        height: 60vh;
+    }
+    .app:has(.tutorial-coach) .comparison-scroll {
+        padding-bottom: 50vh;
+    }
+    /* Drawers and dialogs open where the captions sit, so the captions move up and shrink to their title. */
+    .tool-panel-visible .tutorial-coach,
+    body:has([aria-modal="true"]) .tutorial-coach {
+        top: 12px;
+        bottom: auto;
+    }
+    .tool-panel-visible .tutorial-coach [data-detail],
+    body:has([aria-modal="true"]) .tutorial-coach [data-detail] {
+        display: none;
+    }
+}
+
+/* The words the tutorial is about to connect, tinted as a selection would be. */
+::highlight(tutorial) {
+    background-color: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .coach-target {
         animation: none;

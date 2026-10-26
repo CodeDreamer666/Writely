@@ -19,16 +19,37 @@ import type {
  */
 export const TUTORIAL_TITLE = "A Quiet Afternoon";
 /**
- * What: The phrase in the sample text the tutorial asks the writer to
- * select and revise. It must appear in TUTORIAL_TEXT.
+ * What: The phrase in the sample text the tutorial connects to a card and
+ * revises. It must appear in TUTORIAL_TEXT.
  *
  * Used in:
- * - src/app/tutorial/tutorial.tsx (findPhrase, progress, Coach)
+ * - src/app/tutorial/tutorial.tsx (findPhrase, SCENES)
  *
  * Effect: Changes which words the tutorial points at. If it no longer appears
  * in TUTORIAL_TEXT, the tutorial cannot find it.
  */
 export const TUTORIAL_PHRASE = "a nice place with many nice books";
+/**
+ * What: The intention the tutorial writes on its thought card.
+ *
+ * Used in:
+ * - src/app/tutorial/tutorial.tsx (SCENES)
+ *
+ * Effect: Changes the text typed onto the card while the tutorial plays.
+ */
+export const TUTORIAL_INTENTION = "Use more descriptive words";
+/**
+ * What: The words the tutorial types in place of TUTORIAL_PHRASE. It starts
+ * with the phrase's first letter, which the tutorial keeps so the card stays
+ * connected while it types.
+ *
+ * Used in:
+ * - src/app/tutorial/tutorial.tsx (SCENES)
+ *
+ * Effect: Changes the revision shown in the editor and in the comparison.
+ */
+export const TUTORIAL_REVISION =
+    "a hushed room that smelled of old paper, its shelves crowded with worn spines";
 /**
  * What: The sample paragraph the tutorial starts with.
  *
@@ -40,6 +61,23 @@ export const TUTORIAL_PHRASE = "a nice place with many nice books";
  */
 export const TUTORIAL_TEXT =
     "I went to a small library on Saturday afternoon. It was a nice place with many nice books, and I liked how quiet it was. I walked around for a while because I wanted to find something interesting, but I did not know what to read. After looking at several books, I picked one and sat near a window. I started reading, and it was a good experience because I felt relaxed and forgot about everything else for a while.";
+
+/**
+ * What: The revision goal the tutorial adds after the card-guided rewrite, the
+ * sentence it revises toward that goal, and what it types instead. The
+ * sentence must appear in TUTORIAL_TEXT.
+ *
+ * Used in:
+ * - src/app/tutorial/tutorial.tsx (SCENES)
+ *
+ * Effect: Changes the goal shown in the checklist and the second revision
+ * shown in the editor and the comparison.
+ */
+export const TUTORIAL_GOAL = "Show the feeling instead of naming it";
+export const TUTORIAL_GOAL_PHRASE =
+    "it was a good experience because I felt relaxed and forgot about everything else for a while";
+export const TUTORIAL_GOAL_REVISION =
+    "the afternoon slipped away; when I finally looked up, the light through the window had turned gold";
 
 export const tutorialStorageKey = (userId: string) =>
     `writely.tutorial.v1:${userId}`;

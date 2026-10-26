@@ -134,6 +134,17 @@ export type CoachContext = {
     editor: Editor | null;
     comparing: boolean;
     closeComparison: () => void;
+    /** Lets the tutorial play the revision loop itself, through the same state the controls use. */
+    demo: {
+        /** Puts the sample back as it started, with the tools showing. */
+        reset: () => void;
+        /** Adds a card level with document position `near` and returns its id. */
+        addCard: (near: number) => string;
+        patchCard: (id: string, patch: Partial<Card>) => void;
+        /** Fills in the open "Add revision goal" dialog. */
+        setGoalText: (text: string) => void;
+        closePanel: () => void;
+    };
 };
 
 export default function WritelyApp({
@@ -1419,6 +1430,41 @@ export default function WritelyApp({
                     editor,
                     comparing: !!comparison,
                     closeComparison: () => setComparison(null),
+                    demo: {
+                        reset: () => {
+                            setData(tutorial.initial);
+                            setComparison(null);
+                            setPanel(null);
+                            setModal(null);
+                            setSelected(null);
+                            setEditingCard(null);
+                            setConnectionSelection(null);
+                            setRevisionGoalText("");
+                            setToolsOpen(true);
+                            editor?.commands.setContent(
+                                tutorial.initial.docs[0]!.html,
+                                { emitUpdate: false },
+                            );
+                        },
+                        addCard: (near) => {
+                            const id = uid();
+                            const el = workspace.current;
+                            const y =
+                                editor && el
+                                    ? editor.view.coordsAtPos(near).top -
+                                      el.getBoundingClientRect().top +
+                                      el.scrollTop -
+                                      24
+                                    : 96;
+                            setData((data) =>
+                                addThought(data, id, Math.max(24, y)),
+                            );
+                            return id;
+                        },
+                        patchCard,
+                        setGoalText: setRevisionGoalText,
+                        closePanel: () => setPanel(null),
+                    },
                 })}
                 {notice && (
                     <div

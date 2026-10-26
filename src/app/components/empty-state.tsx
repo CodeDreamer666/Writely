@@ -116,7 +116,7 @@ export function EmptyState({
             <div
                 className={
                     inlineHeader
-                        ? "flex w-full items-center gap-3 text-left"
+                        ? `flex w-full items-center text-left ${compact ? "gap-3" : "gap-5 px-2 max-sm:gap-4 max-sm:px-0"}`
                         : "flex flex-col items-center"
                 }
             >
