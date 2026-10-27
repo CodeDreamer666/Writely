@@ -33,10 +33,8 @@ import {
     useMemo,
     useRef,
     useState,
-    type Dispatch,
     type FormEvent,
     type ReactNode,
-    type SetStateAction,
 } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -58,8 +56,6 @@ import DraftTitle from "./draft-title";
 import FocusExit from "./focus-exit";
 import { useFlowAnchor } from "~/lib/writely/editor/flow-anchor";
 import {
-    diffWords,
-    plain,
     restoreDraft,
     snapshot,
     startRevision,
@@ -80,7 +76,7 @@ import { getWritingStatistics } from "~/lib/writely/writing-statistics";
 import Annotations from "./annotations";
 import { CardColourPopover } from "./card-colours";
 import { addThought } from "~/lib/writely/thought-cards";
-import DiffText from "./diff-text";
+import Comparison, { type ComparisonState } from "./comparison";
 import type { AccountUser } from "../app-header";
 import { usePreferences } from "../preferences";
 import {
@@ -118,8 +114,6 @@ import {
 
 type Modal = "draft-delete" | "save" | "revision-goal" | "restore";
 type Panel = "thoughts" | "checklist" | "drafts" | "stats";
-type ComparisonState = { left: string; right: string };
-
 /**
  * What: An empty list of cards, shared so it is the same list every time.
  *
@@ -697,7 +691,11 @@ export default function WritelyApp({
                                     doc={doc}
                                     comparison={comparison}
                                     setComparison={setComparison}
-                                    onRestore={doRestore}
+                                    onRestore={(draft) => {
+                                        // Restoring replaces the text, so it asks first, as from Drafts.
+                                        setRename(draft.id);
+                                        setModal("restore");
+                                    }}
                                 />
                             ) : (
                                 <article className="paper relative mx-auto w-[calc(100%-384px)] max-w-[var(--editor-width)] pt-14 pb-[calc(48px+var(--flow-bottom-space,50vh))] max-[1119px]:w-[calc(100%-128px)] max-[1000px]:w-[calc(100%-96px)] max-[760px]:w-[calc(100%-40px)] max-[760px]:pt-8 [&:has(.blank-start)_.tiptap]:[min-height:0] min-[761px]:[.focus-mode_&]:w-[calc(100%-96px)] min-[761px]:[.focus-mode_&]:pt-[12vh] [.focus-mode_&_.card-text-highlight]:bg-transparent! [.focus-mode_&_:is(.blank-start,.endmark)]:hidden">
@@ -1738,136 +1736,5 @@ export default function WritelyApp({
                     )}
             </div>
         </Tooltip.Provider>
-    );
-}
-
-function Comparison({
-    doc,
-    comparison,
-    setComparison,
-    onRestore,
-}: {
-    doc: WritingDocument;
-    comparison: ComparisonState;
-    setComparison: Dispatch<SetStateAction<ComparisonState | null>>;
-    onRestore: (draft: Draft) => void;
-}) {
-    const working = {
-        id: "working",
-        name: "Working text (autosaved)",
-        html: doc.html,
-    };
-    const all: (Draft | typeof working)[] = [working, ...doc.drafts];
-    const left = all.find((d) => d.id === comparison.left) ?? working,
-        right = all.find((d) => d.id === comparison.right) ?? working;
-    const parts = diffWords(plain(left.html), plain(right.html));
-    return (
-        <section className={"comparison m-0 flex h-full min-h-0 flex-col p-0"}>
-            <div
-                className={
-                    "comparison-scroll min-h-0 flex-1 overflow-auto px-8 pt-8 pb-10 max-[760px]:px-5 max-[760px]:pt-6"
-                }
-            >
-                <div
-                    className={
-                        "comparison-top mx-auto mb-6 flex max-w-[1100px] items-baseline justify-between gap-4"
-                    }
-                >
-                    <h2 className="font-serif text-[26px] leading-tight font-normal tracking-[-0.02em]">
-                        Draft comparison
-                    </h2>
-                </div>
-                <div
-                    className={
-                        "diff-columns mx-auto grid max-w-[1100px] grid-cols-2 gap-6 max-[760px]:grid-cols-1"
-                    }
-                >
-                    {(
-                        [
-                            [
-                                left,
-                                "left",
-                                "Before",
-                                parts.filter((p) => !p.added),
-                            ],
-                            [
-                                right,
-                                "right",
-                                "After",
-                                parts.filter((p) => !p.removed),
-                            ],
-                        ] as const
-                    ).map(([draft, side, label, chunks]) => (
-                        <div
-                            className={
-                                "diff-column border-line bg-surface min-w-0 rounded-2xl border px-7 pt-5 pb-8 max-[760px]:px-5"
-                            }
-                            key={side}
-                        >
-                            <div
-                                className={
-                                    "diff-header border-line [&_>_span]:text-muted mb-6 flex items-center gap-3 border-b pb-4 [&_>_span]:shrink-0 [&_>_span]:text-[12px] [&_>_span]:font-semibold [&_select]:min-h-10! [&_select]:py-2! [&_select]:text-[13px]!"
-                                }
-                            >
-                                <span>{label}</span>
-                                <select
-                                    aria-label={
-                                        side === "left"
-                                            ? "Baseline draft"
-                                            : "Revised draft"
-                                    }
-                                    value={draft.id}
-                                    onChange={(e) =>
-                                        setComparison(
-                                            (c) =>
-                                                c && {
-                                                    ...c,
-                                                    [side]: e.target.value,
-                                                },
-                                        )
-                                    }
-                                >
-                                    {all.map((v) => (
-                                        <option key={v.id} value={v.id}>
-                                            {v.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div
-                                className={
-                                    "diff-prose font-serif text-[18px] leading-[1.7] [overflow-wrap:anywhere] whitespace-pre-wrap max-[760px]:text-[17px] [&_>_span]:relative"
-                                }
-                            >
-                                <DiffText chunks={chunks} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div
-                className={
-                    "comparison-bottom border-line bg-paper m-0 flex min-h-[72px] shrink-0 flex-row items-center justify-end gap-2 border-t px-8 py-3 max-[760px]:px-4"
-                }
-            >
-                <Button
-                    className={
-                        "comparison-restore border-line! border! hover:bg-[var(--control-hover)]!"
-                    }
-                    disabled={right.id === "working"}
-                    onClick={() => {
-                        if (right.id !== "working") onRestore(right as Draft);
-                    }}
-                >
-                    Restore this version
-                </Button>
-                <Button
-                    className={PRIMARY_BUTTON}
-                    onClick={() => setComparison(null)}
-                >
-                    Continue editing
-                </Button>
-            </div>
-        </section>
     );
 }

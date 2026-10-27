@@ -896,17 +896,22 @@ for (const theme of ["light", "dark"]) {
             marks: [
                 {
                     target: selects.nth(0),
-                    label: "Before: the kept copy",
+                    label: "Older version",
                     side: "below",
                 },
                 {
                     target: selects.nth(1),
-                    label: "After: your saved draft",
+                    label: "Newer version",
                     side: "below",
                 },
                 {
-                    target: page.locator("ins").first(),
-                    label: "Added words (green)",
+                    target: page.getByRole("navigation", { name: "Changes" }),
+                    label: "Jump between changes",
+                    side: "left",
+                },
+                {
+                    target: page.locator(".compare-split ins").first(),
+                    label: "Added (green)",
                     side: "below",
                     pad: 3,
                 },
@@ -914,8 +919,8 @@ for (const theme of ["light", "dark"]) {
                     target: page.getByRole("button", {
                         name: "Restore this version",
                     }),
-                    label: "Make the After text current",
-                    side: "above",
+                    label: "Restore (asks first)",
+                    side: "left",
                 },
                 {
                     target: page.getByRole("button", {
@@ -926,6 +931,31 @@ for (const theme of ["light", "dark"]) {
                 },
             ],
         });
+        await page.setViewportSize(PHONE);
+        // Let the "Named draft saved" message fade so it doesn't cover the header.
+        await page
+            .getByRole("status")
+            .filter({ hasText: "Named draft saved" })
+            .waitFor({ state: "hidden", timeout: 15_000 })
+            .catch(() => {});
+        await page.waitForTimeout(800);
+        await shot("revise-compare-phone", {
+            marks: [
+                {
+                    target: page.getByRole("navigation", { name: "Changes" }),
+                    label: "Previous / Next change",
+                    side: "below",
+                },
+                {
+                    target: page.locator(".compare-unified ins").first(),
+                    label: "Added (green)",
+                    side: "below",
+                    pad: 3,
+                },
+            ],
+        });
+        await page.setViewportSize(DESKTOP);
+        await page.waitForTimeout(800);
         await page.getByRole("button", { name: "Continue editing" }).click();
         await page.waitForTimeout(800);
         const finish = revising.getByRole("button", {

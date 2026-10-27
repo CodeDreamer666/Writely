@@ -300,21 +300,21 @@
         ]
     },
     "link-done": {
-        "width": 468,
+        "width": 449,
         "height": 384,
         "marks": [
             {
-                "x": 0.4509,
+                "x": 0.4699,
                 "y": 0.8143,
-                "w": 0.4521,
+                "w": 0.4287,
                 "h": 0.0677,
                 "label": "Linked words are tinted",
                 "side": "below"
             },
             {
-                "x": 0.0855,
+                "x": 0.0891,
                 "y": 0.1042,
-                "w": 0.3547,
+                "w": 0.3697,
                 "h": 0.2422,
                 "label": "The card",
                 "side": "below"
@@ -340,7 +340,7 @@
         "height": 295,
         "marks": [
             {
-                "x": 0.3169,
+                "x": 0.3176,
                 "y": 0.8091,
                 "w": 0.3318,
                 "h": 0.1424,
@@ -354,7 +354,7 @@
         "height": 330,
         "marks": [
             {
-                "x": 0.4503,
+                "x": 0.4508,
                 "y": 0.2748,
                 "w": 0.0467,
                 "h": 0.1273,
@@ -462,15 +462,15 @@
         "height": 330,
         "marks": [
             {
-                "x": 0.1544,
+                "x": 0.1656,
                 "y": 0.4172,
-                "w": 0.2351,
+                "w": 0.2139,
                 "h": 0.0788,
                 "label": "Selected words",
                 "side": "below"
             },
             {
-                "x": 0.0414,
+                "x": 0.0419,
                 "y": 0.2657,
                 "w": 0.4611,
                 "h": 0.1455,
@@ -520,44 +520,74 @@
         "height": 900,
         "marks": [
             {
-                "x": 0.1284,
-                "y": 0.1783,
-                "w": 0.3435,
+                "x": 0.1401,
+                "y": 0.1278,
+                "w": 0.3052,
                 "h": 0.0556,
-                "label": "Before: the kept copy",
+                "label": "Older version",
                 "side": "below"
             },
             {
-                "x": 0.56,
-                "y": 0.1783,
-                "w": 0.3509,
+                "x": 0.4787,
+                "y": 0.1278,
+                "w": 0.3125,
                 "h": 0.0556,
-                "label": "After: your saved draft",
+                "label": "Newer version",
                 "side": "below"
             },
             {
-                "x": 0.5484,
-                "y": 0.2728,
-                "w": 0.2081,
+                "x": 0.807,
+                "y": 0.0744,
+                "w": 0.1266,
+                "h": 0.0556,
+                "label": "Jump between changes",
+                "side": "left"
+            },
+            {
+                "x": 0.5164,
+                "y": 0.2638,
+                "w": 0.2115,
                 "h": 0.0344,
-                "label": "Added words (green)",
+                "label": "Added (green)",
                 "side": "below"
             },
             {
                 "x": 0.7643,
-                "y": 0.9306,
+                "y": 0.9322,
                 "w": 0.1154,
                 "h": 0.06,
-                "label": "Make the After text current",
-                "side": "above"
+                "label": "Restore (asks first)",
+                "side": "left"
             },
             {
                 "x": 0.8781,
-                "y": 0.9306,
+                "y": 0.9322,
                 "w": 0.1008,
                 "h": 0.06,
                 "label": "Back to writing",
                 "side": "above"
+            }
+        ]
+    },
+    "revise-compare-phone": {
+        "width": 390,
+        "height": 780,
+        "marks": [
+            {
+                "x": 0.5667,
+                "y": 0,
+                "w": 0.4154,
+                "h": 0.0628,
+                "label": "Previous / Next change",
+                "side": "below"
+            },
+            {
+                "x": 0.0436,
+                "y": 0.1962,
+                "w": 0.657,
+                "h": 0.0385,
+                "label": "Added (green)",
+                "side": "below"
             }
         ]
     },

@@ -1069,33 +1069,90 @@ export const GUIDES: Guide[] = [
                         body: (
                             <>
                                 The page switches to <Ui>Draft comparison</Ui>.
-                                The left column (<Ui>Before</Ui>) is the copy
-                                kept when the revision started; the right column
-                                (<Ui>After</Ui>) is what you just saved. Added
-                                words are green and underlined on the right;
-                                removed words are red and struck through on the
-                                left. A <Ui>+</Ui> or <Ui>−</Ui> in the margin
-                                marks each changed paragraph.
+                                On a computer the two versions sit side by side:
+                                the left column (<Ui>Before</Ui>) is the copy
+                                kept when the revision started, the right column
+                                (<Ui>After</Ui>) is what you just saved, and
+                                they scroll together. Removed text has a pale
+                                red background and a line through it; added text
+                                has a pale green background. Unchanged text has
+                                no colour. A small edit marks just the changed
+                                words; a rewritten sentence or paragraph is
+                                marked as a whole.
                             </>
                         ),
                         shot: "revise-compare",
-                        alt: "The Draft comparison page. The Before and After menus, the added words, Restore this version and Continue editing are ringed.",
+                        alt: "The Draft comparison page side by side. The Before and After menus, the change arrows, the added words, Restore this version and Continue editing are ringed.",
                         caption:
-                            "Use the Before and After menus to compare any two versions.",
+                            "Use the Before and After menus at the top to compare any two versions.",
+                    },
+                    {
+                        title: "Click ⌄ to jump to the next change",
+                        body: (
+                            <>
+                                At the top-right, the arrows step through the
+                                changes: <Ui>⌄</Ui> (<Ui>Next change</Ui>) and{" "}
+                                <Ui>⌃</Ui> (<Ui>Previous change</Ui>). Between
+                                them you see how many changes there are, then
+                                which one you’re on, for example <Ui>2 of 3</Ui>
+                                . The current change gets an outline and scrolls
+                                to the middle of the page.
+                            </>
+                        ),
                         notes: [
                             {
-                                kind: "tip",
+                                kind: "result",
                                 text: (
                                     <>
-                                        <Ui>Restore this version</Ui> makes the{" "}
-                                        <em>After</em> (right-hand) version your
-                                        text. To undo this whole pass, pick the{" "}
-                                        <Ui>Before: …</Ui> draft in the{" "}
-                                        <Ui>After</Ui> menu first, then click
-                                        Restore. Your current text is saved as a
-                                        draft before anything is replaced, and a
-                                        message confirms <Ui>Draft restored</Ui>
-                                        .
+                                        If the two versions are identical, the
+                                        counter says <Ui>No changes</Ui> and the
+                                        page tells you the versions are the
+                                        same.
+                                    </>
+                                ),
+                            },
+                        ],
+                    },
+                    {
+                        title: "On a phone, read one text",
+                        body: (
+                            <>
+                                Phone screens show a single text instead of two
+                                columns. Each removal (red, crossed out) comes
+                                straight before the words that replaced it
+                                (green), so you read the change in place. The
+                                same arrows at the top step through the changes,
+                                and the colour key sits just under the menus.
+                            </>
+                        ),
+                        shot: "revise-compare-phone",
+                        alt: "The comparison on a phone as one text. The change arrows and an added passage are ringed.",
+                        caption:
+                            "The ← at the top-left goes back to your text, like Continue editing.",
+                    },
+                    {
+                        title: "Restore a version if you need to (optional)",
+                        body: (
+                            <>
+                                <Ui>Restore this version</Ui> (bottom bar) makes
+                                the <em>After</em> version your text. To undo
+                                this whole pass, first pick the{" "}
+                                <Ui>Before: …</Ui> draft in the <Ui>After</Ui>{" "}
+                                menu, then click Restore. A box asks you to
+                                confirm: click <Ui>Preserve &amp; restore</Ui>.
+                                Your current text is saved as a draft first, and
+                                a message confirms <Ui>Draft restored</Ui>.
+                            </>
+                        ),
+                        notes: [
+                            {
+                                kind: "missing",
+                                text: (
+                                    <>
+                                        The button is greyed out when{" "}
+                                        <Ui>After</Ui> is{" "}
+                                        <Ui>Working text (autosaved)</Ui>: that
+                                        is already your text.
                                     </>
                                 ),
                             },

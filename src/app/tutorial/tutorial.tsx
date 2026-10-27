@@ -161,14 +161,21 @@ function reveal(
     frame(page, from, to, !!cardBox, smooth);
 }
 
-/** Brings the changed words in one column of the comparison into view. */
+/**
+ * Brings the removed (column 1) or added (column 2) words of the comparison into view, in
+ * whichever layout is showing: side by side, or the single text on phones.
+ */
 function revealChanges(column: number, smooth: boolean) {
     const page = document.querySelector<HTMLElement>(".comparison-scroll");
     const changes = [
         ...document.querySelectorAll(
-            `.diff-column:nth-child(${column}) :is(del, ins)`,
+            column === 1
+                ? "[data-side='before'] del, .compare-unified del"
+                : "[data-side='after'] ins, .compare-unified ins",
         ),
-    ].map((el) => el.getBoundingClientRect());
+    ]
+        .filter((el) => el.getClientRects().length)
+        .map((el) => el.getBoundingClientRect());
     if (!page || !changes.length) return;
     frame(
         page,

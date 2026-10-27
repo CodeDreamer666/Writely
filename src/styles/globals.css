@@ -76,6 +76,8 @@
         --shadow: #000000;
         --mark: #5c5326;
         --callout: #ff8f5a;
+        --diff-add: color-mix(in srgb, var(--success) 24%, transparent);
+        --diff-remove: color-mix(in srgb, var(--danger) 22%, transparent);
         --on-callout: #1a1917;
         --card-strength: 26%;
         --card-base: #24231f;
@@ -100,6 +102,8 @@
     --shadow: #000000;
     --mark: #5c5326;
     --callout: #ff8f5a;
+    --diff-add: color-mix(in srgb, var(--success) 24%, transparent);
+    --diff-remove: color-mix(in srgb, var(--danger) 22%, transparent);
     --on-callout: #1a1917;
     --card-strength: 26%;
     --card-base: #24231f;
