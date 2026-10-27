@@ -705,22 +705,38 @@ export default function Library({
                                                     href={`/d/${doc.id}`}
                                                     className={`border-line bg-surface text-ink flex flex-col overflow-hidden rounded-xl border no-underline transition-colors group-hover:border-[var(--control-focus)] ${FOCUS_RING}`}
                                                 >
-                                                    {/* There are no previews, so a blank page keeps the tile's upper area. */}
+                                                    {/* The page shows the opening text, like a print preview; an empty document stays a blank page. */}
                                                     <span
                                                         aria-hidden="true"
                                                         className="border-line flex aspect-[5/4] items-end justify-center border-b bg-[color-mix(in_srgb,var(--text)_3%,var(--bg))] px-[18%] pt-5 transition-colors group-hover:bg-[color-mix(in_srgb,var(--text)_5%,var(--bg))] max-sm:pt-4"
                                                     >
-                                                        <span className="border-line bg-surface block size-full rounded-t-md border border-b-0" />
+                                                        <span className="border-line bg-surface block size-full overflow-hidden rounded-t-md border border-b-0 [mask-image:linear-gradient(to_bottom,#000_70%,transparent)] px-[10%] pt-[10%] font-serif text-[7.5px] leading-[1.5] break-words text-[color-mix(in_srgb,var(--text)_70%,transparent)] sm:text-[8.5px]">
+                                                            {doc.excerpt && (
+                                                                <Highlighted
+                                                                    text={
+                                                                        doc.excerpt
+                                                                    }
+                                                                    terms={
+                                                                        terms
+                                                                    }
+                                                                />
+                                                            )}
+                                                        </span>
                                                     </span>
                                                     <span className="flex min-w-0 flex-col gap-0.5 py-3 pr-12 pl-4 max-sm:pr-10 max-sm:pl-3">
-                                                        <span className="truncate font-serif text-[16px] leading-6">
-                                                            <Highlighted
-                                                                text={
-                                                                    doc.title ||
-                                                                    "Untitled"
-                                                                }
-                                                                terms={terms}
-                                                            />
+                                                        <span className="flex min-w-0 items-center gap-2">
+                                                            <DocIcon />
+                                                            <span className="truncate font-serif text-[16px] leading-6">
+                                                                <Highlighted
+                                                                    text={
+                                                                        doc.title ||
+                                                                        "Untitled"
+                                                                    }
+                                                                    terms={
+                                                                        terms
+                                                                    }
+                                                                />
+                                                            </span>
                                                         </span>
                                                         <EditedTime
                                                             date={doc.updated}
@@ -748,8 +764,9 @@ export default function Library({
                                 <div>
                                     <div
                                         aria-hidden="true"
-                                        className="border-line text-muted grid grid-cols-[minmax(0,1fr)_minmax(120px,200px)_40px] gap-6 border-b px-3 pb-2.5 text-[12.5px] font-medium max-sm:hidden"
+                                        className="border-line text-muted grid grid-cols-[28px_minmax(0,1fr)_minmax(120px,200px)_40px] gap-6 border-b px-3 pb-2.5 text-[12.5px] font-medium max-sm:hidden"
                                     >
+                                        <span />
                                         <span>Title</span>
                                         <span>Last edited</span>
                                     </div>
@@ -765,8 +782,13 @@ export default function Library({
                                                 <TitleTooltip title={doc.title}>
                                                     <Link
                                                         href={`/d/${doc.id}`}
-                                                        className={`text-ink grid min-h-14 grid-cols-[minmax(0,1fr)_minmax(120px,200px)] items-center gap-6 py-2 pr-[76px] pl-3 no-underline transition-colors hover:bg-[var(--control-hover)] max-sm:grid-cols-1 max-sm:gap-0.5 max-sm:py-3 max-sm:pr-14 max-sm:pl-2 ${FOCUS_RING}`}
+                                                        className={`text-ink grid min-h-14 grid-cols-[28px_minmax(0,1fr)_minmax(120px,200px)] items-center gap-x-6 py-2 pr-[76px] pl-3 no-underline transition-colors hover:bg-[var(--control-hover)] max-sm:grid-cols-[28px_minmax(0,1fr)] max-sm:gap-x-3 max-sm:gap-y-0.5 max-sm:py-3 max-sm:pr-14 max-sm:pl-2 ${FOCUS_RING}`}
                                                     >
+                                                        <span className="flex justify-center max-sm:row-span-2">
+                                                            <DocIcon
+                                                                size={20}
+                                                            />
+                                                        </span>
                                                         <span className="truncate font-serif text-[16px] leading-6">
                                                             <Highlighted
                                                                 text={
@@ -918,6 +940,18 @@ export default function Library({
 }
 
 /** The list's "Last edited" column already names the date: "Today", "3 days ago", "3 Oct". */
+/** The document mark beside each title in the library, like a file icon in a file list. */
+function DocIcon({ size = 17 }: { size?: number }) {
+    return (
+        <FileText
+            aria-hidden="true"
+            size={size}
+            strokeWidth={1.7}
+            className="text-accent shrink-0"
+        />
+    );
+}
+
 function editedDate(date: Date) {
     const text = formatEdited(date).replace(/^Edited /, "");
     return text.charAt(0).toUpperCase() + text.slice(1);
