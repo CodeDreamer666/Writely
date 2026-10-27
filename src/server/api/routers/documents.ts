@@ -15,10 +15,7 @@ import {
     setArchived,
     setPinned,
 } from "~/server/documents";
-import {
-    DOCUMENT_FILTERS,
-    DOCUMENT_SORTS,
-} from "~/config/documents";
+import { DOCUMENT_FILTERS } from "~/config/documents";
 import { createDocuments } from "~/server/workspace";
 
 const id = z.string().min(1).max(200);
@@ -27,13 +24,12 @@ const notFound = (found: boolean) => {
 };
 
 export const documentsRouter = createTRPCRouter({
-    /** A page of the library: search, filter and sort work together. */
+    /** A page of the library, newest edit first: search and filter work together. */
     list: protectedProcedure
         .input(
             z.object({
                 query: z.string().max(200).default(""),
                 filter: z.enum(DOCUMENT_FILTERS).default("all"),
-                sort: z.enum(DOCUMENT_SORTS).default("updated-desc"),
                 cursor: z.number().int().min(0).nullish(),
                 limit: z.number().int().min(1).max(60).default(30),
             }),
@@ -69,7 +65,11 @@ export const documentsRouter = createTRPCRouter({
         .input(z.object({ id, archived: z.boolean() }))
         .mutation(async ({ ctx, input }) =>
             notFound(
-                await setArchived(ctx.session.user.id, input.id, input.archived),
+                await setArchived(
+                    ctx.session.user.id,
+                    input.id,
+                    input.archived,
+                ),
             ),
         ),
 

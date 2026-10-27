@@ -5,30 +5,12 @@ import {
 } from "~/lib/writely/plain-text";
 import {
     type DOCUMENT_FILTERS,
-    type DOCUMENT_SORTS,
     RECENT_DAYS,
 } from "~/config/documents";
 import { db } from "~/server/db";
 import { settled } from "~/server/workspace";
 
-export type DocumentSort = (typeof DOCUMENT_SORTS)[number];
 export type DocumentFilter = (typeof DOCUMENT_FILTERS)[number];
-
-/**
- * What: The database ordering for each library sort. Ties are broken by the
- * document key so the order is always stable.
- *
- * Used in:
- * - src/server/documents.ts (listDocuments)
- *
- * Effect: Changes how documents are ordered for that sort.
- */
-const ORDER: Record<DocumentSort, Prisma.Sql> = {
-    "updated-desc": Prisma.sql`"updated" DESC, "key" ASC`,
-    "updated-asc": Prisma.sql`"updated" ASC, "key" ASC`,
-    "created-desc": Prisma.sql`"created" DESC, "key" ASC`,
-    "title-asc": Prisma.sql`lower("title") ASC, "key" ASC`,
-};
 
 export type DocumentSummary = {
     id: string;
@@ -55,14 +37,12 @@ export async function listDocuments(
     {
         query = "",
         filter = "all",
-        sort = "updated-desc",
         offset = 0,
         limit = 30,
         titleOnly = false,
     }: {
         query?: string;
         filter?: DocumentFilter;
-        sort?: DocumentSort;
         offset?: number;
         limit?: number;
         titleOnly?: boolean;
@@ -105,7 +85,7 @@ export async function listDocuments(
       substr("plainText", greatest(1, "hit" - 120), 480) AS "window",
       count(*) OVER () AS "total"
     FROM matches
-    ORDER BY ${ORDER[sort]}
+    ORDER BY "updated" DESC, "key" ASC
     LIMIT ${limit} OFFSET ${offset}
   `;
     const total = Number(rows[0]?.total ?? 0);

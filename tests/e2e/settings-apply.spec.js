@@ -45,9 +45,7 @@ test("saved settings change the editor after a reload", async ({ page }) => {
     await expect(app).not.toHaveClass(/paragraph-highlight/);
 });
 
-test("library layout is saved to the account and sorting lives in the address", async ({
-    page,
-}) => {
+test("library layout is saved to the account", async ({ page }) => {
     await openSample(page);
     await page.goto("/");
     await page
@@ -63,31 +61,7 @@ test("library layout is saved to the account and sorting lives in the address", 
         )
         .toMatchObject({ libraryView: "list" });
 
-    await page.getByLabel("Sort by").selectOption("title-asc");
-    await expect(page).toHaveURL(/sort=title-asc/);
-    const actions = page.getByRole("button", { name: /^Document actions: / });
-    await expect
-        .poll(async () => {
-            const shown = (
-                await actions.evaluateAll((buttons) =>
-                    buttons.map((b) => b.getAttribute("aria-label")),
-                )
-            ).map((label) => label.replace("Document actions: ", ""));
-            return (
-                shown.length > 1 &&
-                shown.every(
-                    (title, i) =>
-                        !i ||
-                        shown[i - 1].localeCompare(title, undefined, {
-                            sensitivity: "base",
-                        }) <= 0,
-                )
-            );
-        })
-        .toBe(true);
-
     await page.reload();
-    await expect(page.getByLabel("Sort by")).toHaveValue("title-asc");
     await expect(
         page
             .getByRole("radiogroup", { name: "Layout" })
