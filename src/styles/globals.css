@@ -15,6 +15,8 @@
     --color-tint: var(--tint);
     --color-danger: var(--danger);
     --color-success: var(--success);
+    --color-callout: var(--callout);
+    --color-on-callout: var(--on-callout);
     --font-sans: Inter, sans-serif;
     --font-serif: "Source Serif 4", Georgia, serif;
 }
@@ -40,6 +42,9 @@
     --selection: #dce9ea;
     --shadow: #1f1d1a;
     --mark: #fcefb5;
+    /* Rings and labels that point at controls in the Help screenshots. */
+    --callout: #d9480f;
+    --on-callout: #ffffff;
     /* Thought cards keep their stored pastel; dark mode blends it into the surface. */
     --card-strength: 100%;
     --card-base: #ffffff;
@@ -70,6 +75,8 @@
         --selection: #34504f;
         --shadow: #000000;
         --mark: #5c5326;
+        --callout: #ff8f5a;
+        --on-callout: #1a1917;
         --card-strength: 26%;
         --card-base: #24231f;
         --card-text-override: var(--text);
@@ -92,6 +99,8 @@
     --selection: #34504f;
     --shadow: #000000;
     --mark: #5c5326;
+    --callout: #ff8f5a;
+    --on-callout: #1a1917;
     --card-strength: 26%;
     --card-base: #24231f;
     --card-text-override: var(--text);
@@ -495,5 +504,24 @@ body {
             min-height: 44px !important;
             min-width: 44px !important;
         }
+    }
+}
+
+/* Help screenshots come in both themes; only the one matching the page shows. */
+.help-shot-dark {
+    display: none;
+}
+:root[data-theme="dark"] .help-shot-light {
+    display: none;
+}
+:root[data-theme="dark"] .help-shot-dark {
+    display: block;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .help-shot-light {
+        display: none;
+    }
+    :root:not([data-theme="light"]) .help-shot-dark {
+        display: block;
     }
 }

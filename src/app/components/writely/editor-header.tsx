@@ -253,6 +253,11 @@ export default function EditorHeader({
                             label: "Keyboard shortcuts",
                             onSelect: onShortcuts,
                         },
+                        {
+                            // A new tab, so the guide sits beside the document.
+                            label: "Help",
+                            onSelect: () => window.open("/help", "_blank"),
+                        },
                     ]}
                 />
             </div>

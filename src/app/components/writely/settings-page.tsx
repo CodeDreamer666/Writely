@@ -44,6 +44,7 @@ import {
 } from "./settings-controls";
 import { ShortcutList } from "./shortcuts";
 import { WritingSettings } from "./writing-settings";
+import { TopicList } from "../../help/topic-list";
 import {
     Button,
     Dialog,
@@ -421,10 +422,15 @@ export default function SettingsPage({
                             </SettingsSection>
                         )}
                         {shown === "help" && (
-                            <SettingsSection id="help-title" title="Help">
+                            <SettingsSection
+                                id="help-title"
+                                title="Help"
+                                hint="Step-by-step guides with pictures. Every step is one action and shows exactly where to click."
+                            >
+                                <TopicList />
                                 <Link
                                     href="/tutorial"
-                                    className="border-line bg-surface text-ink flex items-center gap-3 rounded-2xl border px-5 py-4 no-underline hover:border-[var(--control-focus)]"
+                                    className="border-line bg-surface text-ink mt-4 flex items-center gap-3 rounded-2xl border px-5 py-4 no-underline hover:border-[var(--control-focus)]"
                                 >
                                     <Sparkles
                                         size={18}

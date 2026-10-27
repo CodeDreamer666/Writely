@@ -17,6 +17,7 @@ import {
     type PointerEvent as ReactPointerEvent,
     type RefObject,
 } from "react";
+import { createPortal } from "react-dom";
 import {
     cardArrowAnchor,
     cardArrowPoint,
@@ -941,16 +942,19 @@ export default function Annotations({
                     </div>
                 );
             })}
-            {connectionSelection && (
-                <div
-                    className={
-                        "connection-hint pointer-events-none fixed [top:20px] [left:50%] [max-width:calc(100vw_-_32px)] [transform:translateX(-50%)] [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--control-border)] [border-right-color:var(--control-border)] [border-bottom-color:var(--control-border)] [border-left-color:var(--control-border)] [padding:8px_12px] [color:var(--muted)] [box-shadow:0_2px_8px_color-mix(in_srgb,_var(--shadow)_3%,_transparent)] [background:var(--surface)] [border-image:none] [font:12px/1.5_Inter,_sans-serif]"
-                    }
-                    role="status"
-                >
-                    Select a thought card to connect
-                </div>
-            )}
+            {/* On the page body, so the editor header can't cover it. */}
+            {connectionSelection &&
+                createPortal(
+                    <div
+                        className={
+                            "connection-hint pointer-events-none fixed [top:20px] [left:50%] [z-index:30] [max-width:calc(100vw_-_32px)] [transform:translateX(-50%)] [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--control-border)] [border-right-color:var(--control-border)] [border-bottom-color:var(--control-border)] [border-left-color:var(--control-border)] [padding:8px_12px] [color:var(--muted)] [box-shadow:0_2px_8px_color-mix(in_srgb,_var(--shadow)_3%,_transparent)] [background:var(--surface)] [border-image:none] [font:12px/1.5_Inter,_sans-serif]"
+                        }
+                        role="status"
+                    >
+                        Select a thought card to connect
+                    </div>,
+                    document.body,
+                )}
         </div>
     );
 }

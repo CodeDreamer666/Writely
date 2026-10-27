@@ -45,6 +45,7 @@
     "generated",
     "evidence",
     "tests/e2e",
+    "tests/help",
     ".impeccable",
     ".restore-backup-*",
     ".before-newer-version-restore-*"

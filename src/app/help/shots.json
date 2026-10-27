@@ -1,0 +1,938 @@
+{
+    "cards-add": {
+        "width": 700,
+        "height": 134,
+        "marks": [
+            {
+                "x": 0.0829,
+                "y": 0.4328,
+                "w": 0.0771,
+                "h": 0.403,
+                "label": "Add thought card",
+                "side": "above"
+            }
+        ]
+    },
+    "cards-colour": {
+        "width": 550,
+        "height": 116,
+        "marks": [
+            {
+                "x": 0.5491,
+                "y": 0.0927,
+                "w": 0.24,
+                "h": 0.3103,
+                "label": "Pick a colour",
+                "side": "below"
+            }
+        ]
+    },
+    "cards-drawer": {
+        "width": 592,
+        "height": 344,
+        "marks": [
+            {
+                "x": 0.0541,
+                "y": 0.234,
+                "w": 0.8919,
+                "h": 0.157,
+                "label": "New card",
+                "side": "below"
+            },
+            {
+                "x": 0.7218,
+                "y": 0.0828,
+                "w": 0.1566,
+                "h": 0.1337,
+                "label": "Show or hide all cards",
+                "side": "left"
+            },
+            {
+                "x": 0.6875,
+                "y": 0.7435,
+                "w": 0.0912,
+                "h": 0.157,
+                "label": "Colour",
+                "side": "below"
+            },
+            {
+                "x": 0.8429,
+                "y": 0.7435,
+                "w": 0.0912,
+                "h": 0.157,
+                "label": "Delete",
+                "side": "right"
+            }
+        ]
+    },
+    "cards-folded": {
+        "width": 720,
+        "height": 240,
+        "marks": [
+            {
+                "x": 0.0486,
+                "y": 0.2708,
+                "w": 0.075,
+                "h": 0.2417,
+                "label": "Folded card: click to open it",
+                "side": "below"
+            }
+        ]
+    },
+    "cards-new": {
+        "width": 720,
+        "height": 300,
+        "marks": [
+            {
+                "x": 0.0486,
+                "y": 0.2167,
+                "w": 0.2819,
+                "h": 0.2333,
+                "label": "New card: type here",
+                "side": "below"
+            }
+        ]
+    },
+    "cards-phone": {
+        "width": 390,
+        "height": 780,
+        "marks": [
+            {
+                "x": 0.1801,
+                "y": 0.9295,
+                "w": 0.1385,
+                "h": 0.0692,
+                "label": "Thoughts",
+                "side": "above"
+            },
+            {
+                "x": 0.041,
+                "y": 0.3723,
+                "w": 0.9179,
+                "h": 0.0692,
+                "label": "New card",
+                "side": "below"
+            },
+            {
+                "x": 0.6846,
+                "y": 0.6374,
+                "w": 0.1385,
+                "h": 0.0692,
+                "label": "Edit",
+                "side": "left"
+            },
+            {
+                "x": 0.7974,
+                "y": 0.6374,
+                "w": 0.1385,
+                "h": 0.0692,
+                "label": "Delete",
+                "side": "left"
+            }
+        ]
+    },
+    "cards-saved": {
+        "width": 720,
+        "height": 300,
+        "marks": [
+            {
+                "x": 0.2097,
+                "y": 0.2367,
+                "w": 0.0472,
+                "h": 0.1133,
+                "label": "Edit",
+                "side": "above"
+            },
+            {
+                "x": 0.1708,
+                "y": 0.2367,
+                "w": 0.0417,
+                "h": 0.1133,
+                "label": "Fold away",
+                "side": "left"
+            },
+            {
+                "x": 0.0528,
+                "y": 0.2267,
+                "w": 0.2139,
+                "h": 0.27,
+                "label": "Drag here to move the card",
+                "side": "below"
+            }
+        ]
+    },
+    "cards-typed": {
+        "width": 720,
+        "height": 300,
+        "marks": [
+            {
+                "x": 0.0486,
+                "y": 0.2167,
+                "w": 0.2819,
+                "h": 0.2333,
+                "label": "Click outside the card to save",
+                "side": "below"
+            }
+        ]
+    },
+    "export-menu": {
+        "width": 256,
+        "height": 304,
+        "marks": [
+            {
+                "x": 0.7773,
+                "y": 0.0148,
+                "w": 0.1797,
+                "h": 0.1513,
+                "label": "Document options (⋯)",
+                "side": "left"
+            },
+            {
+                "x": 0.0781,
+                "y": 0.1628,
+                "w": 0.8594,
+                "h": 0.1776,
+                "label": "Word",
+                "side": "left"
+            },
+            {
+                "x": 0.0781,
+                "y": 0.3076,
+                "w": 0.8594,
+                "h": 0.1776,
+                "label": "PDF",
+                "side": "left"
+            }
+        ]
+    },
+    "export-phone": {
+        "width": 390,
+        "height": 780,
+        "marks": [
+            {
+                "x": 0.8641,
+                "y": 0.0032,
+                "w": 0.1359,
+                "h": 0.0692,
+                "label": "⋯",
+                "side": "left"
+            },
+            {
+                "x": 0.4154,
+                "y": 0.2404,
+                "w": 0.5641,
+                "h": 0.0692,
+                "label": "Export",
+                "side": "left"
+            }
+        ]
+    },
+    "export-settings": {
+        "width": 820,
+        "height": 824,
+        "marks": [
+            {
+                "x": 0.0598,
+                "y": 0.2225,
+                "w": 0.8805,
+                "h": 0.1007,
+                "label": "Paper size",
+                "side": "below"
+            },
+            {
+                "x": 0.0598,
+                "y": 0.424,
+                "w": 0.8805,
+                "h": 0.0971,
+                "label": "Put the title on top",
+                "side": "below"
+            }
+        ]
+    },
+    "focus-hidden": {
+        "width": 1280,
+        "height": 900,
+        "marks": [
+            {
+                "x": 0,
+                "y": 0,
+                "w": 1,
+                "h": 0.0711,
+                "label": "Point or tap here to show Exit",
+                "side": "below"
+            }
+        ]
+    },
+    "focus-menu": {
+        "width": 256,
+        "height": 304,
+        "marks": [
+            {
+                "x": 0.7773,
+                "y": 0.0148,
+                "w": 0.1797,
+                "h": 0.1513,
+                "label": "Document options (⋯)",
+                "side": "left"
+            },
+            {
+                "x": 0.0781,
+                "y": 0.4655,
+                "w": 0.8594,
+                "h": 0.1776,
+                "label": "Turn on focus mode",
+                "side": "left"
+            }
+        ]
+    },
+    "focus-on": {
+        "width": 1280,
+        "height": 900,
+        "marks": [
+            {
+                "x": 0.443,
+                "y": 0.0078,
+                "w": 0.114,
+                "h": 0.0467,
+                "label": "Exit focus mode",
+                "side": "below"
+            }
+        ]
+    },
+    "link-done": {
+        "width": 468,
+        "height": 384,
+        "marks": [
+            {
+                "x": 0.4509,
+                "y": 0.8143,
+                "w": 0.4521,
+                "h": 0.0677,
+                "label": "Linked words are tinted",
+                "side": "below"
+            },
+            {
+                "x": 0.0855,
+                "y": 0.1042,
+                "w": 0.3547,
+                "h": 0.2422,
+                "label": "The card",
+                "side": "below"
+            }
+        ]
+    },
+    "link-drawer": {
+        "width": 592,
+        "height": 362,
+        "marks": [
+            {
+                "x": 0.1233,
+                "y": 0.8149,
+                "w": 0.5541,
+                "h": 0.0552,
+                "label": "The linked words",
+                "side": "below"
+            }
+        ]
+    },
+    "link-menu": {
+        "width": 651,
+        "height": 295,
+        "marks": [
+            {
+                "x": 0.3169,
+                "y": 0.8091,
+                "w": 0.3318,
+                "h": 0.1424,
+                "label": "Connect to thought",
+                "side": "right"
+            }
+        ]
+    },
+    "link-more": {
+        "width": 900,
+        "height": 330,
+        "marks": [
+            {
+                "x": 0.4503,
+                "y": 0.2748,
+                "w": 0.0467,
+                "h": 0.1273,
+                "label": "More (⋯)",
+                "side": "below"
+            }
+        ]
+    },
+    "link-phone-attach": {
+        "width": 390,
+        "height": 780,
+        "marks": [
+            {
+                "x": 0.0513,
+                "y": 0.5274,
+                "w": 0.9051,
+                "h": 0.1933,
+                "label": "Attach to this card",
+                "side": "below"
+            },
+            {
+                "x": 0.041,
+                "y": 0.4492,
+                "w": 0.9179,
+                "h": 0.0692,
+                "label": "Or make a new linked card",
+                "side": "below"
+            }
+        ]
+    },
+    "link-phone-done": {
+        "width": 390,
+        "height": 780,
+        "marks": [
+            {
+                "x": 0.0385,
+                "y": 0.1653,
+                "w": 0.4172,
+                "h": 0.0333,
+                "label": "Linked words are tinted",
+                "side": "below"
+            }
+        ]
+    },
+    "link-phone-select": {
+        "width": 390,
+        "height": 279,
+        "marks": [
+            {
+                "x": 0.0385,
+                "y": 0.3725,
+                "w": 0.4172,
+                "h": 0.0932,
+                "label": "Selected words",
+                "side": "above"
+            },
+            {
+                "x": 0.4436,
+                "y": 0.1897,
+                "w": 0.1128,
+                "h": 0.1649,
+                "label": "More (⋯)",
+                "side": "below"
+            }
+        ]
+    },
+    "link-pick": {
+        "width": 728,
+        "height": 277,
+        "marks": [
+            {
+                "x": 0.6366,
+                "y": 0.0542,
+                "w": 0.3037,
+                "h": 0.1661,
+                "label": "Waiting for you to pick a card",
+                "side": "below"
+            },
+            {
+                "x": 0.0549,
+                "y": 0.5199,
+                "w": 0.228,
+                "h": 0.3357,
+                "label": "Click the card",
+                "side": "below"
+            }
+        ]
+    },
+    "link-remove": {
+        "width": 230,
+        "height": 189,
+        "marks": [
+            {
+                "x": 0.6565,
+                "y": 0.6243,
+                "w": 0.1478,
+                "h": 0.1799,
+                "label": "Remove this link",
+                "side": "below"
+            }
+        ]
+    },
+    "link-select": {
+        "width": 900,
+        "height": 330,
+        "marks": [
+            {
+                "x": 0.1544,
+                "y": 0.4172,
+                "w": 0.2351,
+                "h": 0.0788,
+                "label": "Selected words",
+                "side": "below"
+            },
+            {
+                "x": 0.0414,
+                "y": 0.2657,
+                "w": 0.4611,
+                "h": 0.1455,
+                "label": "Appears while words are selected",
+                "side": "above"
+            }
+        ]
+    },
+    "revise-add-goal": {
+        "width": 512,
+        "height": 268,
+        "marks": [
+            {
+                "x": 0.0703,
+                "y": 0.4104,
+                "w": 0.8594,
+                "h": 0.2015,
+                "label": "Type the goal",
+                "side": "below"
+            },
+            {
+                "x": 0.8145,
+                "y": 0.6642,
+                "w": 0.1152,
+                "h": 0.2015,
+                "label": "Add",
+                "side": "below"
+            }
+        ]
+    },
+    "revise-checklist": {
+        "width": 592,
+        "height": 473,
+        "marks": [
+            {
+                "x": 0.0557,
+                "y": 0.2574,
+                "w": 0.8885,
+                "h": 0.1538,
+                "label": "Click a goal to start revising",
+                "side": "below"
+            }
+        ]
+    },
+    "revise-compare": {
+        "width": 1280,
+        "height": 900,
+        "marks": [
+            {
+                "x": 0.1284,
+                "y": 0.1783,
+                "w": 0.3435,
+                "h": 0.0556,
+                "label": "Before: the kept copy",
+                "side": "below"
+            },
+            {
+                "x": 0.56,
+                "y": 0.1783,
+                "w": 0.3509,
+                "h": 0.0556,
+                "label": "After: your saved draft",
+                "side": "below"
+            },
+            {
+                "x": 0.5484,
+                "y": 0.2728,
+                "w": 0.2081,
+                "h": 0.0344,
+                "label": "Added words (green)",
+                "side": "below"
+            },
+            {
+                "x": 0.7643,
+                "y": 0.9306,
+                "w": 0.1154,
+                "h": 0.06,
+                "label": "Make the After text current",
+                "side": "above"
+            },
+            {
+                "x": 0.8781,
+                "y": 0.9306,
+                "w": 0.1008,
+                "h": 0.06,
+                "label": "Back to writing",
+                "side": "above"
+            }
+        ]
+    },
+    "revise-done": {
+        "width": 592,
+        "height": 479,
+        "marks": [
+            {
+                "x": 0.0557,
+                "y": 0.2526,
+                "w": 0.8885,
+                "h": 0.1519,
+                "label": "Ticked: this goal is done",
+                "side": "below"
+            }
+        ]
+    },
+    "revise-drafts": {
+        "width": 592,
+        "height": 384,
+        "marks": [
+            {
+                "x": 0.0541,
+                "y": 0.209,
+                "w": 0.8919,
+                "h": 0.1406,
+                "label": "Save a version any time",
+                "side": "below"
+            },
+            {
+                "x": 0.7271,
+                "y": 0.4196,
+                "w": 0.1495,
+                "h": 0.1198,
+                "label": "Compare",
+                "side": "left"
+            }
+        ]
+    },
+    "revise-finish": {
+        "width": 700,
+        "height": 183,
+        "marks": [
+            {
+                "x": 0.7181,
+                "y": 0.3169,
+                "w": 0.199,
+                "h": 0.2514,
+                "label": "Finish revision",
+                "side": "above"
+            }
+        ]
+    },
+    "revise-open": {
+        "width": 700,
+        "height": 134,
+        "marks": [
+            {
+                "x": 0.3244,
+                "y": 0.4328,
+                "w": 0.2011,
+                "h": 0.403,
+                "label": "Checklist",
+                "side": "above"
+            }
+        ]
+    },
+    "revise-save": {
+        "width": 700,
+        "height": 183,
+        "marks": [
+            {
+                "x": 0.559,
+                "y": 0.3169,
+                "w": 0.1648,
+                "h": 0.2514,
+                "label": "Save draft",
+                "side": "above"
+            }
+        ]
+    },
+    "revise-save-dialog": {
+        "width": 512,
+        "height": 403,
+        "marks": [
+            {
+                "x": 0.0703,
+                "y": 0.3887,
+                "w": 0.8594,
+                "h": 0.134,
+                "label": "Name (already filled in)",
+                "side": "below"
+            },
+            {
+                "x": 0.7467,
+                "y": 0.7778,
+                "w": 0.183,
+                "h": 0.134,
+                "label": "Save draft",
+                "side": "below"
+            }
+        ]
+    },
+    "revise-started": {
+        "width": 1280,
+        "height": 900,
+        "marks": [
+            {
+                "x": 0.3548,
+                "y": 0.0033,
+                "w": 0.2903,
+                "h": 0.0533,
+                "label": "A copy of the text was kept",
+                "side": "below"
+            },
+            {
+                "x": 0.2688,
+                "y": 0.8567,
+                "w": 0.4625,
+                "h": 0.0611,
+                "label": "Revising bar: names your goal",
+                "side": "above"
+            }
+        ]
+    },
+    "revise-this-draft": {
+        "width": 592,
+        "height": 473,
+        "marks": [
+            {
+                "x": 0.7701,
+                "y": 0.8161,
+                "w": 0.164,
+                "h": 0.0888,
+                "label": "Add a goal for this draft",
+                "side": "above"
+            }
+        ]
+    },
+    "settings-goals": {
+        "width": 820,
+        "height": 824,
+        "marks": [
+            {
+                "x": 0.8149,
+                "y": 0.0806,
+                "w": 0.1327,
+                "h": 0.0558,
+                "label": "Goal for every document",
+                "side": "below"
+            }
+        ]
+    },
+    "settings-open": {
+        "width": 520,
+        "height": 200,
+        "marks": [
+            {
+                "x": 0.8442,
+                "y": 0.0525,
+                "w": 0.1038,
+                "h": 0.27,
+                "label": "Settings",
+                "side": "left"
+            }
+        ]
+    },
+    "settings-page": {
+        "width": 1280,
+        "height": 900,
+        "marks": [
+            {
+                "x": 0.0148,
+                "y": 0.1767,
+                "w": 0.2039,
+                "h": 0.38,
+                "label": "Sections",
+                "side": "right"
+            },
+            {
+                "x": 0.2711,
+                "y": 0.2726,
+                "w": 0.5672,
+                "h": 0.0967,
+                "label": "Each row is one setting",
+                "side": "below"
+            }
+        ]
+    },
+    "settings-phone": {
+        "width": 390,
+        "height": 780,
+        "marks": [
+            {
+                "x": 0.0359,
+                "y": 0.0949,
+                "w": 0.9282,
+                "h": 0.0769,
+                "label": "Tap a section",
+                "side": "below"
+            }
+        ]
+    },
+    "settings-phone-section": {
+        "width": 390,
+        "height": 780,
+        "marks": [
+            {
+                "x": 0.0282,
+                "y": 0.091,
+                "w": 0.2614,
+                "h": 0.0641,
+                "label": "Back to the list",
+                "side": "right"
+            }
+        ]
+    },
+    "settings-writing": {
+        "width": 820,
+        "height": 824,
+        "marks": [
+            {
+                "x": 0.0598,
+                "y": 0.1959,
+                "w": 0.8805,
+                "h": 0.0983,
+                "label": "Fades the other paragraphs",
+                "side": "below"
+            }
+        ]
+    },
+    "start-back": {
+        "width": 640,
+        "height": 200,
+        "marks": [
+            {
+                "x": 0.0172,
+                "y": 0.0225,
+                "w": 0.1921,
+                "h": 0.23,
+                "label": "Back to your documents",
+                "side": "below"
+            }
+        ]
+    },
+    "start-dock": {
+        "width": 678,
+        "height": 142,
+        "marks": [
+            {
+                "x": 0.0977,
+                "y": 0.4648,
+                "w": 0.0796,
+                "h": 0.3803,
+                "label": "New card",
+                "side": "above"
+            },
+            {
+                "x": 0.1655,
+                "y": 0.4648,
+                "w": 0.171,
+                "h": 0.3803,
+                "label": "Thoughts",
+                "side": "below"
+            },
+            {
+                "x": 0.3247,
+                "y": 0.4648,
+                "w": 0.2076,
+                "h": 0.3803,
+                "label": "Checklist",
+                "side": "above"
+            },
+            {
+                "x": 0.5205,
+                "y": 0.4648,
+                "w": 0.1402,
+                "h": 0.3803,
+                "label": "Drafts",
+                "side": "below"
+            },
+            {
+                "x": 0.6651,
+                "y": 0.4648,
+                "w": 0.1694,
+                "h": 0.3803,
+                "label": "Word count",
+                "side": "above"
+            },
+            {
+                "x": 0.8227,
+                "y": 0.4648,
+                "w": 0.0796,
+                "h": 0.3803,
+                "label": "Hide",
+                "side": "below"
+            }
+        ]
+    },
+    "start-library": {
+        "width": 1280,
+        "height": 900,
+        "marks": [
+            {
+                "x": 0.0211,
+                "y": 0.1189,
+                "w": 0.2148,
+                "h": 0.0689,
+                "label": "New document",
+                "side": "right"
+            }
+        ]
+    },
+    "start-new": {
+        "width": 1280,
+        "height": 900,
+        "marks": [
+            {
+                "x": 0.4554,
+                "y": 0.005,
+                "w": 0.0892,
+                "h": 0.0511,
+                "label": "Document title",
+                "side": "below"
+            },
+            {
+                "x": 0.2109,
+                "y": 0.1133,
+                "w": 0.5781,
+                "h": 0.3778,
+                "label": "Your page: click here and type",
+                "side": "below"
+            }
+        ]
+    },
+    "start-phone": {
+        "width": 390,
+        "height": 780,
+        "marks": [
+            {
+                "x": 0.4803,
+                "y": 0.891,
+                "w": 0.4812,
+                "h": 0.0846,
+                "label": "New document",
+                "side": "above"
+            }
+        ]
+    },
+    "start-rename": {
+        "width": 780,
+        "height": 190,
+        "marks": [
+            {
+                "x": 0.3269,
+                "y": 0.0237,
+                "w": 0.3051,
+                "h": 0.2421,
+                "label": "Type a name, then press Enter",
+                "side": "below"
+            }
+        ]
+    },
+    "start-saved": {
+        "width": 640,
+        "height": 200,
+        "marks": [
+            {
+                "x": 0.6732,
+                "y": 0.075,
+                "w": 0.0955,
+                "h": 0.125,
+                "label": "Saved",
+                "side": "below"
+            }
+        ]
+    }
+}
