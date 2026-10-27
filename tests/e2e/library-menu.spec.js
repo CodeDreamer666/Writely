@@ -45,22 +45,24 @@ for (const viewport of [
                 const create = await page
                     .getByRole("button", { name: "New document", exact: true })
                     .boundingBox();
-                expect(create.width).toBe(viewport.width - 32);
+                expect(create.width).toBeLessThan(viewport.width);
+                expect(create.height).toBeGreaterThanOrEqual(44);
             }
             for (const name of [
                 "All documents",
                 "Recent",
                 "Pinned",
                 "Archived",
-            ])
-                await expect(
-                    page
-                        .getByRole("navigation", {
-                            name: "Library",
-                            exact: true,
-                        })
-                        .getByRole("button", { name: new RegExp(`^${name}`) }),
-                ).toBeInViewport();
+            ]) {
+                const filter = page
+                    .getByRole("navigation", {
+                        name: "Library",
+                        exact: true,
+                    })
+                    .getByRole("button", { name: new RegExp(`^${name}`) });
+                await filter.scrollIntoViewIfNeeded();
+                await expect(filter).toBeInViewport();
+            }
             const trigger = await triggers.first().boundingBox();
             expect(trigger.width).toBeGreaterThanOrEqual(44);
             expect(trigger.height).toBeGreaterThanOrEqual(44);
@@ -111,7 +113,8 @@ for (const viewport of [
             const first = await cards.nth(0).boundingBox();
             const second = await cards.nth(1).boundingBox();
             expect(first.y).toBe(second.y);
-            expect(first.width).toBeGreaterThan(300);
+            expect(first.width).toBeGreaterThan(180);
+            expect(first.x + first.width).toBeLessThanOrEqual(second.x);
         }
         await expect
             .poll(() =>

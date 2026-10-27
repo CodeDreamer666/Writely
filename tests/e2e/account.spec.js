@@ -48,6 +48,7 @@ test("a new account can be created from the sign-in page and starts with the sam
     ).toContainText("The bus was almost empty");
     await expect(page.locator(".document-row")).toHaveCount(3);
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await page.getByRole("button", { name: "Account", exact: true }).click();
     await expect(page.locator(".account-details")).toContainText("Sam Writer");
     expect(errors).toEqual([]);
     await context.close();
@@ -64,6 +65,7 @@ test("settings shows the account; logging out and back in keeps the writing", as
     await editor.press("Control+End");
     await page.keyboard.type(" Kept across sessions.");
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await page.getByRole("button", { name: "Account", exact: true }).click();
     await expect(page.locator(".account-details")).toContainText(account.name);
     await expect(page.locator(".account-details")).toContainText(account.email);
     await page.getByRole("button", { name: "Log out", exact: true }).click();
@@ -134,6 +136,7 @@ test("deleting the account needs confirmation and removes it", async ({
 }) => {
     await openSample(page);
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await page.getByRole("button", { name: "Account", exact: true }).click();
     await page
         .getByRole("button", { name: "Delete account", exact: true })
         .click();

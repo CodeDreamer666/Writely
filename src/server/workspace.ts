@@ -1,4 +1,4 @@
-import type { Prisma } from "../../generated/prisma/client";
+import { Prisma } from "../../generated/prisma/client";
 import { makeDoc } from "~/lib/writely/model";
 import {
     countWords,
@@ -13,9 +13,6 @@ import type {
 } from "~/lib/writely/types";
 import type { WorkspaceChangesInput } from "~/server/api/routers/workspace";
 import { db } from "~/server/db";
-
-type Transaction = Prisma.TransactionClient;
-const json = (value: unknown) => value as Prisma.InputJsonValue;
 
 // Each user's saves run one after another, and loading waits for them, so a page reloaded during a
 // save always sees it. Kept on globalThis so API routes and pages share it.
@@ -109,15 +106,17 @@ export async function loadWorkspace(
 }
 
 /**
- * What: How long, in milliseconds, database transactions may wait to start
- * (maxWait) and run (timeout). Each change is its own round trip to a
- * remote database, so a whole workspace can outlast Prisma's 5s default.
+ * What: How long, in milliseconds, the transaction that creates a new
+ * account's workspace may wait to start (maxWait) and run (timeout). Each
+ * step is a round trip to a remote database, so it can outlast Prisma's 5s
+ * default on a slow connection.
  *
  * Used in:
- * - src/server/workspace.ts (ensureWorkspace, createDocuments, saveWorkspace)
+ * - src/server/workspace.ts (ensureWorkspace)
  *
- * Effect: Raising them lets very large saves finish on slow connections.
- * Lowering them makes slow saves fail sooner with an error.
+ * Effect: Raising them lets a first visit finish on slow connections.
+ * Lowering them makes slow first visits fail sooner with an error. Saves
+ * don't use it: each one is one or two statements (see applyChanges).
  */
 const TRANSACTION_OPTIONS = { maxWait: 10_000, timeout: 30_000 };
 
@@ -129,9 +128,13 @@ export async function ensureWorkspace(userId: string) {
     const existing = await db.workspace.findUnique({ where: { userId } });
     if (existing) return existing;
     await db.$transaction(async (tx) => {
-        // A concurrent first visit may already have created it.
-        if (await tx.workspace.findUnique({ where: { userId } })) return;
-        await tx.workspace.create({ data: { userId } });
+        // The welcome page and its API calls can arrive together. Let PostgreSQL arbitrate
+        // creation atomically; a read followed by create races across requests and instances.
+        const inserted = await tx.workspace.createMany({
+            data: [{ userId }],
+            skipDuplicates: true,
+        });
+        if (!inserted.count) return;
         await tx.revisionGoal.createMany({
             data: DEFAULT_GOAL_TEXTS.map((text, position) => ({
                 id: crypto.randomUUID(),
@@ -167,21 +170,11 @@ export function createDocuments(
     userId: string,
     docs: NonNullable<WorkspaceChangesInput["documents"]>,
 ) {
-    return queueSave(userId, () =>
-        db.$transaction(
-            (tx) => applyChanges(tx, userId, { documents: docs }),
-            TRANSACTION_OPTIONS,
-        ),
-    );
+    return queueSave(userId, () => applyChanges(userId, { documents: docs }));
 }
 
 export function saveWorkspace(userId: string, changes: WorkspaceChangesInput) {
-    return queueSave(userId, () =>
-        db.$transaction(
-            (tx) => applyChanges(tx, userId, changes),
-            TRANSACTION_OPTIONS,
-        ),
-    );
+    return queueSave(userId, () => applyChanges(userId, changes));
 }
 
 /** Runs a write after the user's earlier saves, so loads and saves see a consistent order. */
@@ -196,157 +189,220 @@ export function queueSave<T>(userId: string, write: () => Promise<T>) {
     return save;
 }
 
-async function applyChanges(
-    tx: Transaction,
-    userId: string,
-    changes: WorkspaceChangesInput,
-) {
-    const { documents = [], deleted = [], order } = changes;
-    if (deleted.length)
-        await tx.document.deleteMany({
-            where: { userId, id: { in: deleted } },
-        });
+// TIMESTAMP(3) columns hold UTC without a zone, as Prisma writes them.
+const utc = (ms: number) => new Date(ms).toISOString().slice(0, -1);
+const jsonb = (value: unknown) => Prisma.sql`${JSON.stringify(value)}::jsonb`;
+const cte = (name: string, body: Prisma.Sql) =>
+    Prisma.sql`${Prisma.raw(`"${name}"`)} AS (${body})`;
 
+/**
+ * Applies a save in as few round trips as possible, so autosave stays quick on a slow or distant
+ * database: documents with their drafts, checks and cards, deletions, order, writing activity and
+ * workspace settings go in one statement. Changed universal goals add a second, and both then run
+ * in one transaction. A single statement is atomic on its own.
+ *
+ * Collections are replaced whole when sent (delete and insert in the same statement), and each
+ * row's position is its index in the list, so card and draft order is kept.
+ */
+async function applyChanges(userId: string, changes: WorkspaceChangesInput) {
+    const { documents = [], deleted = [], order, goals } = changes;
     const positions = new Map(order?.map((id, i) => [id, i]));
-    // Words added across these documents, for the library's "Writing this week".
-    const before = new Map(
-        (
-            await tx.document.findMany({
-                where: { userId, id: { in: documents.map((doc) => doc.id) } },
-                select: { id: true, wordCount: true },
-            })
-        ).map((doc) => [doc.id, doc.wordCount]),
-    );
-    let wordsAdded = 0;
-    for (const doc of documents) {
+    const rows = documents.map((doc) => {
         const plainText = htmlToPlainText(doc.html);
-        wordsAdded += Math.max(
-            0,
-            countWords(plainText) - (before.get(doc.id) ?? 0),
-        );
-        const fields = {
+        return {
+            id: doc.id,
             title: doc.title,
             html: doc.html,
             plainText,
             wordCount: countWords(plainText),
             hidden: doc.hidden,
             session: doc.session ? JSON.stringify(doc.session) : null,
-            universalProgress: json(doc.universalProgress ?? {}),
-            updated: new Date(doc.updated),
-        };
-        const { key: documentKey } = await tx.document.upsert({
-            where: { userId_id: { userId, id: doc.id } },
-            create: {
-                id: doc.id,
-                userId,
-                position: positions.get(doc.id) ?? 0,
-                ...fields,
-            },
-            update: fields,
-            select: { key: true },
-        });
-        if (doc.drafts) {
-            await tx.draft.deleteMany({ where: { documentKey } });
-            await tx.draft.createMany({
-                data: doc.drafts.map((draft, position) => ({
-                    id: draft.id,
-                    documentKey,
-                    position,
-                    name: draft.name,
-                    title: draft.title,
-                    html: draft.html,
-                    time: new Date(draft.time),
-                    goal: draft.goal ?? null,
-                    baseline: draft.baseline ?? null,
-                })),
-            });
-        }
-        if (doc.checks) {
-            await tx.check.deleteMany({ where: { documentKey } });
-            await tx.check.createMany({
-                data: doc.checks.map((check, position) => ({
-                    id: check.id,
-                    documentKey,
-                    position,
-                    text: check.text,
-                    done: check.done,
-                    sourceDefaultId: check.sourceDefaultId ?? null,
-                })),
-            });
-        }
-        if (doc.cards) {
-            await tx.card.deleteMany({ where: { documentKey } });
-            await tx.card.createMany({
-                data: doc.cards.map(({ id, ...data }, position) => ({
-                    id,
-                    documentKey,
-                    position,
-                    data: json(data),
-                })),
-            });
-        }
-    }
-
-    if (order) {
-        for (const [position, id] of order.entries())
-            await tx.document.updateMany({
-                where: { userId, id },
-                data: { position },
-            });
-    }
-
-    if (changes.goals) {
-        // The editor holds one document, so revisions in other documents that used a removed
-        // universal goal are closed here.
-        const kept = new Set(
-            changes.goals.map((goal) => "universal:" + goal.id),
-        );
-        const open = await tx.document.findMany({
-            where: { userId, session: { not: null } },
-            select: { key: true, session: true },
-        });
-        for (const doc of open) {
-            const { checkId } = JSON.parse(doc.session!) as RevisionSession;
-            if (checkId.startsWith("universal:") && !kept.has(checkId))
-                await tx.document.update({
-                    where: { key: doc.key },
-                    data: { session: null },
-                });
-        }
-        await tx.revisionGoal.deleteMany({ where: { userId } });
-        await tx.revisionGoal.createMany({
-            data: changes.goals.map((goal, position) => ({
-                id: goal.id,
-                userId,
-                text: goal.text,
-                position,
+            universalProgress: doc.universalProgress ?? {},
+            updated: utc(doc.updated),
+            position: positions.get(doc.id) ?? null,
+            drafts: doc.drafts?.map((draft) => ({
+                ...draft,
+                time: utc(draft.time),
             })),
-        });
-    }
-
-    if (changes.activityDay)
-        await tx.writingDay.upsert({
-            where: { userId_day: { userId, day: changes.activityDay } },
-            create: { userId, day: changes.activityDay, words: wordsAdded },
-            update: { words: { increment: wordsAdded } },
-        });
-
-    if (
-        changes.active !== undefined ||
-        changes.nextThoughtColour !== undefined
-    ) {
-        const settings = {
-            ...(changes.nextThoughtColour !== undefined && {
-                nextThoughtColour: changes.nextThoughtColour,
-            }),
-            ...(changes.active !== undefined && {
-                activeDocumentId: changes.active,
-            }),
+            checks: doc.checks,
+            cards: doc.cards,
         };
-        await tx.workspace.upsert({
-            where: { userId },
-            create: { userId, ...settings },
-            update: settings,
-        });
+    });
+
+    const steps: Prisma.Sql[] = [];
+    if (deleted.length)
+        steps.push(
+            cte(
+                "gone",
+                Prisma.sql`DELETE FROM "Document" WHERE "userId" = ${userId}
+                    AND "id" IN (SELECT jsonb_array_elements_text(${jsonb(deleted)}))`,
+            ),
+        );
+
+    if (rows.length) {
+        steps.push(
+            cte(
+                "input",
+                Prisma.sql`SELECT d.value AS v, d.value->>'id' AS id
+                    FROM jsonb_array_elements(${jsonb(rows)}) AS d(value)`,
+            ),
+            // Word counts before this save; the statement's snapshot doesn't see its own writes.
+            cte(
+                "old",
+                Prisma.sql`SELECT "id", "wordCount" FROM "Document"
+                    WHERE "userId" = ${userId} AND "id" IN (SELECT id FROM "input")`,
+            ),
+            cte(
+                "up",
+                Prisma.sql`INSERT INTO "Document" ("key", "id", "userId", "position", "title", "html",
+                        "plainText", "wordCount", "hidden", "session", "universalProgress", "updated")
+                    SELECT gen_random_uuid()::text, id, ${userId}, coalesce((v->>'position')::int, 0),
+                        v->>'title', v->>'html', v->>'plainText', (v->>'wordCount')::int,
+                        (v->>'hidden')::boolean, v->>'session', v->'universalProgress',
+                        (v->>'updated')::timestamp(3)
+                    FROM "input"
+                    ON CONFLICT ("userId", "id") DO UPDATE SET
+                        "title" = EXCLUDED."title",
+                        "html" = EXCLUDED."html",
+                        "plainText" = EXCLUDED."plainText",
+                        "wordCount" = EXCLUDED."wordCount",
+                        "hidden" = EXCLUDED."hidden",
+                        "session" = EXCLUDED."session",
+                        "universalProgress" = EXCLUDED."universalProgress",
+                        "updated" = EXCLUDED."updated",
+                        "position" = coalesce(
+                            (SELECT (v->>'position')::int FROM "input" WHERE id = EXCLUDED."id"),
+                            "Document"."position")
+                    RETURNING "key", "id", "wordCount"`,
+            ),
+            cte(
+                "saved",
+                Prisma.sql`SELECT "up"."key", "input".v FROM "up" JOIN "input" ON "input".id = "up"."id"`,
+            ),
+        );
+        // Replaces a collection of each saved document that sent one (drafts, checks or cards).
+        const replace = (
+            field: string,
+            table: string,
+            columns: string,
+            values: Prisma.Sql,
+        ) => {
+            const key = Prisma.raw(`'${field}'`);
+            const sent = Prisma.sql`jsonb_typeof(s.v->${key}) = 'array'`;
+            steps.push(
+                cte(
+                    `${field}_gone`,
+                    Prisma.sql`DELETE FROM ${Prisma.raw(`"${table}"`)} WHERE "documentKey" IN
+                        (SELECT s."key" FROM "saved" s WHERE ${sent})`,
+                ),
+                cte(
+                    `${field}_new`,
+                    Prisma.sql`INSERT INTO ${Prisma.raw(`"${table}"`)}
+                        ("key", "id", "documentKey", "position", ${Prisma.raw(columns)})
+                        SELECT gen_random_uuid()::text, e.value->>'id', s."key", (e.ord - 1)::int, ${values}
+                        FROM "saved" s
+                        CROSS JOIN LATERAL jsonb_array_elements(s.v->${key}) WITH ORDINALITY AS e(value, ord)
+                        WHERE ${sent}`,
+                ),
+            );
+        };
+        replace(
+            "drafts",
+            "Draft",
+            `"name", "title", "html", "time", "goal", "baseline"`,
+            Prisma.sql`e.value->>'name', e.value->>'title', e.value->>'html',
+                (e.value->>'time')::timestamp(3), e.value->>'goal', e.value->>'baseline'`,
+        );
+        replace(
+            "checks",
+            "Check",
+            `"text", "done", "sourceDefaultId"`,
+            Prisma.sql`e.value->>'text', (e.value->>'done')::boolean, e.value->>'sourceDefaultId'`,
+        );
+        // A card's id has its own column; everything else about it is kept as one record.
+        replace("cards", "Card", `"data"`, Prisma.sql`e.value - 'id'`);
     }
+
+    if (order)
+        // Documents saved above take their position in the upsert; a row may change once per statement.
+        steps.push(
+            cte(
+                "ordered",
+                Prisma.sql`UPDATE "Document" AS d SET "position" = (o.ord - 1)::int
+                    FROM jsonb_array_elements_text(${jsonb(order)}) WITH ORDINALITY AS o(id, ord)
+                    WHERE d."userId" = ${userId} AND d."id" = o.id
+                    ${rows.length ? Prisma.sql`AND o.id NOT IN (SELECT id FROM "input")` : Prisma.empty}`,
+            ),
+        );
+
+    // Words added across these documents, for the library's "Writing this week".
+    if (changes.activityDay) {
+        const words = rows.length
+            ? Prisma.sql`(SELECT coalesce(sum(greatest(0, "up"."wordCount" - coalesce("old"."wordCount", 0))), 0)::int
+                FROM "up" LEFT JOIN "old" ON "old"."id" = "up"."id")`
+            : Prisma.sql`0`;
+        steps.push(
+            cte(
+                "activity",
+                Prisma.sql`INSERT INTO "WritingDay" ("userId", "day", "words")
+                    VALUES (${userId}, ${changes.activityDay}, ${words})
+                    ON CONFLICT ("userId", "day") DO UPDATE SET "words" = "WritingDay"."words" + EXCLUDED."words"`,
+            ),
+        );
+    }
+
+    const settings = [
+        ...(changes.nextThoughtColour !== undefined
+            ? [
+                  [
+                      "nextThoughtColour",
+                      Prisma.sql`${changes.nextThoughtColour}::int`,
+                  ] as const,
+              ]
+            : []),
+        ...(changes.active !== undefined
+            ? [["activeDocumentId", Prisma.sql`${changes.active}`] as const]
+            : []),
+    ];
+    if (settings.length)
+        steps.push(
+            cte(
+                "settings",
+                Prisma.sql`INSERT INTO "Workspace" ("userId", ${Prisma.raw(settings.map(([column]) => `"${column}"`).join(", "))})
+                    VALUES (${userId}, ${Prisma.join(settings.map(([, value]) => value))})
+                    ON CONFLICT ("userId") DO UPDATE SET ${Prisma.raw(
+                        settings
+                            .map(
+                                ([column]) =>
+                                    `"${column}" = EXCLUDED."${column}"`,
+                            )
+                            .join(", "),
+                    )}`,
+            ),
+        );
+
+    const statements = steps.length
+        ? [Prisma.sql`WITH ${Prisma.join(steps, ",\n")} SELECT 1`]
+        : [];
+
+    if (goals)
+        // Runs after the documents, so a revision of a removed universal goal is closed even in a
+        // document saved above (the editor holds one document; this reaches all of them).
+        statements.push(Prisma.sql`WITH
+            "kept" AS (SELECT 'universal:' || g AS "checkId" FROM jsonb_array_elements_text(${jsonb(goals.map((goal) => goal.id))}) AS g),
+            "closed" AS (UPDATE "Document" SET "session" = NULL
+                WHERE "userId" = ${userId} AND "session" IS NOT NULL
+                AND ("session"::jsonb->>'checkId') LIKE 'universal:%'
+                AND ("session"::jsonb->>'checkId') NOT IN (SELECT "checkId" FROM "kept")),
+            "gone" AS (DELETE FROM "RevisionGoal" WHERE "userId" = ${userId}),
+            "added" AS (INSERT INTO "RevisionGoal" ("key", "id", "userId", "text", "position")
+                SELECT gen_random_uuid()::text, g.value->>'id', ${userId}, g.value->>'text', (g.ord - 1)::int
+                FROM jsonb_array_elements(${jsonb(goals)}) WITH ORDINALITY AS g(value, ord))
+            SELECT 1`);
+
+    if (statements.length === 1) await db.$queryRaw(statements[0]!);
+    else if (statements.length)
+        await db.$transaction(
+            statements.map((statement) => db.$queryRaw(statement)),
+        );
 }

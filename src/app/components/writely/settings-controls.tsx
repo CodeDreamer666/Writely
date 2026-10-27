@@ -9,7 +9,7 @@ import type {
 export const entries = <T extends object>(o: T) =>
     Object.entries(o) as [Extract<keyof T, string>, T[keyof T]][];
 
-/** A titled part of Settings: the title and its explanation on the left, the settings on the right. */
+/** A titled part of Settings, shown as the panel beside the section list: the title and its explanation above the settings. */
 export function SettingsSection({
     id,
     title,
@@ -25,23 +25,22 @@ export function SettingsSection({
     children: ReactNode;
 }) {
     return (
-        <section
-            aria-labelledby={id}
-            className="border-line grid grid-cols-[220px_minmax(0,1fr)] gap-x-12 gap-y-5 border-t py-10 first-of-type:border-t-0 max-[860px]:grid-cols-[minmax(0,1fr)]"
-        >
-            <div>
-                <h2
-                    id={id}
-                    className="font-serif text-[22px] leading-tight font-normal tracking-[-0.015em]"
-                >
-                    {title}
-                </h2>
-                {hint && (
-                    <p className="text-muted mt-2 text-[13px] leading-relaxed">
-                        {hint}
-                    </p>
-                )}
-                {action && <div className="mt-4">{action}</div>}
+        <section aria-labelledby={id} className="grid gap-y-7">
+            <div className="border-line flex items-end justify-between gap-x-6 gap-y-4 border-b pb-6 max-sm:flex-col max-sm:items-stretch">
+                <div className="max-w-[560px]">
+                    <h2
+                        id={id}
+                        className="font-serif text-[30px] leading-tight font-normal tracking-[-0.02em]"
+                    >
+                        {title}
+                    </h2>
+                    {hint && (
+                        <p className="text-muted mt-2 text-[13.5px] leading-relaxed">
+                            {hint}
+                        </p>
+                    )}
+                </div>
+                {action && <div className="shrink-0">{action}</div>}
             </div>
             <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-5">
                 {children}

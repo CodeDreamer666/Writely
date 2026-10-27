@@ -13,8 +13,6 @@ import {
     ChevronDown,
     ChevronRight,
     ChevronUp,
-    Compass,
-    GitCompareArrows,
     Globe,
     Eye,
     EyeOff,
@@ -47,7 +45,10 @@ import {
     selectionTarget,
     type SelectionSnapshot,
 } from "~/lib/writely/annotation-model";
-import { CardHighlights } from "~/lib/writely/editor/card-highlights";
+import {
+    CardHighlights,
+    setCardHighlights,
+} from "~/lib/writely/editor/card-highlights";
 import { ActiveBlocks } from "~/lib/writely/editor/active-blocks";
 import { EmptyDraftPlaceholder } from "~/lib/writely/editor/empty-draft-placeholder";
 import { documentExtensions } from "~/lib/writely/editor/document-extensions";
@@ -90,6 +91,8 @@ import {
 import { EmptyState } from "../empty-state";
 import { useDocumentExport } from "../use-document-export";
 import EditorHeader from "./editor-header";
+import { CompactCards } from "./compact-cards";
+import { useCompactLayout } from "./use-compact-layout";
 import { ShortcutsDialog } from "./shortcuts";
 import {
     ActionMenu,
@@ -165,6 +168,7 @@ export default function WritelyApp({
     };
 }) {
     const router = useRouter();
+    const compact = useCompactLayout();
     const [data, setData] = useState<WorkspaceData>(
         () =>
             tutorial?.initial ??
@@ -427,10 +431,24 @@ export default function WritelyApp({
     const addCard = () => {
         const id = uid();
         const y = Math.max(64, (workspace.current?.scrollTop ?? 0) + 96);
-        setData((data) => addThought(data, id, y));
+        setData((data) => {
+            const next = addThought(data, id, y);
+            const target =
+                compact && editor
+                    ? selectionTarget(editor.state.doc, connectionSelection)
+                    : null;
+            if (target) {
+                const card = next.docs
+                    .find((d) => d.id === next.active)
+                    ?.cards.find((c) => c.id === id);
+                if (card) card.connectors = [{ id: uid(), target }];
+            }
+            return next;
+        });
+        if (compact) setConnectionSelection(null);
         setSelected(id);
         setEditingCard(id);
-        setPanel(null);
+        setPanel(compact ? "thoughts" : null);
         setModal(null);
     };
     const deleteCard = (id: string) => {
@@ -567,6 +585,37 @@ export default function WritelyApp({
     const toggle = (next: Panel) => setPanel(panel === next ? null : next);
     // Picking a thought in the list brings its card back onto the page and scrolls to it.
     const revealCard = (card: Card) => {
+        if (compact) {
+            setPanel(null);
+            setEditingCard(null);
+            setSelected(card.id);
+            const target = card.connectors?.[0]?.target;
+            if (editor && target && !target.orphaned) {
+                const position = target.kind === "essay" ? 0 : target.from;
+                if (
+                    position !== undefined &&
+                    position <= editor.state.doc.content.size
+                ) {
+                    requestAnimationFrame(() => {
+                        if (editor.isDestroyed || !workspace.current) return;
+                        const top = editor.view.coordsAtPos(position).top;
+                        const bounds =
+                            workspace.current.getBoundingClientRect();
+                        workspace.current.scrollTo({
+                            top: Math.max(
+                                0,
+                                workspace.current.scrollTop +
+                                    top -
+                                    bounds.top -
+                                    72,
+                            ),
+                            behavior: "auto",
+                        });
+                    });
+                }
+            }
+            return;
+        }
         if (doc.hidden) update({ hidden: false });
         setPanel(null);
         setSelected(card.id);
@@ -578,6 +627,30 @@ export default function WritelyApp({
                 behavior: smooth ? "smooth" : "auto",
             }),
         );
+    };
+
+    useEffect(() => {
+        if (!compact) return;
+        setCardHighlights(
+            editor,
+            selected ? doc.cards.filter((card) => card.id === selected) : [],
+            selected,
+        );
+        return () => setCardHighlights(editor);
+    }, [compact, editor, doc.cards, selected]);
+
+    const attachCompactCard = (card: Card) => {
+        const target =
+            editor && selectionTarget(editor.state.doc, connectionSelection);
+        if (!target) {
+            setConnectionSelection(null);
+            setNotice("Select words in the document to attach a card.");
+            return;
+        }
+        const attached = { ...card, connectors: [{ id: uid(), target }] };
+        patchCard(card.id, { connectors: attached.connectors });
+        setConnectionSelection(null);
+        revealCard(attached);
     };
 
     return (
@@ -598,16 +671,17 @@ export default function WritelyApp({
                         focusMode={focusMode}
                         onToggleFocusMode={toggleFocusMode}
                         onShortcuts={() => setShortcutsOpen(true)}
+                        compact={compact}
+                        onCards={() => {
+                            setEditingCard(null);
+                            setPanel("thoughts");
+                        }}
+                        onRetrySave={autosave.retry}
+                        onDrafts={() => toggle("drafts")}
+                        onGoals={() => toggle("checklist")}
                         title={doc.title}
                         onRename={(title) => update({ title })}
-                        status={
-                            tutorial
-                                ? null
-                                : autosave.status === "saving" ||
-                                    autosave.status === "error"
-                                  ? autosave.status
-                                  : "saved"
-                        }
+                        status={tutorial ? null : autosave.status}
                         onBack={() =>
                             tutorial ? tutorial.onExit() : void leaveTo("/")
                         }
@@ -656,95 +730,22 @@ export default function WritelyApp({
                                                 );
                                                 setSelected(null);
                                                 setEditingCard(null);
-                                                setPanel(null);
+                                                setPanel(
+                                                    compact ? "thoughts" : null,
+                                                );
                                                 if (doc.hidden)
                                                     update({ hidden: false });
                                             }}
                                         />
                                     )}
                                     <EditorContent editor={editor} />
-                                    {!statistics.words && !doc.cards.length && (
-                                        <div
-                                            className="blank-start grid [animation:appear_300ms_ease-out] grid-cols-3 gap-2 motion-reduce:animate-none max-md:grid-cols-1"
-                                            aria-label="Ways to begin"
-                                        >
-                                            {(
-                                                [
-                                                    [
-                                                        StickyNote,
-                                                        "Jot a thought",
-                                                        "A note beside the page",
-                                                        addCard,
-                                                    ],
-                                                    [
-                                                        Target,
-                                                        "Set a goal",
-                                                        "What should this draft do?",
-                                                        openRevisionGoal,
-                                                    ],
-                                                    ...(tutorial
-                                                        ? []
-                                                        : [
-                                                              [
-                                                                  Compass,
-                                                                  "Take the tour",
-                                                                  "Two minutes, hands-on",
-                                                                  () =>
-                                                                      void leaveTo(
-                                                                          "/tutorial",
-                                                                      ),
-                                                              ],
-                                                          ]),
-                                                ] as [
-                                                    typeof Plus,
-                                                    string,
-                                                    string,
-                                                    () => void,
-                                                ][]
-                                            ).map(
-                                                ([
-                                                    Icon,
-                                                    name,
-                                                    hint,
-                                                    action,
-                                                ]) => (
-                                                    <button
-                                                        key={name}
-                                                        type="button"
-                                                        onClick={action}
-                                                        className="group border-line! hover:bg-surface! h-auto! min-w-0! items-center! justify-start! gap-3! rounded-xl! border! bg-transparent! px-3! py-2.5! text-left! font-normal! shadow-none! hover:border-[var(--control-focus)]!"
-                                                    >
-                                                        <span
-                                                            aria-hidden="true"
-                                                            className="bg-tint text-accent flex size-8 shrink-0 items-center justify-center rounded-lg"
-                                                        >
-                                                            <Icon
-                                                                size={15}
-                                                                strokeWidth={
-                                                                    1.7
-                                                                }
-                                                            />
-                                                        </span>
-                                                        <span className="min-w-0">
-                                                            <span className="text-ink block truncate text-[13px] font-medium">
-                                                                {name}
-                                                            </span>
-                                                            <span className="text-muted block truncate text-[11.5px]">
-                                                                {hint}
-                                                            </span>
-                                                        </span>
-                                                    </button>
-                                                ),
-                                            )}
-                                        </div>
-                                    )}
                                     <div
                                         className="endmark bg-line mt-10 h-px w-6"
                                         aria-hidden="true"
                                     />
                                 </article>
                             )}
-                            {!comparison && editor && (
+                            {!comparison && editor && !compact && (
                                 <Annotations
                                     key={doc.id}
                                     editor={editor}
@@ -772,8 +773,31 @@ export default function WritelyApp({
                         </main>
                     </div>
 
+                    {compact && (
+                        <CompactCards
+                            open={panel === "thoughts"}
+                            onClose={() => {
+                                setPanel(null);
+                                setEditingCard(null);
+                                setConnectionSelection(null);
+                            }}
+                            cards={doc.cards}
+                            editing={editingCard}
+                            onEdit={setEditingCard}
+                            onPatch={patchCard}
+                            onDelete={deleteCard}
+                            onAdd={addCard}
+                            onReveal={revealCard}
+                            connecting={!!connectionSelection}
+                            onAttach={attachCompactCard}
+                            onCancelConnection={() =>
+                                setConnectionSelection(null)
+                            }
+                            smartPunctuation={preferences.smartPunctuation}
+                        />
+                    )}
                     <Drawer
-                        open={panel === "thoughts"}
+                        open={!compact && panel === "thoughts"}
                         title="Thoughts"
                         onClose={() => setPanel(null)}
                         actions={
@@ -1094,22 +1118,11 @@ export default function WritelyApp({
                         {!doc.drafts.length && (
                             <EmptyState
                                 compact
+                                inlineHeader
                                 className="mt-5"
                                 icon={History}
                                 title="No named drafts yet"
                                 body="Your working text is always autosaved. Name a draft to keep a version you can return to."
-                                cards={[
-                                    {
-                                        icon: Save,
-                                        title: "Mark a milestone",
-                                        text: "Save before a big rewrite so nothing is lost.",
-                                    },
-                                    {
-                                        icon: GitCompareArrows,
-                                        title: "Compare any two",
-                                        text: "See exactly what changed between versions.",
-                                    },
-                                ]}
                             />
                         )}
                         <ol

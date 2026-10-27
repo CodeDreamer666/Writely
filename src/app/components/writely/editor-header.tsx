@@ -66,6 +66,11 @@ export default function EditorHeader({
     focusMode,
     onToggleFocusMode,
     onShortcuts,
+    compact = false,
+    onCards,
+    onDrafts,
+    onGoals,
+    onRetrySave,
 }: {
     title: string;
     onRename?: (title: string) => void;
@@ -79,6 +84,11 @@ export default function EditorHeader({
     focusMode: boolean;
     onToggleFocusMode: () => void;
     onShortcuts: () => void;
+    compact?: boolean;
+    onCards?: () => void;
+    onDrafts?: () => void;
+    onGoals?: () => void;
+    onRetrySave?: () => void;
 }) {
     const history = useEditorState({
         editor,
@@ -164,6 +174,14 @@ export default function EditorHeader({
                         <span className="max-md:sr-only">{STATUS[status]}</span>
                     </span>
                 )}
+                {status === "error" && (
+                    <button
+                        className="retry-save text-danger! min-h-9! px-2! text-xs!"
+                        onClick={onRetrySave}
+                    >
+                        Retry
+                    </button>
+                )}
                 <span aria-hidden="true" className="bg-line mx-1 h-4 w-px" />
                 <Button
                     icon={Undo2}
@@ -196,6 +214,22 @@ export default function EditorHeader({
                         ) : undefined
                     }
                     items={[
+                        ...(compact
+                            ? [
+                                  {
+                                      label: "Cards",
+                                      onSelect: () => onCards?.(),
+                                  },
+                                  {
+                                      label: "Saved drafts",
+                                      onSelect: () => onDrafts?.(),
+                                  },
+                                  {
+                                      label: "Revision goals",
+                                      onSelect: () => onGoals?.(),
+                                  },
+                              ]
+                            : []),
                         ...(onExport
                             ? [
                                   {

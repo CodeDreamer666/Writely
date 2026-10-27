@@ -38,6 +38,7 @@ import { highlightParts } from "~/lib/writely/plain-text";
 import type { Preferences } from "~/lib/writely/preferences";
 import type {
     DocumentFilter,
+    DocumentSort,
     DocumentSummary,
 } from "~/server/documents";
 import { api } from "~/trpc/react";
@@ -78,6 +79,23 @@ const FILTERS: [DocumentFilter, string, LucideIcon][] = [
     ["recent", "Recent", Clock],
     ["pinned", "Pinned", Pin],
     ["archived", "Archived", Archive],
+];
+
+/**
+ * What: The sort menu choices, as the sort name and the label shown.
+ *
+ * Used in:
+ * - src/app/components/library/library.tsx (Library)
+ *
+ * Effect: Changes the labels or order of the sort menu. Each name must also
+ * be in DOCUMENT_SORTS in src/config/documents.ts. The first one is the
+ * default and is left out of the address.
+ */
+const SORTS: [DocumentSort, string][] = [
+    ["updated-desc", "Last edited"],
+    ["updated-asc", "Oldest edited"],
+    ["created-desc", "Date created"],
+    ["title-asc", "Title A–Z"],
 ];
 
 function Highlighted({ text, terms }: { text: string; terms: string[] }) {
@@ -124,6 +142,8 @@ export default function Library({
     const view = preferences.libraryView;
     const filter =
         FILTERS.find(([f]) => f === params.get("filter"))?.[0] ?? "all";
+    const sort =
+        SORTS.find(([s]) => s === params.get("sort"))?.[0] ?? SORTS[0]![0];
     const [input, setInput] = useState(params.get("q") ?? "");
     const query = params.get("q") ?? "";
 
@@ -154,7 +174,7 @@ export default function Library({
 
     const utils = api.useUtils();
     const list = api.documents.list.useInfiniteQuery(
-        { query, filter, limit: 30 },
+        { query, filter, sort, limit: 30 },
         {
             getNextPageParam: (page) => page.nextOffset,
             placeholderData: keepPreviousData,
@@ -346,7 +366,7 @@ export default function Library({
 
     return (
         <Tooltip.Provider delayDuration={450}>
-            <div className="bg-paper text-ink min-h-dvh">
+            <div className="library bg-paper text-ink min-h-dvh">
                 <AppHeader
                     search={
                         <div role="search" className="relative">
@@ -502,7 +522,33 @@ export default function Library({
                                 )}
                             </div>
                             {!!items.length && (
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3 max-sm:w-full max-sm:gap-2">
+                                    <label
+                                        className="sr-only"
+                                        htmlFor="library-sort"
+                                    >
+                                        Sort by
+                                    </label>
+                                    <select
+                                        id="library-sort"
+                                        value={sort}
+                                        onChange={(e) =>
+                                            setParams({
+                                                sort:
+                                                    e.target.value ===
+                                                    SORTS[0]![0]
+                                                        ? null
+                                                        : e.target.value,
+                                            })
+                                        }
+                                        className="border-line! bg-surface! h-[54px]! min-h-[54px]! w-auto! rounded-xl! py-2! pr-10! pl-4! text-[14px]! max-sm:h-12! max-sm:min-h-12! max-sm:min-w-0! max-sm:flex-1! max-sm:text-[16px]!"
+                                    >
+                                        {SORTS.map(([value, label]) => (
+                                            <option key={value} value={value}>
+                                                {label}
+                                            </option>
+                                        ))}
+                                    </select>
                                     <div
                                         role="radiogroup"
                                         aria-label="Layout"

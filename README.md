@@ -15,6 +15,7 @@ Built on the [T3 stack](https://create.t3.gg): Next.js (App Router), TypeScript,
 - Universal revision goals managed in Settings, with independent completion for each manuscript and separate manuscript-specific goals.
 - Movable thought cards with inline editing, collapsed leaf markers, and automatic pastel colours that cycle Yellow → Blue → Green → Pink. Double-click card text or use its pencil button to edit; click outside to save, or press Escape to cancel.
 - Select manuscript text and choose **Connect to thought**, then click a card to connect it. Each card has one visible connection; multiple cards can share a text range, with accurate arrows and overlapping highlights that follow edits.
+- Phones and iPads use a full-width editor without margin cards or arrows. Open **Document options (⋯) → Cards** to create and edit cards. Select words, open **More formatting → Connect to thought**, then choose an existing card or create one. Tap a card to scroll to and highlight its linked words. Laptop layouts keep spatial cards.
 - A full-page Settings view with account details, log out and account deletion.
 
 ## Run locally
@@ -28,7 +29,7 @@ npm run db:migrate     # creates the tables in your PostgreSQL database
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and create an account. A new account starts with the sample manuscripts.
+Open [http://localhost:3000](http://localhost:3000) and create an account. A new account starts at the welcome screen, where you can begin writing or explore a sample.
 
 The stack uses Next.js 16, React 19, Prisma 7 with its PostgreSQL driver adapter, Zod 4,
 Tailwind CSS 4, ESLint 10 and Vitest 5. TypeScript stays on the latest supported 6.0
@@ -43,7 +44,7 @@ your database provider. If the runtime connection uses a pooler, optionally set
 
 Prisma configuration lives in `prisma7.config.ts`. Run `npm run db:migrate` to apply
 the PostgreSQL migrations. For subsequent schema changes, use `npm run db:generate`
-to create a migration, then `npx prisma generate` to refresh the generated client.
+to create a migration, then `npm run postinstall` to refresh the generated client.
 
 Switching providers does not transfer existing SQLite data. The old
 `.data/db.sqlite` file is preserved; accounts and writing need a separate export
@@ -57,10 +58,16 @@ npm run start
 ```
 
 `BETTER_AUTH_SECRET` is required in production, and `BETTER_AUTH_URL` should be the app's public URL.
+Generate a secret with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+For local development, use `http://localhost:3000` as `BETTER_AUTH_URL`.
+Google sign-in is offered when both Google credentials are configured; register
+`<BETTER_AUTH_URL>/api/auth/callback/google` as an authorized redirect URI in Google Cloud.
+Password-reset emails use `RESEND_API_KEY` and a verified `EMAIL_FROM` sender.
+Without email credentials, development logs the reset code; production requires email delivery.
 
 ## Data and accounts
 
-Writing, saved versions, thought cards, revision goals and preferences belong to the signed-in account. Autosave sends only what changed since the last successful save. Until the server confirms a save, the latest changes are also kept in the browser, so a reload or a dropped connection doesn't lose writing.
+Writing, saved versions, thought cards, revision goals and preferences belong to the signed-in account. Autosave sends only what changed since the last successful save: after a short typing pause, or after five seconds of continuous typing. Until the server confirms a save, the latest changes are also kept in the browser. Failed saves retry automatically with backoff and when connectivity returns. The header shows Saving, Saved, or Not saved with a manual Retry action. Mobile backgrounding also sends a best-effort save; unconfirmed edits remain recoverable in the same browser.
 
 Writing created in the earlier browser-only prototype (stored in `localStorage` under `writely.local.v1`) moves into the first account created in that browser.
 
@@ -81,6 +88,7 @@ npm run typecheck
 npm run lint
 npm test            # Vitest unit tests for the editor models
 npm run test:e2e    # Playwright browser tests (uses an installed Google Chrome)
+npx playwright test tests/e2e/responsive-persistence.spec.js # phone/iPad cards, offline recovery and login
 ```
 
 The browser tests start `npm run dev` unless a server is already running; set `WRITELY_TEST_URL` to target another one. Each test signs up its own account. They run against the development server because production applies Better Auth's sign-up rate limit.

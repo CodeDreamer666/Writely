@@ -164,6 +164,13 @@ body {
     }
 }
 
+/* Tooltips only label buttons. A tooltip left open by keyboard focus must not catch clicks meant for
+   the control underneath it. */
+[data-radix-popper-content-wrapper]:has(> .tooltip),
+.tooltip {
+    pointer-events: none !important;
+}
+
 /* Tutorial coach marks: a soft ring on the real control the current step talks about. */
 .coach-target {
     box-shadow:
@@ -285,5 +292,208 @@ body {
 @keyframes caret-blink {
     50% {
         opacity: 0;
+    }
+}
+
+/* Phones and tablets use a full-width writing surface and touch-sized controls.
+   The pointer query includes landscape iPad Pro while preserving laptop styling. */
+@media (max-width: 1024px), (max-width: 1400px) and (pointer: coarse) {
+    .app {
+        height: var(--visual-height, 100dvh);
+    }
+    .app .paper {
+        width: calc(100% - 64px);
+        max-width: 760px;
+        padding-top: 32px;
+        overflow-wrap: anywhere;
+    }
+    .app .editor-header {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        padding-top: env(safe-area-inset-top);
+        height: calc(60px + env(safe-area-inset-top));
+    }
+    .app .editor-header > :nth-child(2) {
+        justify-content: flex-start;
+    }
+    .app .document-title {
+        font-size: 16px !important;
+    }
+    .app .workspace-tools {
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+        border-width: 1px 0 0;
+        padding-bottom: env(safe-area-inset-bottom);
+        box-shadow: none;
+    }
+    .app .workspace-tools #writing-tool-items {
+        justify-content: space-evenly;
+        width: 100%;
+        overflow-x: auto;
+    }
+    .app .dock-button {
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+    .app .canvas-tools-launcher {
+        bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    .app .drawer {
+        z-index: 21;
+        bottom: 0;
+        max-height: min(72dvh, calc(var(--visual-height, 100dvh) - 70px));
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .app .drawer-scrim {
+        z-index: 20;
+    }
+    .app #compact-cards {
+        width: min(640px, 100%);
+    }
+    .app .paper .tiptap {
+        font-size: min(var(--editor-font-size), 20px);
+    }
+    .app input,
+    .app textarea,
+    .library input {
+        font-size: 16px !important;
+    }
+    .library main {
+        padding-top: 24px;
+    }
+    .library main h1 {
+        font-size: 32px;
+    }
+    .library aside {
+        gap: 0;
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+    .library aside > button {
+        position: fixed;
+        right: max(20px, env(safe-area-inset-right));
+        bottom: calc(24px + env(safe-area-inset-bottom));
+        z-index: 14;
+        width: auto !important;
+        height: 56px !important;
+        border-radius: 18px !important;
+        padding-inline: 20px !important;
+    }
+    .library aside nav ul {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 8px;
+    }
+    .library aside nav li {
+        flex: 0 0 auto;
+    }
+    .library aside nav a {
+        min-height: 44px !important;
+    }
+    .library > div {
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+    }
+    .library aside {
+        border-right: 0;
+        padding-top: 16px;
+    }
+    .library aside > div {
+        display: none;
+    }
+}
+@media (max-width: 600px) {
+    .app .paper {
+        width: calc(100% - 36px);
+        padding-top: 24px;
+    }
+    .app .editor-header {
+        gap: 2px;
+        padding-inline: 4px;
+    }
+    .app .editor-header > :first-child span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+    .app .editor-header .save-status {
+        margin-right: 0;
+    }
+    .app .editor-header .save-status + span {
+        display: none;
+    }
+    .app .editor-header .document-title {
+        padding-inline: 4px !important;
+    }
+    .app .dock-button {
+        width: 44px !important;
+        padding-inline: 0 !important;
+    }
+    .app .dock-button > span:not([aria-hidden]) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+    .app .drawer {
+        width: 100%;
+        border-radius: 18px 18px 0 0;
+    }
+    .library main h1 {
+        font-size: 28px;
+    }
+}
+@media (min-width: 768px) and (max-width: 1024px),
+    (min-width: 768px) and (max-width: 1400px) and (pointer: coarse) {
+    .library > header {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+}
+
+/* Important Tailwind control sizes live in a layer; these touch overrides must as well. */
+@layer base {
+    @media (max-width: 1024px), (max-width: 1400px) and (pointer: coarse) {
+        .library aside > button {
+            width: auto !important;
+            height: 56px !important;
+            border-radius: 18px !important;
+            padding-inline: 20px !important;
+        }
+        .app input,
+        .app textarea,
+        .library input {
+            font-size: 16px !important;
+        }
+        .app .editor-header .document-title {
+            font-size: 16px !important;
+        }
+        .app .editor-header button {
+            min-height: 44px !important;
+            min-width: 44px !important;
+            height: 44px !important;
+        }
+        .app .editor-header .document-title {
+            min-width: 0 !important;
+        }
+        .library [aria-label^="Document actions:"] {
+            width: 44px !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            min-width: 44px !important;
+        }
+    }
+    @media (max-width: 1279px) {
+        .library [aria-label^="Document actions:"] {
+            width: 44px !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            min-width: 44px !important;
+        }
     }
 }

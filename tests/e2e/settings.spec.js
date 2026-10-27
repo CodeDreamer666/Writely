@@ -23,7 +23,7 @@ const settled = (page) =>
             response.ok(),
     );
 
-test("settings lists every section without a section menu and keeps writing and export choices", async ({
+test("settings shows one section at a time from the sidebar and keeps writing and export choices", async ({
     page,
 }) => {
     const errors = errorsFor(page);
@@ -32,9 +32,12 @@ test("settings lists every section without a section menu and keeps writing and 
     await expect(
         page.getByRole("heading", { name: "Settings", level: 1 }),
     ).toBeVisible();
-    await expect(
-        page.getByRole("navigation", { name: "Settings sections" }),
-    ).toHaveCount(0);
+    const sections = page.getByRole("navigation", {
+        name: "Settings sections",
+    });
+    await expect(page.getByRole("heading", { level: 2 })).toHaveText([
+        "Appearance",
+    ]);
     for (const name of [
         "Appearance",
         "Writing",
@@ -43,14 +46,26 @@ test("settings lists every section without a section menu and keeps writing and 
         "Keyboard shortcuts",
         "Help",
         "Account",
-    ])
-        await expect(
-            page.getByRole("heading", { name, level: 2, exact: true }),
-        ).toBeVisible();
+    ]) {
+        const button = sections.getByRole("button", { name, exact: true });
+        await button.click();
+        await expect(button).toHaveAttribute("aria-current", "page");
+        await expect(page.getByRole("heading", { level: 2 })).toHaveText([
+            name,
+        ]);
+    }
     await page.screenshot({
         path: "test-results/settings-desktop.png",
         fullPage: true,
     });
+    await page.reload();
+    await expect(page.getByRole("heading", { level: 2 })).toHaveText([
+        "Account",
+    ]);
+
+    await sections
+        .getByRole("button", { name: "Writing", exact: true })
+        .click();
 
     // Paragraph highlighting starts on and typewriter scrolling off.
     await expect(
@@ -66,9 +81,15 @@ test("settings lists every section without a section menu and keeps writing and 
     await page.getByRole("switch", { name: "Check spelling" }).click();
     await page.getByRole("switch", { name: "Smart punctuation" }).click();
     await page.getByRole("switch", { name: "Typewriter scrolling" }).click();
+    await sections
+        .getByRole("button", { name: "Appearance", exact: true })
+        .click();
     await page
         .getByRole("radiogroup", { name: "Paragraph spacing" })
         .getByRole("radio", { name: /Airy/ })
+        .click();
+    await sections
+        .getByRole("button", { name: "Document export", exact: true })
         .click();
     await page
         .getByRole("radiogroup", { name: "Paper size" })
@@ -92,7 +113,7 @@ test("settings lists every section without a section menu and keeps writing and 
         exportTitle: true,
     });
 
-    await page.reload();
+    await page.goto("/settings#writing");
     await expect(
         page.getByRole("switch", { name: "Paragraph highlighting" }),
     ).toHaveAttribute("aria-checked", "false");
@@ -113,30 +134,47 @@ test("settings lists every section without a section menu and keeps writing and 
     expect(errors).toEqual([]);
 });
 
-test("universal goals reorder and the new order reaches the editor", async ({
+test("universal goals can be added, edited and deleted, and are saved to the account", async ({
     page,
 }) => {
-    await openSample(page);
-    await page.goto("/settings");
+    test.setTimeout(60_000);
+    // A new account starts with the default universal goals.
+    await page.goto("/settings#checklist");
     const goals = page.locator("[data-goal]");
     await expect(goals).toHaveCount(3);
-    const first = await goals.nth(0).innerText();
+    const texts = async () =>
+        (await stored(page)).defaultRevisionGoals.map((goal) => goal.text);
+
+    await page.getByRole("button", { name: "Add goal" }).click();
+    await page.getByLabel("Goal", { exact: true }).fill("Read it out loud");
     await page
-        .getByRole("button", { name: `Move down: ${first.split("\n").at(-1)}` })
+        .getByRole("dialog")
+        .getByRole("button", { name: "Add goal" })
         .click();
-    await expect(goals.nth(1)).toContainText(first.split("\n").at(-1));
-    await expect
-        .poll(async () =>
-            (await stored(page)).defaultRevisionGoals.map((goal) => goal.text),
-        )
-        .toEqual([
-            "Remove repeated ideas",
-            "Improve the introduction",
-            "Find a quieter ending",
-        ]);
-    await expect(
-        page.getByRole("button", { name: "Move up: Remove repeated ideas" }),
-    ).toBeDisabled();
+    await expect(goals).toHaveCount(4);
+
+    await page
+        .getByRole("button", {
+            name: "Edit universal goal: Find a quieter ending",
+        })
+        .click();
+    await page.getByLabel("Goal", { exact: true }).fill("Find a softer ending");
+    await page.getByRole("button", { name: "Save goal" }).click();
+
+    await page
+        .getByRole("button", {
+            name: "Delete universal goal: Remove repeated ideas",
+        })
+        .click();
+    const expected = [
+        "Improve the introduction",
+        "Find a softer ending",
+        "Read it out loud",
+    ];
+    await expect.poll(texts, { timeout: 15_000 }).toEqual(expected);
+
+    await page.reload();
+    await expect(goals).toHaveText(expected.map((text) => new RegExp(text)));
 });
 
 test("focus mode, shortcuts, smart punctuation, the dock and card colours in the editor", async ({

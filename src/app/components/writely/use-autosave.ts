@@ -63,7 +63,7 @@ export function forgetUnsavedWorkspace(userId: string, documentId?: string) {
 
 /**
  * Saves the workspace shortly after each change, sending only what differs from the last
- * successful save. "saving" appears while edits keep arriving for more than half a second.
+ * successful save. Continuous typing saves at least every five seconds; failures retry with backoff.
  */
 export function useAutosave(
     data: WorkspaceData,
@@ -79,7 +79,12 @@ export function useAutosave(
         local?: string;
     },
 ) {
-    const { mutateAsync: saveToServer } = api.workspace.save.useMutation();
+    // This hook owns recovery. React Query's default offline pause would otherwise
+    // leave the header showing Saving indefinitely instead of reporting an unsaved copy.
+    const { mutateAsync: saveToServer } = api.workspace.save.useMutation({
+        networkMode: "always",
+        retry: false,
+    });
     const documentId = saved.active;
     const storageKey = local ?? unsavedKey(userId, documentId);
     const mutateAsync = async (changes: WorkspaceChanges) => {
@@ -95,13 +100,14 @@ export function useAutosave(
         callbacks = useRef({ mutateAsync, onSaved });
     latest.current = data;
     callbacks.current = { mutateAsync, onSaved };
-    const pending = useRef(false),
-        inFlight = useRef<Promise<void> | null>(null),
+    const inFlight = useRef<Promise<void> | null>(null),
         queued = useRef(false),
         alive = useRef(true);
     const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined),
-        delayTimer = useRef<ReturnType<typeof setTimeout>>(undefined),
+        maxTimer = useRef<ReturnType<typeof setTimeout>>(undefined),
+        retryTimer = useRef<ReturnType<typeof setTimeout>>(undefined),
         fadeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const failures = useRef(0);
 
     const keepLocally = useRef(() => {
         try {
@@ -113,13 +119,14 @@ export function useAutosave(
 
     const attempt = useRef((): Promise<void> => {
         clearTimeout(saveTimer.current);
+        clearTimeout(maxTimer.current);
+        maxTimer.current = undefined;
+        clearTimeout(retryTimer.current);
         if (inFlight.current) {
             queued.current = true;
             return inFlight.current;
         }
         const finish = () => {
-            clearTimeout(delayTimer.current);
-            pending.current = false;
             if (alive.current) {
                 setStatus("saved");
                 fadeTimer.current = setTimeout(() => setStatus("idle"), 1400);
@@ -133,29 +140,38 @@ export function useAutosave(
             return Promise.resolve();
         }
         keepLocally.current();
-        // As with the original local saves, "saving" marks a long run of edits, not a slow request.
-        clearTimeout(delayTimer.current);
-        pending.current = false;
+        if (alive.current) setStatus("saving");
         const request = callbacks.current.mutateAsync(changes).then(
             () => {
                 lastSaved.current = target;
+                failures.current = 0;
                 inFlight.current = null;
                 callbacks.current.onSaved?.();
-                // A save requested meanwhile goes out now; newer edits wait for their own pause.
-                if (queued.current) {
+                // Follow an in-flight request with any newer edits before reporting Saved.
+                if (
+                    queued.current ||
+                    workspaceChanges(target, latest.current)
+                ) {
                     queued.current = false;
                     return attempt.current();
                 }
-                if (latest.current !== target) return;
                 forget();
                 finish();
             },
             () => {
                 inFlight.current = null;
                 queued.current = false;
-                clearTimeout(delayTimer.current);
-                pending.current = false;
-                if (alive.current) setStatus("error");
+                keepLocally.current();
+                if (alive.current) {
+                    setStatus("error");
+                    retryTimer.current = setTimeout(
+                        () => void attempt.current(),
+                        Math.min(
+                            30_000,
+                            1000 * 2 ** Math.min(failures.current++, 5),
+                        ),
+                    );
+                }
             },
         );
         inFlight.current = request;
@@ -165,16 +181,12 @@ export function useAutosave(
     useEffect(() => {
         clearTimeout(saveTimer.current);
         clearTimeout(fadeTimer.current);
-        setStatus((old) =>
-            old === "error" || old === "saving" ? old : "idle",
-        );
-        if (!pending.current) {
-            pending.current = true;
-            delayTimer.current = setTimeout(() => {
-                if (pending.current)
-                    setStatus((old) => (old === "error" ? old : "saving"));
-            }, 500);
-        }
+        if (!workspaceChanges(lastSaved.current, data)) return;
+        // Keep each edit immediately, even if typing never pauses or iOS suspends the tab.
+        keepLocally.current();
+        setStatus((old) => (old === "error" ? old : "saving"));
+        if (!maxTimer.current)
+            maxTimer.current = setTimeout(() => void attempt.current(), 5000);
         saveTimer.current = setTimeout(() => void attempt.current(), 350);
     }, [data]);
 
@@ -195,14 +207,24 @@ export function useAutosave(
             }).catch(() => undefined);
         };
         window.addEventListener("pagehide", flush);
+        const visibility = () => {
+            if (document.visibilityState === "hidden") flush();
+            else if (workspaceChanges(lastSaved.current, latest.current))
+                void attempt.current();
+        };
+        const online = () => void attempt.current();
+        document.addEventListener("visibilitychange", visibility);
+        window.addEventListener("online", online);
         return () => {
             alive.current = false;
             window.removeEventListener("pagehide", flush);
+            document.removeEventListener("visibilitychange", visibility);
+            window.removeEventListener("online", online);
             clearTimeout(saveTimer.current);
-            clearTimeout(delayTimer.current);
+            clearTimeout(maxTimer.current);
+            maxTimer.current = undefined;
+            clearTimeout(retryTimer.current);
             clearTimeout(fadeTimer.current);
-            // The delay timer is gone, so a remount (React Strict Mode) must be able to start a new one.
-            pending.current = false;
         };
     }, [local]);
 
