@@ -1,9 +1,5 @@
 "use client";
 import {
-    EditorContent,
-    useEditor,
-} from "@tiptap/react";
-import {
     Pencil,
     Plus,
     StickyNote,
@@ -11,64 +7,21 @@ import {
     Unlink,
     X,
 } from "lucide-react";
-import { useEffect } from "react";
 import type { Card } from "~/lib/writely/types";
-import { documentExtensions } from "~/lib/writely/editor/document-extensions";
 import { PRIMARY_BUTTON } from "~/config/ui";
 import { EmptyState } from "../empty-state";
 import { Button } from "../ui";
+import {
+    CardScreen,
+    primeKeyboard,
+} from "./card-screen";
 import { Drawer } from "./dock";
 
-function CardEditor({
-    card,
-    onPatch,
-    smartPunctuation,
-}: {
-    card: Card;
-    onPatch: (id: string, patch: Partial<Card>) => void;
-    smartPunctuation: boolean;
-}) {
-    const editor = useEditor(
-        {
-            immediatelyRender: false,
-            extensions: documentExtensions({
-                trailingNode: false,
-                smartPunctuation,
-            }),
-            content: card.html ?? {
-                type: "doc",
-                content: [
-                    {
-                        type: "paragraph",
-                        content: card.text
-                            ? [{ type: "text", text: card.text }]
-                            : [],
-                    },
-                ],
-            },
-            editorProps: {
-                attributes: {
-                    role: "textbox",
-                    "aria-label": "Card text",
-                    "aria-multiline": "true",
-                    class: "compact-card-editor min-h-32 rounded-xl border border-line bg-paper p-4 font-serif text-[17px] leading-relaxed outline-none focus:border-[var(--control-focus)] [overflow-wrap:anywhere]",
-                },
-            },
-            onUpdate: ({ editor }) =>
-                onPatch(card.id, {
-                    text: editor.getText(),
-                    html: editor.getHTML(),
-                }),
-        },
-        [card.id, smartPunctuation],
-    );
-    useEffect(() => {
-        editor?.commands.focus("end");
-    }, [editor]);
-    return <EditorContent editor={editor} />;
-}
-
-/** Compact screens keep cards in a sheet; only their text highlights belong on the page. */
+/**
+ * Compact screens keep cards in a sheet for reading them; only their text highlights belong on
+ * the page. Writing or editing a card opens a full screen of its own (CardScreen), which closes back
+ * to the document.
+ */
 export function CompactCards({
     open,
     onClose,
@@ -102,14 +55,8 @@ export function CompactCards({
     return (
         <>
             <Drawer
-                open={open}
-                title={
-                    current
-                        ? "Edit card"
-                        : connecting
-                          ? "Attach to a card"
-                          : "Cards"
-                }
+                open={open && !current}
+                title={connecting ? "Attach to a card" : "Cards"}
                 onClose={onClose}
                 id="compact-cards"
             >
@@ -125,30 +72,15 @@ export function CompactCards({
                         />
                     </div>
                 )}
-                {current ? (
-                    <div className="space-y-4">
-                        <CardEditor
-                            key={current.id}
-                            card={current}
-                            onPatch={onPatch}
-                            smartPunctuation={smartPunctuation}
-                        />
-                        <p className="text-muted text-xs">
-                            Changes save automatically.
-                        </p>
-                        <button
-                            className={`${PRIMARY_BUTTON} w-full!`}
-                            onClick={() => onEdit(null)}
-                        >
-                            Done
-                        </button>
-                    </div>
-                ) : (
+                {!current && (
                     <>
                         <button
                             data-autofocus
                             className={`${PRIMARY_BUTTON} w-full! gap-2! text-[13px]! font-medium`}
-                            onClick={onAdd}
+                            onClick={() => {
+                                primeKeyboard();
+                                onAdd();
+                            }}
                         >
                             <Plus size={16} aria-hidden="true" />
                             New card
@@ -181,7 +113,8 @@ export function CompactCards({
                                                     ? onAttach(card)
                                                     : target && !target.orphaned
                                                       ? onReveal(card)
-                                                      : onEdit(card.id)
+                                                      : (primeKeyboard(),
+                                                        onEdit(card.id))
                                             }
                                         >
                                             <span className="font-serif text-[17px] leading-relaxed [overflow-wrap:anywhere]">
@@ -203,14 +136,17 @@ export function CompactCards({
                                                     ? "Attach selected text"
                                                     : target && !target.orphaned
                                                       ? "Show highlighted text"
-                                                      : "View card"}
+                                                      : "Edit card"}
                                             </span>
                                         </button>
                                         <div className="border-line flex justify-end border-t px-2 py-1">
                                             <Button
                                                 icon={Pencil}
                                                 label={`Edit card ${index + 1}`}
-                                                onClick={() => onEdit(card.id)}
+                                                onClick={() => {
+                                                    primeKeyboard();
+                                                    onEdit(card.id);
+                                                }}
                                             />
                                             {target && (
                                                 <Button
@@ -238,6 +174,15 @@ export function CompactCards({
                     </>
                 )}
             </Drawer>
+            {current && (
+                <CardScreen
+                    key={current.id}
+                    card={current}
+                    onPatch={onPatch}
+                    onClose={onClose}
+                    smartPunctuation={smartPunctuation}
+                />
+            )}
         </>
     );
 }

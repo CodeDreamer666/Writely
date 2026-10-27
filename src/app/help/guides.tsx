@@ -510,12 +510,15 @@ export const GUIDES: Guide[] = [
                         title: "Tap New card and type",
                         body: (
                             <>
-                                Tap <Ui>New card</Ui>. The panel changes to{" "}
-                                <Ui>Edit card</Ui> with the new card open for
-                                typing. Type your thought; it saves as you type.
-                                Tap <Ui>Done</Ui> to go back to the list, and
-                                the <Ui>×</Ui> at the top-right to close the
-                                panel.
+                                Tap <Ui>New card</Ui>. The card opens on a
+                                screen of its own titled <Ui>New card</Ui>, with
+                                the keyboard already up. Type your thought; it
+                                saves as you type, however long it gets. Tap{" "}
+                                <Ui>Done</Ui> at the top-right (or the{" "}
+                                <Ui>←</Ui> at the top-left, or your phone’s back
+                                gesture) to return to your document where you
+                                left it. To change a card later, open the panel
+                                again and tap its pencil.
                             </>
                         ),
                     },
@@ -743,7 +746,8 @@ export const GUIDES: Guide[] = [
                                 <Ui>Attach selected text</Ui> under it. Tap them
                                 on the card you want. Or tap <Ui>New card</Ui>{" "}
                                 at the top to make a fresh card that is already
-                                linked to these words.
+                                linked to these words; it opens on its own
+                                screen for typing.
                             </>
                         ),
                         shot: "link-phone-attach",

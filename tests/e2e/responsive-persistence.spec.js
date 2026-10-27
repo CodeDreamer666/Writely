@@ -60,12 +60,11 @@ test.describe("phone and iPad cards", () => {
             await page
                 .getByRole("textbox", { name: "Card text", exact: true })
                 .fill("A thought kept across devices");
+            // Done returns straight to the document.
             await page
                 .getByRole("button", { name: "Done", exact: true })
                 .click();
-            await page
-                .getByRole("button", { name: "Close panel", exact: true })
-                .click();
+            await expect(page.locator(".card-screen")).toHaveCount(0);
             await selectWords(page, "Words to remember");
             await page
                 .getByRole("button", { name: "More formatting", exact: true })

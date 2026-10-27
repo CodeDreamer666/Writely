@@ -529,3 +529,12 @@ body {
         display: block;
     }
 }
+
+/* The phone card editor's prompt while a card is empty. */
+.card-screen-text p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    color: var(--muted);
+    pointer-events: none;
+}
