@@ -6,6 +6,7 @@ import {
 import {
     Pencil,
     Plus,
+    StickyNote,
     Trash2,
     Unlink,
     X,
@@ -14,6 +15,7 @@ import { useEffect } from "react";
 import type { Card } from "~/lib/writely/types";
 import { documentExtensions } from "~/lib/writely/editor/document-extensions";
 import { PRIMARY_BUTTON } from "~/config/ui";
+import { EmptyState } from "../empty-state";
 import { Button } from "../ui";
 import { Drawer } from "./dock";
 
@@ -145,20 +147,23 @@ export function CompactCards({
                     <>
                         <button
                             data-autofocus
-                            className={`${PRIMARY_BUTTON} w-full! gap-2!`}
+                            className={`${PRIMARY_BUTTON} w-full! gap-2! text-[13px]! font-medium`}
                             onClick={onAdd}
                         >
-                            <Plus size={17} />
+                            <Plus size={16} aria-hidden="true" />
                             New card
                         </button>
                         {!cards.length && (
-                            <p className="text-muted py-6 text-center text-sm leading-relaxed">
-                                Keep a thought here. Select words in your
-                                document and choose “Connect to thought” to
-                                attach it.
-                            </p>
+                            <EmptyState
+                                compact
+                                inlineHeader
+                                className="mt-5"
+                                icon={StickyNote}
+                                title="No cards yet"
+                                body="Keep a thought here. Select words in your document and choose “Connect to thought” to attach it."
+                            />
                         )}
-                        <ul className="m-0 mt-4 grid list-none gap-3 p-0">
+                        <ul className="m-0 mt-4 grid list-none gap-3 p-0 empty:hidden">
                             {cards.map((card, index) => {
                                 const target = card.connectors?.[0]?.target;
                                 return (
