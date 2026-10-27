@@ -1,6 +1,8 @@
 "use client";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
+    ChevronLeft,
+    ChevronRight,
     CircleHelp,
     FileDown,
     Keyboard,
@@ -94,17 +96,43 @@ export default function SettingsPage({
         heading.current?.focus({ preventScroll: true });
     }, []);
 
-    // The open section lives in the address, so reloads and links land on it.
-    const [section, setSection] = useState<Section>(SECTIONS[0][0]);
+    // The open section lives in the address, so reloads and links land on it. With none named,
+    // wide screens show the first section and narrow screens show the list of sections.
+    const [section, setSection] = useState<Section | null>(null);
+    const shown = section ?? SECTIONS[0][0];
+    // Set when opening a section from the narrow list added a history entry, so Back can undo it.
+    const pushed = useRef(false);
     useEffect(() => {
-        const sync = () => setSection(sectionFromHash() ?? SECTIONS[0][0]);
+        const sync = () => {
+            const next = sectionFromHash() ?? null;
+            if (!next) pushed.current = false;
+            setSection(next);
+        };
         sync();
         window.addEventListener("hashchange", sync);
         return () => window.removeEventListener("hashchange", sync);
     }, []);
     const openSection = (value: Section) => {
+        // From the narrow list, opening a section is a step the phone's back gesture should undo.
+        const fromList =
+            section === null && window.matchMedia("(max-width: 860px)").matches;
         setSection(value);
-        window.history.replaceState(null, "", `#${value}`);
+        if (fromList) {
+            pushed.current = true;
+            window.history.pushState(null, "", `#${value}`);
+        } else window.history.replaceState(null, "", `#${value}`);
+    };
+    const showList = () => {
+        if (pushed.current) {
+            window.history.back();
+            return;
+        }
+        setSection(null);
+        window.history.replaceState(
+            null,
+            "",
+            window.location.pathname + window.location.search,
+        );
     };
 
     // Universal goals save straight away; the editor reads them when a document opens.
@@ -179,21 +207,29 @@ export default function SettingsPage({
                     className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(240px,300px)_minmax(0,1fr)] max-[860px]:grid-cols-1 max-[860px]:content-start"
                     aria-labelledby="settings-title"
                 >
-                    <aside className="border-line flex min-w-0 flex-col gap-7 self-stretch border-r px-6 pt-9 pb-10 max-[860px]:gap-4 max-[860px]:border-r-0 max-[860px]:border-b max-[860px]:pt-5 max-[860px]:pb-5 max-sm:px-4">
+                    {/* On narrow screens the sidebar becomes a list of sections, and a section opens in its own view. */}
+                    <aside
+                        className={`border-line flex min-w-0 flex-col gap-7 self-stretch border-r px-6 pt-9 pb-10 max-[860px]:gap-0 max-[860px]:border-r-0 max-[860px]:pt-3 max-[860px]:pb-10 max-sm:px-4 ${
+                            section ? "max-[860px]:hidden" : ""
+                        }`}
+                    >
                         <h1
                             id="settings-title"
                             tabIndex={-1}
                             ref={heading}
-                            className="px-2 font-serif text-[36px] leading-none font-normal tracking-[-0.03em] outline-none focus-visible:border-transparent! focus-visible:shadow-none! max-[860px]:text-[30px]"
+                            className="px-2 font-serif text-[36px] leading-none font-normal tracking-[-0.03em] outline-none focus-visible:border-transparent! focus-visible:shadow-none! max-[860px]:sr-only"
                         >
                             Settings
                         </h1>
                         <nav aria-label="Settings sections" className="min-w-0">
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[860px]:grid max-[860px]:grid-cols-4 max-[860px]:gap-1.5 max-sm:grid-cols-2">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[860px]:gap-0">
                                 {SECTIONS.map(([value, label, Icon]) => {
-                                    const current = section === value;
+                                    const current = shown === value;
                                     return (
-                                        <li key={value}>
+                                        <li
+                                            key={value}
+                                            className="border-line max-[860px]:border-b max-[860px]:last:border-b-0"
+                                        >
                                             <button
                                                 aria-current={
                                                     current ? "page" : undefined
@@ -201,25 +237,33 @@ export default function SettingsPage({
                                                 onClick={() =>
                                                     openSection(value)
                                                 }
-                                                className={`h-11! min-h-11! w-full! justify-start! gap-3! rounded-xl! border-0! px-3.5! text-[14px]! shadow-none! max-[860px]:h-10! max-[860px]:min-h-10! max-[860px]:gap-2! max-[860px]:px-2.5! max-[860px]:text-[13px]! ${
+                                                className={`max-[860px]:text-ink! h-11! min-h-11! w-full! justify-start! gap-3! rounded-xl! border-0! px-3.5! text-[14px]! shadow-none! max-[860px]:h-14! max-[860px]:min-h-14! max-[860px]:rounded-none! max-[860px]:bg-transparent! max-[860px]:px-1! max-[860px]:text-[15px]! max-[860px]:font-normal! ${
                                                     current
                                                         ? "bg-tint! text-ink! font-semibold"
                                                         : "text-muted! hover:text-ink! bg-transparent! hover:bg-[var(--control-hover)]!"
                                                 }`}
                                             >
-                                                <Icon
-                                                    size={18}
-                                                    strokeWidth={1.6}
-                                                    aria-hidden="true"
-                                                    className={
-                                                        current
-                                                            ? "text-ink shrink-0"
-                                                            : "text-muted shrink-0"
-                                                    }
-                                                />
+                                                <span className="max-[860px]:bg-surface max-[860px]:border-line contents max-[860px]:flex max-[860px]:size-9 max-[860px]:shrink-0 max-[860px]:items-center max-[860px]:justify-center max-[860px]:rounded-xl max-[860px]:border">
+                                                    <Icon
+                                                        size={18}
+                                                        strokeWidth={1.6}
+                                                        aria-hidden="true"
+                                                        className={
+                                                            current
+                                                                ? "text-ink shrink-0"
+                                                                : "text-muted max-[860px]:text-ink shrink-0"
+                                                        }
+                                                    />
+                                                </span>
                                                 <span className="min-w-0 flex-1 truncate text-left">
                                                     {label}
                                                 </span>
+                                                <ChevronRight
+                                                    size={17}
+                                                    strokeWidth={1.6}
+                                                    aria-hidden="true"
+                                                    className="text-muted hidden shrink-0 max-[860px]:block"
+                                                />
                                             </button>
                                         </li>
                                     );
@@ -228,8 +272,23 @@ export default function SettingsPage({
                         </nav>
                     </aside>
 
-                    <div className="w-full max-w-[820px] min-w-0 px-12 pt-10 pb-24 max-[1100px]:px-8 max-[860px]:px-6 max-[860px]:pt-7 max-sm:px-4">
-                        {section === "appearance" && (
+                    <div
+                        className={`w-full max-w-[820px] min-w-0 px-12 pt-10 pb-24 max-[1100px]:px-8 max-[860px]:px-6 max-[860px]:pt-3 max-sm:px-4 ${
+                            section ? "" : "max-[860px]:hidden"
+                        }`}
+                    >
+                        <button
+                            onClick={showList}
+                            className="text-muted! hover:text-ink! mb-3 hidden! h-10! min-h-10! gap-1! rounded-lg! border-0! bg-transparent! pr-3! pl-1! text-[14px]! shadow-none! hover:bg-[var(--control-hover)]! max-[860px]:inline-flex!"
+                        >
+                            <ChevronLeft
+                                size={18}
+                                strokeWidth={1.6}
+                                aria-hidden="true"
+                            />
+                            Settings
+                        </button>
+                        {shown === "appearance" && (
                             <SettingsSection
                                 id="appearance-title"
                                 title="Appearance"
@@ -241,7 +300,7 @@ export default function SettingsPage({
                                 />
                             </SettingsSection>
                         )}
-                        {section === "writing" && (
+                        {shown === "writing" && (
                             <SettingsSection
                                 id="writing-title"
                                 title="Writing"
@@ -253,7 +312,7 @@ export default function SettingsPage({
                                 />
                             </SettingsSection>
                         )}
-                        {section === "export" && (
+                        {shown === "export" && (
                             <SettingsSection
                                 id="export-title"
                                 title="Document export"
@@ -265,7 +324,7 @@ export default function SettingsPage({
                                 />
                             </SettingsSection>
                         )}
-                        {section === "checklist" && (
+                        {shown === "checklist" && (
                             <SettingsSection
                                 id="universal-title"
                                 title="Revision checklist"
@@ -350,7 +409,7 @@ export default function SettingsPage({
                                 )}
                             </SettingsSection>
                         )}
-                        {section === "shortcuts" && (
+                        {shown === "shortcuts" && (
                             <SettingsSection
                                 id="shortcuts-title"
                                 title="Keyboard shortcuts"
@@ -361,7 +420,7 @@ export default function SettingsPage({
                                 </SettingsCard>
                             </SettingsSection>
                         )}
-                        {section === "help" && (
+                        {shown === "help" && (
                             <SettingsSection id="help-title" title="Help">
                                 <Link
                                     href="/tutorial"
@@ -386,7 +445,7 @@ export default function SettingsPage({
                                 </Link>
                             </SettingsSection>
                         )}
-                        {section === "account" && (
+                        {shown === "account" && (
                             <SettingsSection id="account-title" title="Account">
                                 <SettingsCard>
                                     <dl className="account-details m-0">
