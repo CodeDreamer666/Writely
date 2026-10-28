@@ -11,6 +11,7 @@ import {
     List,
     ListChecks,
     LoaderCircle,
+    MoreVertical,
     Pin,
     Plus,
     Search,
@@ -652,19 +653,19 @@ export default function Library({
                                     {items.map((doc) => (
                                         <li
                                             key={doc.id}
-                                            className="group relative min-w-0"
+                                            className="group relative flex min-w-0 flex-col"
                                         >
                                             <TitleTooltip title={doc.title}>
                                                 <Link
                                                     href={`/d/${doc.id}`}
-                                                    className={`border-line bg-surface text-ink flex flex-col overflow-hidden rounded-xl border no-underline transition-colors group-hover:border-[var(--control-focus)] ${FOCUS_RING}`}
+                                                    className={`border-line bg-surface text-ink flex flex-1 flex-col overflow-hidden rounded-xl border no-underline transition-colors group-hover:border-[var(--control-focus)] ${FOCUS_RING}`}
                                                 >
-                                                    {/* The page shows the opening text, like a print preview; an empty document stays a blank page. */}
+                                                    {/* The top of the card is the page itself, like Google Docs: the opening text sits directly in it, and an empty document leaves it blank. */}
                                                     <span
                                                         aria-hidden="true"
-                                                        className="border-line flex aspect-[5/4] items-end justify-center border-b bg-[color-mix(in_srgb,var(--text)_3%,var(--bg))] px-[18%] pt-5 transition-colors group-hover:bg-[color-mix(in_srgb,var(--text)_5%,var(--bg))] max-sm:pt-4"
+                                                        className="border-line relative block aspect-[5/4] shrink-0 overflow-hidden border-b"
                                                     >
-                                                        <span className="border-line bg-surface block size-full overflow-hidden rounded-t-md border border-b-0 [mask-image:linear-gradient(to_bottom,#000_70%,transparent)] px-[10%] pt-[10%] font-serif text-[7.5px] leading-[1.5] break-words text-[color-mix(in_srgb,var(--text)_70%,transparent)] sm:text-[8.5px]">
+                                                        <span className="absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,#000_65%,transparent)] px-4 pt-3.5 font-serif text-[9px] leading-[1.55] break-words text-[color-mix(in_srgb,var(--text)_72%,transparent)] max-sm:px-3 max-sm:pt-3 sm:text-[10px]">
                                                             {doc.excerpt && (
                                                                 <Highlighted
                                                                     text={
@@ -709,6 +710,12 @@ export default function Library({
                                                     menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                     triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                     items={menuFor(doc)}
+                                                    trigger={
+                                                        <MoreVertical
+                                                            size={16}
+                                                            strokeWidth={1.6}
+                                                        />
+                                                    }
                                                 />
                                             </div>
                                         </li>
@@ -775,6 +782,14 @@ export default function Library({
                                                         menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                         triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                         items={menuFor(doc)}
+                                                        trigger={
+                                                            <MoreVertical
+                                                                size={16}
+                                                                strokeWidth={
+                                                                    1.6
+                                                                }
+                                                            />
+                                                        }
                                                     />
                                                 </div>
                                             </li>
