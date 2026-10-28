@@ -48,12 +48,7 @@ for (const viewport of [
                 expect(create.width).toBeLessThan(viewport.width);
                 expect(create.height).toBeGreaterThanOrEqual(44);
             }
-            for (const name of [
-                "All documents",
-                "Recent",
-                "Pinned",
-                "Archived",
-            ]) {
+            for (const name of ["All documents", "Pinned"]) {
                 const filter = page
                     .getByRole("navigation", {
                         name: "Library",
@@ -63,6 +58,10 @@ for (const viewport of [
                 await filter.scrollIntoViewIfNeeded();
                 await expect(filter).toBeInViewport();
             }
+            // Archived lives in the list's overflow menu, beside the layout switch.
+            await expect(
+                page.getByRole("button", { name: "More views", exact: true }),
+            ).toBeInViewport();
             const trigger = await triggers.first().boundingBox();
             expect(trigger.width).toBeGreaterThanOrEqual(44);
             expect(trigger.height).toBeGreaterThanOrEqual(44);

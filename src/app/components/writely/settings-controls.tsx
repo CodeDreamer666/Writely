@@ -25,17 +25,17 @@ export function SettingsSection({
     children: ReactNode;
 }) {
     return (
-        <section aria-labelledby={id} className="grid gap-y-7">
-            <div className="border-line flex items-end justify-between gap-x-6 gap-y-4 border-b pb-6 max-sm:flex-col max-sm:items-stretch">
+        <section aria-labelledby={id} className="grid gap-y-6 max-sm:gap-y-5">
+            <div className="border-line flex items-end justify-between gap-x-6 gap-y-4 border-b pb-5 max-sm:flex-col max-sm:items-stretch max-sm:pb-4">
                 <div className="max-w-[560px]">
                     <h2
                         id={id}
-                        className="font-serif text-[30px] leading-tight font-normal tracking-[-0.02em]"
+                        className="m-0 font-serif text-[30px] leading-tight font-normal tracking-[-0.02em] max-[860px]:text-[28px]"
                     >
                         {title}
                     </h2>
                     {hint && (
-                        <p className="text-muted mt-2 text-[13.5px] leading-relaxed">
+                        <p className="text-muted mt-1.5 mb-0 text-[13.5px] leading-relaxed">
                             {hint}
                         </p>
                     )}

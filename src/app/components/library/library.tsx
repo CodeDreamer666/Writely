@@ -3,14 +3,13 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
     Archive,
-    Clock,
-    Compass,
     FilePen,
     FileText,
     LayoutGrid,
     List,
     ListChecks,
     LoaderCircle,
+    MoreVertical,
     Pin,
     Plus,
     Search,
@@ -65,7 +64,8 @@ import {
 
 /**
  * What: The filter buttons above the document list, as the filter name and
- * the label shown.
+ * the label shown. Archived documents are reached from the list's ⋮ menu
+ * instead, so the buttons fit side by side on a phone.
  *
  * Used in:
  * - src/app/components/library/library.tsx (Library)
@@ -75,9 +75,7 @@ import {
  */
 const FILTERS: [DocumentFilter, string, LucideIcon][] = [
     ["all", "All documents", FileText],
-    ["recent", "Recent", Clock],
     ["pinned", "Pinned", Pin],
-    ["archived", "Archived", Archive],
 ];
 
 function Highlighted({ text, terms }: { text: string; terms: string[] }) {
@@ -122,8 +120,10 @@ export default function Library({
         params = useSearchParams();
     const [preferences, setPreferences] = usePreferences(initialPreferences);
     const view = preferences.libraryView;
-    const filter =
-        FILTERS.find(([f]) => f === params.get("filter"))?.[0] ?? "all";
+    const filter: DocumentFilter =
+        params.get("filter") === "archived"
+            ? "archived"
+            : (FILTERS.find(([f]) => f === params.get("filter"))?.[0] ?? "all");
     const [input, setInput] = useState(params.get("q") ?? "");
     const query = params.get("q") ?? "";
 
@@ -323,19 +323,13 @@ export default function Library({
             return {
                 icon: Pin,
                 title: "No pinned documents",
-                body: "Pin a document from its ⋯ menu to keep it close at hand.",
+                body: "Pin a document from its ⋮ menu to keep it close at hand.",
             };
         if (filter === "archived")
             return {
                 icon: Archive,
                 title: "Nothing archived",
-                body: "Archive finished or paused documents from their ⋯ menu. They stay safe here, out of the way.",
-            };
-        if (filter === "recent")
-            return {
-                icon: Clock,
-                title: "Nothing edited recently",
-                body: "Documents you’ve edited in the last two weeks appear here.",
+                body: "Archive finished or paused documents from their ⋮ menu. They stay safe here, out of the way.",
             };
         return {
             icon: FilePen,
@@ -411,7 +405,7 @@ export default function Library({
                             aria-label="Library"
                             className="min-w-0 min-[1024px]:max-xl:flex-1"
                         >
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1279px]:grid max-[1279px]:grid-cols-4 max-[1279px]:gap-2 max-sm:grid-cols-2 max-sm:gap-1.5">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1279px]:grid max-[1279px]:max-w-[440px] max-[1279px]:grid-cols-2 max-[1279px]:gap-2 max-sm:max-w-none max-sm:gap-1.5">
                                 {FILTERS.map(([value, label, Icon]) => {
                                     const current = filter === value;
                                     const count = counts.data?.[value];
@@ -476,9 +470,11 @@ export default function Library({
                                         ? "Search results"
                                         : filter === "all"
                                           ? "Documents"
-                                          : FILTERS.find(
-                                                ([f]) => f === filter,
-                                            )![1]}
+                                          : filter === "archived"
+                                            ? "Archived"
+                                            : FILTERS.find(
+                                                  ([f]) => f === filter,
+                                              )![1]}
                                 </h1>
                                 {searching && (
                                     <p
@@ -501,8 +497,8 @@ export default function Library({
                                     </p>
                                 )}
                             </div>
-                            {!!items.length && (
-                                <div className="flex items-center">
+                            <div className="flex items-center gap-2">
+                                {!!items.length && (
                                     <div
                                         role="radiogroup"
                                         aria-label="Layout"
@@ -542,8 +538,45 @@ export default function Library({
                                             </button>
                                         ))}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                                {/* Archived documents are kept out of the filters above and reached from here. */}
+                                <ActionMenu
+                                    label="More views"
+                                    menuLabel="More views"
+                                    menuWidth={208}
+                                    triggerClassName="pointer-events-auto! h-[54px]! min-h-[54px]! w-11! min-w-11! rounded-xl! border! border-[var(--border)]! bg-[var(--surface)]! p-0! text-[var(--muted)]! opacity-100! shadow-none! hover:bg-[var(--control-hover)]! hover:text-[var(--text)]! focus-visible:[box-shadow:0_0_0_2px_var(--control-ring)]!"
+                                    trigger={
+                                        <MoreVertical
+                                            size={19}
+                                            strokeWidth={1.6}
+                                        />
+                                    }
+                                    items={
+                                        filter === "archived"
+                                            ? [
+                                                  {
+                                                      label: "Back to all documents",
+                                                      onSelect: () =>
+                                                          setParams({
+                                                              filter: null,
+                                                          }),
+                                                  },
+                                              ]
+                                            : [
+                                                  {
+                                                      label: counts.data
+                                                          ?.archived
+                                                          ? `Archived (${counts.data.archived})`
+                                                          : "Archived",
+                                                      onSelect: () =>
+                                                          setParams({
+                                                              filter: "archived",
+                                                          }),
+                                                  },
+                                              ]
+                                    }
+                                />
+                            </div>
                         </div>
 
                         {list.isError && (
@@ -581,33 +614,16 @@ export default function Library({
                                             Clear search
                                         </button>
                                     ) : filter === "all" ? (
-                                        <>
-                                            <Button
-                                                className={`${PRIMARY_BUTTON} h-10! gap-2! rounded-lg! px-4! text-[13px]! font-medium`}
-                                                icon={
-                                                    creating
-                                                        ? LoaderCircle
-                                                        : Plus
-                                                }
-                                                onClick={() =>
-                                                    void newDocument()
-                                                }
-                                                disabled={creating}
-                                            >
-                                                New document
-                                            </Button>
-                                            <Link
-                                                href="/tutorial"
-                                                className="border-line text-ink hover:bg-surface inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-[13px] no-underline"
-                                            >
-                                                <Compass
-                                                    size={16}
-                                                    strokeWidth={1.6}
-                                                    aria-hidden="true"
-                                                />
-                                                Take the 2-minute tour
-                                            </Link>
-                                        </>
+                                        <Button
+                                            className={`${PRIMARY_BUTTON} h-10! gap-2! rounded-lg! px-4! text-[13px]! font-medium`}
+                                            icon={
+                                                creating ? LoaderCircle : Plus
+                                            }
+                                            onClick={() => void newDocument()}
+                                            disabled={creating}
+                                        >
+                                            New document
+                                        </Button>
                                     ) : (
                                         <button
                                             className="border-line! h-10! rounded-lg! border! px-4! text-[13px]!"
@@ -652,19 +668,19 @@ export default function Library({
                                     {items.map((doc) => (
                                         <li
                                             key={doc.id}
-                                            className="group relative min-w-0"
+                                            className="group relative flex min-w-0 flex-col"
                                         >
                                             <TitleTooltip title={doc.title}>
                                                 <Link
                                                     href={`/d/${doc.id}`}
-                                                    className={`border-line bg-surface text-ink flex flex-col overflow-hidden rounded-xl border no-underline transition-colors group-hover:border-[var(--control-focus)] ${FOCUS_RING}`}
+                                                    className={`border-line bg-surface text-ink flex flex-1 flex-col overflow-hidden rounded-xl border no-underline transition-colors group-hover:border-[var(--control-focus)] ${FOCUS_RING}`}
                                                 >
-                                                    {/* The page shows the opening text, like a print preview; an empty document stays a blank page. */}
+                                                    {/* The top of the card is the page itself, like Google Docs: the opening text sits directly in it, and an empty document leaves it blank. */}
                                                     <span
                                                         aria-hidden="true"
-                                                        className="border-line flex aspect-[5/4] items-end justify-center border-b bg-[color-mix(in_srgb,var(--text)_3%,var(--bg))] px-[18%] pt-5 transition-colors group-hover:bg-[color-mix(in_srgb,var(--text)_5%,var(--bg))] max-sm:pt-4"
+                                                        className="border-line relative block aspect-[5/4] shrink-0 overflow-hidden border-b"
                                                     >
-                                                        <span className="border-line bg-surface block size-full overflow-hidden rounded-t-md border border-b-0 [mask-image:linear-gradient(to_bottom,#000_70%,transparent)] px-[10%] pt-[10%] font-serif text-[7.5px] leading-[1.5] break-words text-[color-mix(in_srgb,var(--text)_70%,transparent)] sm:text-[8.5px]">
+                                                        <span className="absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,#000_65%,transparent)] px-4 pt-3.5 font-serif text-[9px] leading-[1.55] break-words text-[color-mix(in_srgb,var(--text)_72%,transparent)] max-sm:px-3 max-sm:pt-3 sm:text-[10px]">
                                                             {doc.excerpt && (
                                                                 <Highlighted
                                                                     text={
@@ -709,6 +725,12 @@ export default function Library({
                                                     menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                     triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                     items={menuFor(doc)}
+                                                    trigger={
+                                                        <MoreVertical
+                                                            size={16}
+                                                            strokeWidth={1.6}
+                                                        />
+                                                    }
                                                 />
                                             </div>
                                         </li>
@@ -775,6 +797,14 @@ export default function Library({
                                                         menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                         triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                         items={menuFor(doc)}
+                                                        trigger={
+                                                            <MoreVertical
+                                                                size={16}
+                                                                strokeWidth={
+                                                                    1.6
+                                                                }
+                                                            />
+                                                        }
                                                     />
                                                 </div>
                                             </li>

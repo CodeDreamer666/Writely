@@ -24,7 +24,6 @@ export const TOOLTIP_CLASS =
  * - src/app/components/writely/writely-app.tsx (WritelyApp)
  * - src/app/components/library/library.tsx (Library)
  * - src/app/components/writely/settings-page.tsx (SettingsPage)
- * - src/app/tutorial/tutorial.tsx (the tutorial's coach marks)
  *
  * Effect: Changes the colour and hover style of every main action button.
  */
@@ -95,3 +94,15 @@ export const OVERLAY_CLASS =
  */
 export const DIALOG_CLASS =
     "dialog [width:480px] [max-width:100%] [max-height:calc(100dvh_-_48px)] overflow-y-auto [animation:dialog-fade-in_160ms_ease-out] [border-radius:12px] [border:1px_solid_var(--border)] [padding:24px] [box-shadow:0_16px_48px_color-mix(in_srgb,_var(--shadow)_14%,_transparent)] [background:var(--surface)] [color:var(--text)] [&_label]:[margin-bottom:8px] [&_label]:block [&_label]:[font-size:11px] [&_label]:[font-weight:500] [&_label]:[color:var(--muted)] [&_p]:[margin-bottom:24px] [&_p]:[font-size:13px] [&_p]:[line-height:1.7] [&_p]:[color:var(--muted)] [@media(prefers-reduced-motion:_reduce)]:[animation:none]";
+
+/**
+ * What: The look of the "← Documents" and "← Settings" links at the top of
+ * Settings: a quiet label with a 44px touch target and a visible focus ring.
+ *
+ * Used in:
+ * - src/app/components/writely/settings-page.tsx (SettingsPage)
+ *
+ * Effect: Changes how the way back from Settings and its sections looks.
+ */
+export const BACK_LINK =
+    "text-muted hover:text-ink -ml-2 inline-flex h-11 min-h-11 items-center gap-1.5 self-start rounded-lg pr-3 pl-2 text-[14px] no-underline hover:bg-[var(--control-hover)] focus-visible:[box-shadow:0_0_0_2px_var(--control-ring)] focus-visible:outline-none";

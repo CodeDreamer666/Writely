@@ -165,7 +165,7 @@ export async function loadDocumentWorkspace(
     return workspace && { ...workspace, active: documentId };
 }
 
-/** Adds complete documents (a new piece, a saved tutorial sample or imported prototype writing). */
+/** Adds complete documents (a new piece or imported prototype writing). */
 export function createDocuments(
     userId: string,
     docs: NonNullable<WorkspaceChangesInput["documents"]>,

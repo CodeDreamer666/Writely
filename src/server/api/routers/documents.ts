@@ -48,7 +48,7 @@ export const documentsRouter = createTRPCRouter({
             recentDocuments(ctx.session.user.id, input.query),
         ),
 
-    /** Adds complete documents; used for new pieces, saved tutorial samples and old prototype data. */
+    /** Adds complete documents; used for new pieces and old prototype data. */
     create: protectedProcedure
         .input(z.object({ documents: z.array(documentInput).min(1).max(100) }))
         .mutation(async ({ ctx, input }) => {

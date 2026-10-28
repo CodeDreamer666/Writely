@@ -71,12 +71,9 @@ export function useAutosave(
     {
         userId,
         onSaved,
-        local,
     }: {
         userId: string;
         onSaved?: () => void;
-        /** Keeps everything in this browser under the given key instead (the tutorial sandbox). */
-        local?: string;
     },
 ) {
     // This hook owns recovery. React Query's default offline pause would otherwise
@@ -86,14 +83,9 @@ export function useAutosave(
         retry: false,
     });
     const documentId = saved.active;
-    const storageKey = local ?? unsavedKey(userId, documentId);
-    const mutateAsync = async (changes: WorkspaceChanges) => {
-        if (!local) return saveToServer(changes);
-        localStorage.setItem(local, JSON.stringify(latest.current));
-    };
-    const forget = () => {
-        if (!local) forgetUnsavedWorkspace(userId, documentId);
-    };
+    const storageKey = unsavedKey(userId, documentId);
+    const mutateAsync = (changes: WorkspaceChanges) => saveToServer(changes);
+    const forget = () => forgetUnsavedWorkspace(userId, documentId);
     const [status, setStatus] = useState<SaveStatus>("idle");
     const latest = useRef(data),
         lastSaved = useRef(saved),
@@ -198,7 +190,6 @@ export function useAutosave(
             const changes = withActivity(lastSaved.current, latest.current);
             if (!changes) return;
             keepLocally.current();
-            if (local) return;
             void fetch("/api/trpc/workspace.save", {
                 method: "POST",
                 keepalive: true,
@@ -226,7 +217,7 @@ export function useAutosave(
             clearTimeout(retryTimer.current);
             clearTimeout(fadeTimer.current);
         };
-    }, [local]);
+    }, []);
 
     return {
         status,

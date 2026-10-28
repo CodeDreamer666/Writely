@@ -3,10 +3,7 @@ import {
     excerpt,
     searchTerms,
 } from "~/lib/writely/plain-text";
-import {
-    type DOCUMENT_FILTERS,
-    RECENT_DAYS,
-} from "~/config/documents";
+import type { DOCUMENT_FILTERS } from "~/config/documents";
 import { db } from "~/server/db";
 import { settled } from "~/server/workspace";
 
@@ -55,10 +52,6 @@ export async function listDocuments(
         Prisma.sql`"archived" = ${filter === "archived"}`,
     ];
     if (filter === "pinned") conditions.push(Prisma.sql`"pinned" = true`);
-    if (filter === "recent")
-        conditions.push(
-            Prisma.sql`"updated" >= ${new Date(Date.now() - RECENT_DAYS * 86_400_000)}`,
-        );
     for (const term of terms)
         conditions.push(
             titleOnly
@@ -116,26 +109,23 @@ export async function listDocuments(
 /** How many documents each library filter shows, for the sidebar. */
 export async function documentCounts(userId: string) {
     await settled(userId);
-    const since = new Date(Date.now() - RECENT_DAYS * 86_400_000);
     const [row] = await db.$queryRaw<
-        { all: bigint; recent: bigint; pinned: bigint; archived: bigint }[]
+        { all: bigint; pinned: bigint; archived: bigint }[]
     >`
     SELECT
       count(*) FILTER (WHERE NOT "archived") AS "all",
-      count(*) FILTER (WHERE NOT "archived" AND "updated" >= ${since}) AS "recent",
       count(*) FILTER (WHERE NOT "archived" AND "pinned") AS "pinned",
       count(*) FILTER (WHERE "archived") AS "archived"
     FROM "Document" WHERE "userId" = ${userId}
   `;
     return {
         all: Number(row?.all ?? 0),
-        recent: Number(row?.recent ?? 0),
         pinned: Number(row?.pinned ?? 0),
         archived: Number(row?.archived ?? 0),
     } satisfies Record<DocumentFilter, number>;
 }
 
-/** Archiving moves a document out of All, Recent and Pinned without deleting anything. */
+/** Archiving moves a document out of All and Pinned without deleting anything. */
 export async function setArchived(
     userId: string,
     id: string,

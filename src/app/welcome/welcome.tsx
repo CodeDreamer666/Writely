@@ -1,9 +1,9 @@
 "use client";
 import {
     ArrowRight,
+    BookOpen,
     Feather,
     PenLine,
-    Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ import { api } from "~/trpc/react";
 
 /**
  * What: The look of the two large choice cards on the welcome screen
- * (start writing, or take the tutorial).
+ * (start writing, or read the Help guides).
  *
  * Used in:
  * - src/app/welcome/welcome.tsx (Welcome)
@@ -136,19 +136,18 @@ export default function Welcome({ name }: { name: string }) {
                             Open a blank draft and begin.
                         </span>
                     </button>
-                    <Link href="/tutorial" className={`${CHOICE} field-sky`}>
-                        <Sparkles
+                    <Link href="/help" className={`${CHOICE} field-sky`}>
+                        <BookOpen
                             size={20}
                             strokeWidth={1.5}
                             className="mb-auto"
                             aria-hidden="true"
                         />
                         <span className="font-serif text-[24px] tracking-[-0.02em]">
-                            Explore with a sample
+                            Learn the basics
                         </span>
                         <span className="text-[13.5px] leading-relaxed text-[var(--field-soft)]">
-                            Two minutes with a short paragraph and Writely’s
-                            revision tools.
+                            Step-by-step guides with pictures for every feature.
                         </span>
                     </Link>
                 </div>
