@@ -1,7 +1,4 @@
-import {
-    Keyboard,
-    PlayCircle,
-} from "lucide-react";
+import { Keyboard } from "lucide-react";
 import { type Metadata } from "next";
 import Link from "next/link";
 import { AppHeader } from "../components/app-header";
@@ -33,12 +30,6 @@ export default function HelpHome() {
                 <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
                     {(
                         [
-                            [
-                                "/tutorial",
-                                PlayCircle,
-                                "Watch the two-minute tour",
-                                "A sample revision plays out on its own. Your documents aren’t touched.",
-                            ],
                             [
                                 "/settings#shortcuts",
                                 Keyboard,

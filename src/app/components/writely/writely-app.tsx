@@ -3,7 +3,6 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import {
     EditorContent,
     useEditor,
-    type Editor,
 } from "@tiptap/react";
 import { useRouter } from "next/navigation";
 import {
@@ -34,7 +33,6 @@ import {
     useRef,
     useState,
     type FormEvent,
-    type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -125,58 +123,23 @@ type Panel = "thoughts" | "checklist" | "drafts" | "stats";
  */
 const EMPTY_CARDS: Card[] = [];
 
-/** What the tutorial coach can see and steer while it guides someone through the real editor. */
-export type CoachContext = {
-    doc: WritingDocument;
-    editor: Editor | null;
-    comparing: boolean;
-    closeComparison: () => void;
-    /** Lets the tutorial play the revision loop itself, through the same state the controls use. */
-    demo: {
-        /** Puts the sample back as it started, with the tools showing. */
-        reset: () => void;
-        /** Adds a card level with document position `near` and returns its id. */
-        addCard: (near: number) => string;
-        patchCard: (id: string, patch: Partial<Card>) => void;
-        /** Fills in the open "Add revision goal" dialog. */
-        setGoalText: (text: string) => void;
-        closePanel: () => void;
-    };
-};
-
 export default function WritelyApp({
     initialWorkspace,
     user,
     preferences: initialPreferences,
-    tutorial,
 }: {
     initialWorkspace: WorkspaceData;
     user: AccountUser;
     preferences: Preferences;
-    /** Runs the editor as an isolated sandbox: saved only in this browser, no documents sidebar. */
-    tutorial?: {
-        storageKey: string;
-        initial: WorkspaceData;
-        coach: (context: CoachContext) => ReactNode;
-        onExit: () => void;
-    };
 }) {
     const router = useRouter();
     const compact = useCompactLayout();
     const [data, setData] = useState<WorkspaceData>(
         () =>
-            tutorial?.initial ??
             readUnsavedWorkspace(user.id, initialWorkspace.active) ??
             initialWorkspace,
     );
-    // The tutorial is a sandbox: its preference changes last only while it runs.
-    const [account, setAccountPreferences] = usePreferences(initialPreferences);
-    const [sandbox, setSandbox] = useState<Partial<Preferences>>({});
-    const preferences = tutorial ? { ...account, ...sandbox } : account;
-    const setPreferences = (changes: Partial<Preferences>) =>
-        tutorial
-            ? setSandbox((current) => ({ ...current, ...changes }))
-            : setAccountPreferences(changes);
+    const [preferences, setPreferences] = usePreferences(initialPreferences);
     const toolsOpen = preferences.toolsOpen;
     const setToolsOpen = (open: boolean) => setPreferences({ toolsOpen: open });
     const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -247,9 +210,8 @@ export default function WritelyApp({
     const workspace = useRef<HTMLElement>(null),
         dialog = useRef<HTMLElement>(null),
         priorFocus = useRef<Element | null>(null);
-    const autosave = useAutosave(data, tutorial?.initial ?? initialWorkspace, {
+    const autosave = useAutosave(data, initialWorkspace, {
         userId: user.id,
-        local: tutorial?.storageKey,
     });
     // Leaving the editor saves first; an unconfirmed save stays in this browser and is retried.
     const leaveTo = async (href: string) => {
@@ -660,7 +622,7 @@ export default function WritelyApp({
                 >
                     <EditorHeader
                         editor={editor}
-                        onExport={tutorial ? undefined : exportDocument}
+                        onExport={exportDocument}
                         exporting={exporter.exporting}
                         focusMode={focusMode}
                         onToggleFocusMode={toggleFocusMode}
@@ -675,11 +637,9 @@ export default function WritelyApp({
                         onGoals={() => toggle("checklist")}
                         title={doc.title}
                         onRename={(title) => update({ title })}
-                        status={tutorial ? null : autosave.status}
-                        onBack={() =>
-                            tutorial ? tutorial.onExit() : void leaveTo("/")
-                        }
-                        backLabel={tutorial ? "Exit tutorial" : "Documents"}
+                        status={autosave.status}
+                        onBack={() => void leaveTo("/")}
+                        backLabel="Documents"
                     />
                     <div className="workspace-shell relative flex min-h-0 flex-1">
                         <main
@@ -1075,23 +1035,21 @@ export default function WritelyApp({
                                                     Add goal
                                                 </button>
                                             ) : (
-                                                !tutorial && (
-                                                    <button
-                                                        className="text-ink! h-8! min-h-8! shrink-0 gap-1! rounded-lg! px-2! text-[12px]! font-medium"
-                                                        aria-label="Manage universal goals in Settings"
-                                                        onClick={() =>
-                                                            void leaveTo(
-                                                                "/settings",
-                                                            )
-                                                        }
-                                                    >
-                                                        Manage
-                                                        <ChevronRight
-                                                            size={14}
-                                                            aria-hidden="true"
-                                                        />
-                                                    </button>
-                                                )
+                                                <button
+                                                    className="text-ink! h-8! min-h-8! shrink-0 gap-1! rounded-lg! px-2! text-[12px]! font-medium"
+                                                    aria-label="Manage universal goals in Settings"
+                                                    onClick={() =>
+                                                        void leaveTo(
+                                                            "/settings",
+                                                        )
+                                                    }
+                                                >
+                                                    Manage
+                                                    <ChevronRight
+                                                        size={14}
+                                                        aria-hidden="true"
+                                                    />
+                                                </button>
                                             )}
                                         </div>
                                     )}
@@ -1436,47 +1394,6 @@ export default function WritelyApp({
                 {shortcutsOpen && (
                     <ShortcutsDialog onClose={() => setShortcutsOpen(false)} />
                 )}
-                {tutorial?.coach({
-                    doc,
-                    editor,
-                    comparing: !!comparison,
-                    closeComparison: () => setComparison(null),
-                    demo: {
-                        reset: () => {
-                            setData(tutorial.initial);
-                            setComparison(null);
-                            setPanel(null);
-                            setModal(null);
-                            setSelected(null);
-                            setEditingCard(null);
-                            setConnectionSelection(null);
-                            setRevisionGoalText("");
-                            setToolsOpen(true);
-                            editor?.commands.setContent(
-                                tutorial.initial.docs[0]!.html,
-                                { emitUpdate: false },
-                            );
-                        },
-                        addCard: (near) => {
-                            const id = uid();
-                            const el = workspace.current;
-                            const y =
-                                editor && el
-                                    ? editor.view.coordsAtPos(near).top -
-                                      el.getBoundingClientRect().top +
-                                      el.scrollTop -
-                                      24
-                                    : 96;
-                            setData((data) =>
-                                addThought(data, id, Math.max(24, y)),
-                            );
-                            return id;
-                        },
-                        patchCard,
-                        setGoalText: setRevisionGoalText,
-                        closePanel: () => setPanel(null),
-                    },
-                })}
                 {notice && (
                     <div
                         className={

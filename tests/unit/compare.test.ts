@@ -4,13 +4,6 @@ import {
     it,
 } from "vitest";
 import {
-    TUTORIAL_GOAL_PHRASE,
-    TUTORIAL_GOAL_REVISION,
-    TUTORIAL_PHRASE,
-    TUTORIAL_REVISION,
-    TUTORIAL_TEXT,
-} from "../../src/lib/writely/tutorial";
-import {
     compareTexts,
     sentences,
     type Block,
@@ -177,16 +170,23 @@ describe("compareTexts", () => {
     });
 
     it("shows a real two-phrase revision as two readable changes", () => {
-        const revised = TUTORIAL_TEXT.replace(
-            TUTORIAL_PHRASE,
-            TUTORIAL_REVISION,
-        ).replace(TUTORIAL_GOAL_PHRASE, TUTORIAL_GOAL_REVISION);
-        const result = compareTexts(TUTORIAL_TEXT, revised);
+        const text =
+            "I went to a small library on Saturday afternoon. It was a nice place with many nice books, and I liked how quiet it was. I walked around for a while because I wanted to find something interesting, but I did not know what to read. After looking at several books, I picked one and sat near a window. I started reading, and it was a good experience because I felt relaxed and forgot about everything else for a while.";
+        const revised = text
+            .replace(
+                "a nice place with many nice books",
+                "a hushed room that smelled of old paper, its shelves crowded with worn spines",
+            )
+            .replace(
+                "it was a good experience because I felt relaxed and forgot about everything else for a while",
+                "the afternoon slipped away; when I finally looked up, the light through the window had turned gold",
+            );
+        const result = compareTexts(text, revised);
         expect(result.changes).toBe(2);
         // Two changes, each one removal and one addition: no scattered single words.
         expect(changed(result.blocks)).toHaveLength(4);
         expect(sides(result.blocks)).toEqual({
-            before: TUTORIAL_TEXT,
+            before: text,
             after: revised,
         });
     });

@@ -3,8 +3,6 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
     Archive,
-    Clock,
-    Compass,
     FilePen,
     FileText,
     LayoutGrid,
@@ -66,7 +64,8 @@ import {
 
 /**
  * What: The filter buttons above the document list, as the filter name and
- * the label shown.
+ * the label shown. Archived documents are reached from the list's ⋮ menu
+ * instead, so the buttons fit side by side on a phone.
  *
  * Used in:
  * - src/app/components/library/library.tsx (Library)
@@ -76,9 +75,7 @@ import {
  */
 const FILTERS: [DocumentFilter, string, LucideIcon][] = [
     ["all", "All documents", FileText],
-    ["recent", "Recent", Clock],
     ["pinned", "Pinned", Pin],
-    ["archived", "Archived", Archive],
 ];
 
 function Highlighted({ text, terms }: { text: string; terms: string[] }) {
@@ -123,8 +120,10 @@ export default function Library({
         params = useSearchParams();
     const [preferences, setPreferences] = usePreferences(initialPreferences);
     const view = preferences.libraryView;
-    const filter =
-        FILTERS.find(([f]) => f === params.get("filter"))?.[0] ?? "all";
+    const filter: DocumentFilter =
+        params.get("filter") === "archived"
+            ? "archived"
+            : (FILTERS.find(([f]) => f === params.get("filter"))?.[0] ?? "all");
     const [input, setInput] = useState(params.get("q") ?? "");
     const query = params.get("q") ?? "";
 
@@ -324,19 +323,13 @@ export default function Library({
             return {
                 icon: Pin,
                 title: "No pinned documents",
-                body: "Pin a document from its ⋯ menu to keep it close at hand.",
+                body: "Pin a document from its ⋮ menu to keep it close at hand.",
             };
         if (filter === "archived")
             return {
                 icon: Archive,
                 title: "Nothing archived",
-                body: "Archive finished or paused documents from their ⋯ menu. They stay safe here, out of the way.",
-            };
-        if (filter === "recent")
-            return {
-                icon: Clock,
-                title: "Nothing edited recently",
-                body: "Documents you’ve edited in the last two weeks appear here.",
+                body: "Archive finished or paused documents from their ⋮ menu. They stay safe here, out of the way.",
             };
         return {
             icon: FilePen,
@@ -412,7 +405,7 @@ export default function Library({
                             aria-label="Library"
                             className="min-w-0 min-[1024px]:max-xl:flex-1"
                         >
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1279px]:grid max-[1279px]:grid-cols-4 max-[1279px]:gap-2 max-sm:grid-cols-2 max-sm:gap-1.5">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1279px]:grid max-[1279px]:max-w-[440px] max-[1279px]:grid-cols-2 max-[1279px]:gap-2 max-sm:max-w-none max-sm:gap-1.5">
                                 {FILTERS.map(([value, label, Icon]) => {
                                     const current = filter === value;
                                     const count = counts.data?.[value];
@@ -477,9 +470,11 @@ export default function Library({
                                         ? "Search results"
                                         : filter === "all"
                                           ? "Documents"
-                                          : FILTERS.find(
-                                                ([f]) => f === filter,
-                                            )![1]}
+                                          : filter === "archived"
+                                            ? "Archived"
+                                            : FILTERS.find(
+                                                  ([f]) => f === filter,
+                                              )![1]}
                                 </h1>
                                 {searching && (
                                     <p
@@ -502,8 +497,8 @@ export default function Library({
                                     </p>
                                 )}
                             </div>
-                            {!!items.length && (
-                                <div className="flex items-center">
+                            <div className="flex items-center gap-2">
+                                {!!items.length && (
                                     <div
                                         role="radiogroup"
                                         aria-label="Layout"
@@ -543,8 +538,45 @@ export default function Library({
                                             </button>
                                         ))}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                                {/* Archived documents are kept out of the filters above and reached from here. */}
+                                <ActionMenu
+                                    label="More views"
+                                    menuLabel="More views"
+                                    menuWidth={208}
+                                    triggerClassName="pointer-events-auto! h-[54px]! min-h-[54px]! w-11! min-w-11! rounded-xl! border! border-[var(--border)]! bg-[var(--surface)]! p-0! text-[var(--muted)]! opacity-100! shadow-none! hover:bg-[var(--control-hover)]! hover:text-[var(--text)]! focus-visible:[box-shadow:0_0_0_2px_var(--control-ring)]!"
+                                    trigger={
+                                        <MoreVertical
+                                            size={19}
+                                            strokeWidth={1.6}
+                                        />
+                                    }
+                                    items={
+                                        filter === "archived"
+                                            ? [
+                                                  {
+                                                      label: "Back to all documents",
+                                                      onSelect: () =>
+                                                          setParams({
+                                                              filter: null,
+                                                          }),
+                                                  },
+                                              ]
+                                            : [
+                                                  {
+                                                      label: counts.data
+                                                          ?.archived
+                                                          ? `Archived (${counts.data.archived})`
+                                                          : "Archived",
+                                                      onSelect: () =>
+                                                          setParams({
+                                                              filter: "archived",
+                                                          }),
+                                                  },
+                                              ]
+                                    }
+                                />
+                            </div>
                         </div>
 
                         {list.isError && (
@@ -582,33 +614,16 @@ export default function Library({
                                             Clear search
                                         </button>
                                     ) : filter === "all" ? (
-                                        <>
-                                            <Button
-                                                className={`${PRIMARY_BUTTON} h-10! gap-2! rounded-lg! px-4! text-[13px]! font-medium`}
-                                                icon={
-                                                    creating
-                                                        ? LoaderCircle
-                                                        : Plus
-                                                }
-                                                onClick={() =>
-                                                    void newDocument()
-                                                }
-                                                disabled={creating}
-                                            >
-                                                New document
-                                            </Button>
-                                            <Link
-                                                href="/tutorial"
-                                                className="border-line text-ink hover:bg-surface inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-[13px] no-underline"
-                                            >
-                                                <Compass
-                                                    size={16}
-                                                    strokeWidth={1.6}
-                                                    aria-hidden="true"
-                                                />
-                                                Take the 2-minute tour
-                                            </Link>
-                                        </>
+                                        <Button
+                                            className={`${PRIMARY_BUTTON} h-10! gap-2! rounded-lg! px-4! text-[13px]! font-medium`}
+                                            icon={
+                                                creating ? LoaderCircle : Plus
+                                            }
+                                            onClick={() => void newDocument()}
+                                            disabled={creating}
+                                        >
+                                            New document
+                                        </Button>
                                     ) : (
                                         <button
                                             className="border-line! h-10! rounded-lg! border! px-4! text-[13px]!"

@@ -1,7 +1,7 @@
 "use client";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
-    ChevronLeft,
+    ArrowLeft,
     ChevronRight,
     CircleHelp,
     FileDown,
@@ -12,7 +12,6 @@ import {
     Pencil,
     PenLine,
     Plus,
-    Sparkles,
     Trash2,
     UserRound,
     type LucideIcon,
@@ -50,6 +49,7 @@ import {
     Dialog,
 } from "../ui";
 import {
+    BACK_LINK,
     DANGER_BUTTON,
     DIALOG_ACTIONS,
     PRIMARY_BUTTON,
@@ -210,18 +210,29 @@ export default function SettingsPage({
                 >
                     {/* On narrow screens the sidebar becomes a list of sections, and a section opens in its own view. */}
                     <aside
-                        className={`border-line flex min-w-0 flex-col gap-7 self-stretch border-r px-6 pt-9 pb-10 max-[860px]:gap-0 max-[860px]:border-r-0 max-[860px]:pt-3 max-[860px]:pb-10 max-sm:px-4 ${
+                        className={`border-line flex min-w-0 flex-col gap-6 self-stretch border-r px-6 pt-4 pb-10 max-[860px]:gap-3 max-[860px]:border-r-0 max-[860px]:pt-2 max-sm:px-4 ${
                             section ? "max-[860px]:hidden" : ""
                         }`}
                     >
-                        <h1
-                            id="settings-title"
-                            tabIndex={-1}
-                            ref={heading}
-                            className="px-2 font-serif text-[36px] leading-none font-normal tracking-[-0.03em] outline-none focus-visible:border-transparent! focus-visible:shadow-none! max-[860px]:sr-only"
-                        >
-                            Settings
-                        </h1>
+                        <div className="flex flex-col gap-2 max-[860px]:gap-1">
+                            <Link href="/" className={BACK_LINK}>
+                                <ArrowLeft
+                                    size={17}
+                                    strokeWidth={1.6}
+                                    aria-hidden="true"
+                                />
+                                <span className="sr-only">Back to </span>
+                                Documents
+                            </Link>
+                            <h1
+                                id="settings-title"
+                                tabIndex={-1}
+                                ref={heading}
+                                className="px-2 font-serif text-[36px] leading-tight font-normal tracking-[-0.03em] outline-none focus-visible:border-transparent! focus-visible:shadow-none! max-[860px]:px-0 max-[860px]:text-[28px]"
+                            >
+                                Settings
+                            </h1>
+                        </div>
                         <nav aria-label="Settings sections" className="min-w-0">
                             <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[860px]:gap-0">
                                 {SECTIONS.map(([value, label, Icon]) => {
@@ -274,21 +285,27 @@ export default function SettingsPage({
                     </aside>
 
                     <div
-                        className={`w-full max-w-[820px] min-w-0 px-12 pt-10 pb-24 max-[1100px]:px-8 max-[860px]:px-6 max-[860px]:pt-3 max-sm:px-4 ${
+                        className={`flex w-full max-w-[820px] min-w-0 flex-col px-12 pt-[72px] pb-24 max-[1100px]:px-8 max-[860px]:px-6 max-[860px]:pt-2 max-sm:px-4 ${
                             section ? "" : "max-[860px]:hidden"
                         }`}
                     >
-                        <button
-                            onClick={showList}
-                            className="text-muted! hover:text-ink! mb-3 hidden! h-10! min-h-10! gap-1! rounded-lg! border-0! bg-transparent! pr-3! pl-1! text-[14px]! shadow-none! hover:bg-[var(--control-hover)]! max-[860px]:inline-flex!"
+                        {/* Wide screens keep the section list beside the panel, so only narrow ones need a way back to it. */}
+                        <Link
+                            href="/settings"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                showList();
+                            }}
+                            className={`${BACK_LINK} mb-1 min-[861px]:hidden`}
                         >
-                            <ChevronLeft
-                                size={18}
+                            <ArrowLeft
+                                size={17}
                                 strokeWidth={1.6}
                                 aria-hidden="true"
                             />
+                            <span className="sr-only">Back to </span>
                             Settings
-                        </button>
+                        </Link>
                         {shown === "appearance" && (
                             <SettingsSection
                                 id="appearance-title"
@@ -428,27 +445,6 @@ export default function SettingsPage({
                                 hint="Step-by-step guides with pictures. Every step is one action and shows exactly where to click."
                             >
                                 <TopicList />
-                                <Link
-                                    href="/tutorial"
-                                    className="border-line bg-surface text-ink mt-4 flex items-center gap-3 rounded-2xl border px-5 py-4 no-underline hover:border-[var(--control-focus)]"
-                                >
-                                    <Sparkles
-                                        size={18}
-                                        strokeWidth={1.5}
-                                        className="text-accent shrink-0"
-                                        aria-hidden="true"
-                                    />
-                                    <span className="flex flex-col gap-1.5">
-                                        <span className="block text-[14px] font-medium">
-                                            How Writely works
-                                        </span>
-                                        <span className="text-muted block text-[13px]">
-                                            A two-minute sample: thought cards,
-                                            connections, saving and comparing.
-                                            Your documents aren’t touched.
-                                        </span>
-                                    </span>
-                                </Link>
                             </SettingsSection>
                         )}
                         {shown === "account" && (
