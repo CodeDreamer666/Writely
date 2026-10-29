@@ -50,7 +50,11 @@ export function LongPressTooltips({ children }: { children: ReactNode }) {
         const events = ["pointerup", "pointercancel", "pointerdown"] as const;
         for (const name of events) window.addEventListener(name, hide);
         window.addEventListener("scroll", hide, true);
+        // The keyboard moving means the button the tooltip points at has moved too.
+        const viewport = window.visualViewport;
+        viewport?.addEventListener("resize", hide);
         return () => {
+            viewport?.removeEventListener("resize", hide);
             for (const name of events) window.removeEventListener(name, hide);
             window.removeEventListener("scroll", hide, true);
         };
@@ -95,6 +99,17 @@ export function useLongPress(label: string) {
     const timer = useRef<number | undefined>(undefined);
     const origin = useRef<{ x: number; y: number } | null>(null);
     const held = useRef(false);
+    const prior = useRef<Element | null>(null);
+    // Holding a button can pull focus (and the keyboard) away from the editor; hand it back.
+    const restoreFocus = () => {
+        const before = prior.current;
+        if (
+            before instanceof HTMLElement &&
+            before.isContentEditable &&
+            document.activeElement !== before
+        )
+            before.focus({ preventScroll: true });
+    };
     const clear = () => {
         window.clearTimeout(timer.current);
         timer.current = undefined;
@@ -114,10 +129,12 @@ export function useLongPress(label: string) {
             onPointerDown: (event) => {
                 if (event.pointerType === "mouse") return;
                 held.current = false;
+                prior.current = document.activeElement;
                 origin.current = { x: event.clientX, y: event.clientY };
                 const el = event.currentTarget;
                 timer.current = window.setTimeout(() => {
                     held.current = true;
+                    restoreFocus();
                     tips.show(label, el);
                 }, LONG_PRESS_MS);
             },
@@ -132,9 +149,13 @@ export function useLongPress(label: string) {
                 )
                     clear();
             },
-            onPointerUp: clear,
+            onPointerUp: () => {
+                clear();
+                if (held.current) restoreFocus();
+            },
             onPointerCancel: () => {
                 clear();
+                if (held.current) restoreFocus();
                 tips.hide();
             },
             onContextMenu: (event) => event.preventDefault(),
