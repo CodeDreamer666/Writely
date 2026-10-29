@@ -137,12 +137,17 @@ export function ActionMenu({
             top?: number;
             left?: number;
         }>({});
+    const menu = useRef<HTMLDivElement>(null);
     const container = useRef<HTMLDivElement>(null),
         trigger = useRef<HTMLButtonElement>(null);
     useEffect(() => {
         if (!open) return;
         const dismiss = (e: PointerEvent) => {
-            if (!container.current?.contains(e.target as Node)) setOpen(false);
+            if (
+                !container.current?.contains(e.target as Node) &&
+                !menu.current?.contains(e.target as Node)
+            )
+                setOpen(false);
         };
         const anchor = trigger.current?.getBoundingClientRect();
         const dismissScroll = () => {
@@ -163,9 +168,8 @@ export function ActionMenu({
         };
     }, [open]);
     const menuItems = () => [
-        ...(container.current?.querySelectorAll<HTMLElement>(
-            "[role=menuitem]",
-        ) ?? []),
+        ...(menu.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ??
+            []),
     ];
     const reveal = (last = false) => {
         setSubmenu(null);
@@ -276,51 +280,57 @@ export function ActionMenu({
                     <MoreHorizontal size={16} strokeWidth={1.6} />
                 )}
             </button>
-            {open && (
-                <div
-                    className={
-                        "document-menu fixed [top:100%] [right:auto] [z-index:15] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)] [.draft-meta_&]:absolute [.draft-meta_&]:[top:calc(100%_+_4px)]! [.draft-meta_&]:[right:0] [.draft-meta_&]:[left:auto]! [.draft-meta_&]:[z-index:30] [.draft-meta_&]:[width:144px]"
-                    }
-                    style={{
-                        ...menuPosition,
-                        width: menuWidth,
-                        minWidth: menuWidth,
-                    }}
-                    role="menu"
-                    aria-label={submenu ? submenu.label : menuLabel}
-                >
-                    {submenu && (
-                        <button
-                            role="menuitem"
-                            onClick={() => showSubmenu(null)}
-                        >
-                            <ChevronLeft size={14} aria-hidden="true" /> Back
-                        </button>
-                    )}
-                    {(submenu?.children ?? items).map((item) => (
-                        <button
-                            key={item.label}
-                            role="menuitem"
-                            className={`${item.danger ? "danger [color:var(--danger)] [.account-actions_button&]:[border-top-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-right-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-bottom-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-left-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[color:var(--danger)] [.account-actions_button&]:[background:color-mix(in_srgb,_var(--danger)_8%,_var(--bg))] [.account-actions_button&:active]:[color:var(--danger)] [.account-actions_button&:active]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.account-actions_button&:hover]:[color:var(--danger)] [.account-actions_button&:hover]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.document-menu_button&]:[color:var(--danger)]" : ""} ${item.separator ? "menu-separated [.document-menu_&]:[margin-top:4px] [.document-menu_&]:[border-radius:0_0_4px_4px] [.document-menu_&]:[border-top-width:1px] [.document-menu_&]:[border-top-style:solid] [.document-menu_&]:[border-top-color:var(--border)] [.document-menu_&]:[padding-top:10px]" : ""}`}
-                            aria-haspopup={item.children ? "menu" : undefined}
-                            onClick={() =>
-                                item.children
-                                    ? showSubmenu(item)
-                                    : item.onSelect && choose(item.onSelect)
-                            }
-                        >
-                            {item.label}
-                            {item.children && (
-                                <ChevronRight
-                                    size={14}
-                                    className="ml-auto"
-                                    aria-hidden="true"
-                                />
-                            )}
-                        </button>
-                    ))}
-                </div>
-            )}
+            {open &&
+                createPortal(
+                    <div
+                        ref={menu}
+                        className={
+                            "document-menu fixed [right:auto] [z-index:35] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)]"
+                        }
+                        style={{
+                            ...menuPosition,
+                            width: menuWidth,
+                            minWidth: menuWidth,
+                        }}
+                        role="menu"
+                        aria-label={submenu ? submenu.label : menuLabel}
+                    >
+                        {submenu && (
+                            <button
+                                role="menuitem"
+                                onClick={() => showSubmenu(null)}
+                            >
+                                <ChevronLeft size={14} aria-hidden="true" />{" "}
+                                Back
+                            </button>
+                        )}
+                        {(submenu?.children ?? items).map((item) => (
+                            <button
+                                key={item.label}
+                                role="menuitem"
+                                className={`${item.danger ? "danger [color:var(--danger)] [.account-actions_button&]:[border-top-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-right-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-bottom-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-left-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[color:var(--danger)] [.account-actions_button&]:[background:color-mix(in_srgb,_var(--danger)_8%,_var(--bg))] [.account-actions_button&:active]:[color:var(--danger)] [.account-actions_button&:active]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.account-actions_button&:hover]:[color:var(--danger)] [.account-actions_button&:hover]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.document-menu_button&]:[color:var(--danger)]" : ""} ${item.separator ? "menu-separated [.document-menu_&]:[margin-top:4px] [.document-menu_&]:[border-radius:0_0_4px_4px] [.document-menu_&]:[border-top-width:1px] [.document-menu_&]:[border-top-style:solid] [.document-menu_&]:[border-top-color:var(--border)] [.document-menu_&]:[padding-top:10px]" : ""}`}
+                                aria-haspopup={
+                                    item.children ? "menu" : undefined
+                                }
+                                onClick={() =>
+                                    item.children
+                                        ? showSubmenu(item)
+                                        : item.onSelect && choose(item.onSelect)
+                                }
+                            >
+                                {item.label}
+                                {item.children && (
+                                    <ChevronRight
+                                        size={14}
+                                        className="ml-auto"
+                                        aria-hidden="true"
+                                    />
+                                )}
+                            </button>
+                        ))}
+                    </div>,
+                    document.body,
+                )}
         </div>
     );
 }

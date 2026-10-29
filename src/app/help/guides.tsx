@@ -910,11 +910,9 @@ export const GUIDES: Guide[] = [
             <>
                 A revision is one pass over your whole draft with a single goal,
                 such as “Improve the introduction”. When you start one, Writely
-                quietly keeps a copy of the text as it is (the <em>baseline</em>
-                ), so you can see exactly what this pass changed and undo it if
-                you don’t like it. Three tools work together: <Ui>
-                    Checklist
-                </Ui>{" "}
+                keeps a draft named <Ui>Before revision: …</Ui>, so you can see
+                exactly what this pass changed and restore the starting text if
+                you don’t like it. Three tools work together: <Ui>Checklist</Ui>{" "}
                 holds your goals, <Ui>Drafts</Ui> holds saved versions, and the
                 comparison shows the difference between two versions.
             </>
@@ -942,7 +940,8 @@ export const GUIDES: Guide[] = [
                             <>
                                 Goals under <Ui>Universal goals</Ui> appear in
                                 every document (you set them in Settings). Each
-                                unfinished goal says <Ui>Start a revision</Ui>{" "}
+                                unfinished goal says{" "}
+                                <Ui>Start revision · saves a starting draft</Ui>{" "}
                                 under it. Click the goal’s row once.
                             </>
                         ),
@@ -957,18 +956,18 @@ export const GUIDES: Guide[] = [
                                 The panel closes and two things appear: a
                                 message at the top,{" "}
                                 <Ui>
-                                    Baseline preserved. You’re editing a working
-                                    draft.
+                                    Revision started. Your starting text is kept
+                                    in Drafts.
                                 </Ui>
                                 , and a tinted bar above the tools reading{" "}
                                 <Ui>Revising · </Ui>
-                                and your goal, with <Ui>Save draft</Ui> and{" "}
-                                <Ui>Finish revision</Ui> buttons. Now edit your
-                                text as usual.
+                                and your goal, with a <Ui>
+                                    Finish revision
+                                </Ui>{" "}
+                                button. Now edit your text as usual; your
+                                changes autosave.
                             </>
                         ),
-                        shot: "revise-started",
-                        alt: "The editor during a revision. The message at the top and the Revising bar above the tools are ringed.",
                         caption:
                             "The Revising bar stays until you finish the revision.",
                         notes: [
@@ -1027,18 +1026,16 @@ export const GUIDES: Guide[] = [
                 title: "Save your work and compare",
                 steps: [
                     {
-                        title: "Click Save draft in the Revising bar",
+                        title: "Keep an optional milestone in Drafts",
                         body: (
                             <>
-                                When you’ve made some changes, click{" "}
-                                <Ui>Save draft</Ui> (with a floppy-disk icon) in
-                                the tinted bar. Or press <Key>Ctrl</Key>+
-                                <Key>S</Key> (<Key>⌘</Key>+<Key>S</Key> on a
-                                Mac).
+                                Your work already autosaves. To keep a separate
+                                version, open <Ui>Drafts</Ui> and click{" "}
+                                <Ui>Save named draft</Ui>. Or press{" "}
+                                <Key>Ctrl</Key>+<Key>S</Key> (<Key>⌘</Key>+
+                                <Key>S</Key> on a Mac).
                             </>
                         ),
-                        shot: "revise-save",
-                        alt: "The Revising bar with the Save draft button ringed.",
                     },
                     {
                         title: "Check the name and click Save draft",
@@ -1050,32 +1047,27 @@ export const GUIDES: Guide[] = [
                                 bottom-right.
                             </>
                         ),
-                        shot: "revise-save-dialog",
-                        alt: "The Keep this version box with the Draft name field and the Save draft button ringed.",
                         caption:
-                            "Saving a draft doesn’t end the revision; you can keep editing.",
+                            "Saving keeps the editor open and doesn’t end the revision.",
                     },
                     {
-                        title: "Read the comparison",
+                        title: "Open Compare when you want to review changes",
                         body: (
                             <>
-                                The page switches to <Ui>Draft comparison</Ui>.
-                                On a computer the two versions sit side by side:
-                                the left column (<Ui>Before</Ui>) is the copy
-                                kept when the revision started, the right column
-                                (<Ui>After</Ui>) is what you just saved, and
-                                they scroll together. Removed text has a pale
-                                red background and a line through it; added text
-                                has a pale green background. Unchanged text has
-                                no colour. A small edit marks just the changed
-                                words; a rewritten sentence or paragraph is
-                                marked as a whole.
+                                Open <Ui>Drafts</Ui> and click <Ui>Compare</Ui>{" "}
+                                on a version. It opens beside{" "}
+                                <Ui>Current writing</Ui> on a computer. Use{" "}
+                                <Ui>Version</Ui> and <Ui>Compare with</Ui> to
+                                change the pair. Small edits highlight changed
+                                words. Whole paragraphs use a coloured edge and
+                                an Added or Removed label, keeping the text
+                                readable. Empty versions are labelled
+                                explicitly. Comparing never changes your
+                                writing.
                             </>
                         ),
-                        shot: "revise-compare",
-                        alt: "The Draft comparison page side by side. The Before and After menus, the change arrows, the added words, Restore this version and Continue editing are ringed.",
                         caption:
-                            "Use the Before and After menus at the top to compare any two versions.",
+                            "Comparison opens only when you choose Compare.",
                     },
                     {
                         title: "Click ⌄ to jump to the next change",
@@ -1109,15 +1101,13 @@ export const GUIDES: Guide[] = [
                         body: (
                             <>
                                 Phone screens show a single text instead of two
-                                columns. Each removal (red, crossed out) comes
-                                straight before the words that replaced it
-                                (green), so you read the change in place. The
-                                same arrows at the top step through the changes,
-                                and the colour key sits just under the menus.
+                                columns. Each removal comes straight before the
+                                words that replaced it (green), so you read the
+                                change in place. The same arrows at the top step
+                                through the changes, and the colour key sits
+                                just under the menus.
                             </>
                         ),
-                        shot: "revise-compare-phone",
-                        alt: "The comparison on a phone as one text. The change arrows and an added passage are ringed.",
                         caption:
                             "The ← at the top-left goes back to your text, like Continue editing.",
                     },
@@ -1125,14 +1115,18 @@ export const GUIDES: Guide[] = [
                         title: "Restore a version if you need to (optional)",
                         body: (
                             <>
-                                <Ui>Restore this version</Ui> (bottom bar) makes
-                                the <em>After</em> version your text. To undo
-                                this whole pass, first pick the{" "}
-                                <Ui>Before: …</Ui> draft in the <Ui>After</Ui>{" "}
-                                menu, then click Restore. A box asks you to
+                                <Ui>Restore this version</Ui> replaces your
+                                current writing with the saved draft identified
+                                in the bottom bar. To return to the start of a
+                                revision, choose its <Ui>Before revision: …</Ui>{" "}
+                                draft in
+                                <Ui>Version</Ui> and keep{" "}
+                                <Ui>Current writing</Ui> under{" "}
+                                <Ui>Compare with</Ui>. A box asks you to
                                 confirm: click <Ui>Preserve &amp; restore</Ui>.
-                                Your current text is saved as a draft first, and
-                                a message confirms <Ui>Draft restored</Ui>.
+                                Your current text is kept as a labelled restore
+                                backup first, and a message confirms{" "}
+                                <Ui>Draft restored</Ui>.
                             </>
                         ),
                         notes: [
@@ -1140,10 +1134,9 @@ export const GUIDES: Guide[] = [
                                 kind: "missing",
                                 text: (
                                     <>
-                                        The button is greyed out when{" "}
-                                        <Ui>After</Ui> is{" "}
-                                        <Ui>Working text (autosaved)</Ui>: that
-                                        is already your text.
+                                        The button is greyed out if no saved
+                                        draft is selected, or the selected draft
+                                        already matches your current writing.
                                     </>
                                 ),
                             },
@@ -1173,8 +1166,6 @@ export const GUIDES: Guide[] = [
                                 tick at the right of the Revising bar.
                             </>
                         ),
-                        shot: "revise-finish",
-                        alt: "The Revising bar with the Finish revision button ringed.",
                         notes: [
                             {
                                 kind: "result",
@@ -1183,8 +1174,8 @@ export const GUIDES: Guide[] = [
                                         The Revising bar disappears and a
                                         message says{" "}
                                         <Ui>
-                                            Revision finished. Your working text
-                                            is autosaved.
+                                            Revision complete. Goal marked done;
+                                            no new draft created.
                                         </Ui>
                                     </>
                                 ),
@@ -1197,13 +1188,12 @@ export const GUIDES: Guide[] = [
                             <>
                                 Open <Ui>Checklist</Ui>: the goal now has a
                                 green tick and says{" "}
-                                <Ui>Complete · revise again</Ui>, and the count
-                                in the tools bar goes up by one. Click the goal
-                                again any time to do another pass.
+                                <Ui>Revise again · saves a starting draft</Ui>,
+                                and the count in the tools bar goes up by one.
+                                Click the goal again any time to do another
+                                pass.
                             </>
                         ),
-                        shot: "revise-done",
-                        alt: "The Revision Checklist with the first goal ticked and labelled Complete · revise again, ringed.",
                     },
                 ],
             },
@@ -1222,10 +1212,8 @@ export const GUIDES: Guide[] = [
                                 see how it differs.
                             </>
                         ),
-                        shot: "revise-drafts",
-                        alt: "The Your drafts panel with Save named draft and the first Compare button ringed.",
                         caption:
-                            "“Before: …” drafts are the copies kept when a revision started.",
+                            "Revision starting points and restore backups are labelled in the list.",
                         notes: [
                             {
                                 kind: "tip",

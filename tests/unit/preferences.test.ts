@@ -18,7 +18,7 @@ test("stored preferences fall back to defaults field by field", () => {
             libraryView: "list",
             extra: 1,
         }),
-        { ...DEFAULT_PREFERENCES, theme: "dark", libraryView: "list" },
+        { ...DEFAULT_PREFERENCES, theme: "light", libraryView: "list" },
     );
 });
 

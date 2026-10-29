@@ -9,16 +9,8 @@ import {
 import {
     readPreferences,
     type Preferences,
-    type Theme,
 } from "~/lib/writely/preferences";
-import { THEME_COOKIE } from "~/config/storage";
 import { api } from "~/trpc/react";
-
-/** Applies a theme now and remembers it in a cookie, so the next page renders with it. */
-export function applyTheme(theme: Theme) {
-    document.documentElement.dataset.theme = theme;
-    document.cookie = `${THEME_COOKIE}=${theme}; path=/; max-age=31536000; samesite=lax`;
-}
 
 // One copy of the signed-in user's preferences for every page in this tab. A page's server-rendered
 // preferences seed it, but once this tab has changed something the local copy wins, so Back to a
@@ -53,7 +45,6 @@ function connect() {
     channel.onmessage = (event: MessageEvent) => {
         changedHere = true;
         const next = readPreferences(event.data);
-        if (next.theme !== shared?.theme) applyTheme(next.theme);
         publish(next, false);
     };
 }
@@ -107,9 +98,6 @@ export function usePreferences(initial: Preferences) {
     }, [mutate]);
     useEffect(() => {
         connect();
-        // Another device may have changed the theme since this browser's cookie was written.
-        if (document.documentElement.dataset.theme !== preferences.theme)
-            applyTheme(preferences.theme);
         window.addEventListener("pagehide", save);
         return () => {
             window.removeEventListener("pagehide", save);
@@ -120,7 +108,6 @@ export function usePreferences(initial: Preferences) {
     const update = (changes: Partial<Preferences>) => {
         const next = { ...preferences, ...changes };
         changedHere = true;
-        if (changes.theme) applyTheme(changes.theme);
         publish(next, true);
         pending.current = { ...pending.current, ...changes };
         setSaveState("saving");

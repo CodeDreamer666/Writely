@@ -12,6 +12,7 @@ Built on the [T3 stack](https://create.t3.gg): Next.js (App Router), TypeScript,
 - A visual-only empty editor prompt: **Begin anywhere. Every thought has somewhere to go.**
 - Always-on Flow Anchor keeps continuous writing within a comfortable focus band while respecting deliberate navigation and reduced motion.
 - Named draft versions, side-by-side comparison, and restoration that preserves the previous working text.
+- Starting a revision automatically keeps a **Before revision** draft. **Finish revision** marks the goal complete without creating another draft; edits autosave throughout. Saving a named draft keeps the editor open. **Compare** explicitly opens the chosen draft against current writing, and restoring keeps a labelled backup of the text it replaces.
 - Universal revision goals managed in Settings, with independent completion for each manuscript and separate manuscript-specific goals.
 - Movable thought cards with inline editing, collapsed leaf markers, and automatic pastel colours that cycle Yellow → Blue → Green → Pink. Double-click card text or use its pencil button to edit; click outside to save, or press Escape to cancel.
 - Select manuscript text and choose **Connect to thought**, then click a card to connect it. Each card has one visible connection; multiple cards can share a text range, with accurate arrows and overlapping highlights that follow edits.

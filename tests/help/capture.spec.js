@@ -842,7 +842,9 @@ for (const theme of ["light", "dark"]) {
                 {
                     target: page
                         .getByRole("status")
-                        .filter({ hasText: "Baseline preserved" }),
+                        .filter({
+                            hasText: "Your starting text is kept in Drafts",
+                        }),
                     label: "A copy of the text was kept",
                     side: "below",
                 },
@@ -861,9 +863,12 @@ for (const theme of ["light", "dark"]) {
         await page.keyboard.press("Home");
         await page.keyboard.type("On the last morning of March, ");
         await page.waitForTimeout(500);
-        const saveDraft = revising.getByRole("button", { name: "Save draft" });
+        await dockButton(page, "Saved drafts").click();
+        const saveDraft = page.getByRole("button", {
+            name: "Save named draft",
+        });
         await shot("revise-save", {
-            area: tools,
+            area: page.getByRole("complementary", { name: "Your drafts" }),
             pad: 56,
             marks: [{ target: saveDraft, label: "Save draft", side: "above" }],
         });
@@ -889,6 +894,11 @@ for (const theme of ["light", "dark"]) {
             ],
         });
         await keep.getByRole("button", { name: "Save draft" }).click();
+        await dockButton(page, "Saved drafts").click();
+        await page
+            .getByRole("button", { name: "Compare", exact: true })
+            .last()
+            .click();
         await page.getByRole("heading", { name: "Draft comparison" }).waitFor();
         await page.waitForTimeout(900);
         const selects = page.locator(".comparison-scroll select, main select");

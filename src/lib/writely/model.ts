@@ -103,7 +103,9 @@ export function startRevision(
     doc: WritingDocument,
     check: Check,
 ): WritingDocument {
-    const base = snapshot(doc, `Before: ${check.text}`);
+    const base = snapshot(doc, `Before revision: ${check.text}`, {
+        goal: check.text,
+    });
     return {
         ...doc,
         drafts: [...doc.drafts, base],

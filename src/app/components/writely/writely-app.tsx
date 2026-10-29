@@ -20,7 +20,6 @@ import {
     Palette,
     Pencil,
     Plus,
-    Save,
     StickyNote,
     Target,
     Trash2,
@@ -378,8 +377,8 @@ export default function WritelyApp({
         if (!doc.session) return;
         update(completeRevision);
         setComparison(null);
-        setPanel("checklist");
-        setNotice("Revision finished. Your working text is autosaved.");
+        setPanel(null);
+        setNotice("Revision complete. Goal marked done; no new draft created.");
     };
     const addCard = () => {
         const id = uid();
@@ -420,7 +419,7 @@ export default function WritelyApp({
         }
         update((d) => startRevision(d, c));
         setPanel(null);
-        setNotice("Baseline preserved. You’re editing a working draft.");
+        setNotice("Revision started. Your starting text is kept in Drafts.");
         editor?.commands.focus();
     };
     useEffect(() => {
@@ -476,7 +475,10 @@ export default function WritelyApp({
         update((current) => restoreDraft(current, d));
         editor?.commands.setContent(d.html, { emitUpdate: false });
         setComparison(null);
-        setNotice("Draft restored. Your previous text was preserved first.");
+        setPanel(null);
+        setNotice(
+            "Draft restored. Your previous text is kept in Drafts as a restore backup.",
+        );
     };
     const targetDraft = data.docs
         .find((d) => d.id === draftToDelete?.documentId)
@@ -518,14 +520,21 @@ export default function WritelyApp({
                     v.id === rename ? { ...v, name: draftName.trim() } : v,
                 ),
             }));
+            setNotice("Draft renamed.");
         } else {
             const d = snapshot(doc, draftName.trim(), {
                 goal: doc.session?.goal,
                 baseline: doc.session?.baseline || doc.drafts.at(-1)?.id,
             });
             update((v) => ({ drafts: [...v.drafts, d] }));
-            if (d.baseline) setComparison({ left: d.baseline, right: d.id });
-            setNotice("Named draft saved. Revision remains open.");
+            setComparison(null);
+            setPanel(null);
+            setNotice(
+                `“${d.name}” kept in Drafts.${doc.session ? " Your revision is still in progress." : " You can keep writing."}`,
+            );
+            requestAnimationFrame(() =>
+                editor?.commands.focus(null, { scrollIntoView: false }),
+            );
         }
         setModal(null);
     };
@@ -888,6 +897,11 @@ export default function WritelyApp({
                         title="Revision Checklist"
                         onClose={() => setPanel(null)}
                     >
+                        <p className="text-muted mt-0 mb-4 text-[12px] leading-relaxed">
+                            Starting a revision saves your current text as a
+                            draft. Finishing marks the goal complete. Your edits
+                            autosave throughout.
+                        </p>
                         {(
                             [
                                 ["Universal goals", universalChecks(data, doc)],
@@ -954,8 +968,8 @@ export default function WritelyApp({
                                                             {active
                                                                 ? "Revising now"
                                                                 : c.done
-                                                                  ? "Complete · revise again"
-                                                                  : "Start a revision"}
+                                                                  ? "Revise again · saves a starting draft"
+                                                                  : "Start revision · saves a starting draft"}
                                                         </small>
                                                     </span>
                                                 </button>
@@ -1059,6 +1073,10 @@ export default function WritelyApp({
                         title="Your drafts"
                         onClose={() => setPanel(null)}
                     >
+                        <p className="text-muted mt-0 mb-4 text-[12px] leading-relaxed">
+                            Your current writing autosaves. Drafts keep versions
+                            you can compare or restore.
+                        </p>
                         <button
                             data-autofocus
                             className={`${PRIMARY_BUTTON} draft-save w-full! gap-2! text-[13px]! font-medium`}
@@ -1118,19 +1136,28 @@ export default function WritelyApp({
                                                     Goal: {d.goal}
                                                 </p>
                                             )}
+                                            {(d.name.startsWith(
+                                                "Before revision:",
+                                            ) ||
+                                                d.name.startsWith("Before:") ||
+                                                d.name.startsWith(
+                                                    "Before restoring ",
+                                                )) && (
+                                                <span className="text-muted mt-1 block text-[11px] leading-relaxed">
+                                                    {d.name.startsWith(
+                                                        "Before restoring ",
+                                                    )
+                                                        ? "Restore backup · your text before restoring"
+                                                        : "Revision starting point · saved automatically"}
+                                                </span>
+                                            )}
                                         </div>
                                         <button
                                             className="draft-compare border-line! text-accent! hover:bg-tint! h-9! min-h-9! shrink-0 rounded-lg! border! px-3! text-[12px]! font-medium"
                                             onClick={() => {
                                                 setComparison({
-                                                    left:
-                                                        d.baseline ||
-                                                        doc.drafts.find(
-                                                            (v) =>
-                                                                v.id !== d.id,
-                                                        )?.id ||
-                                                        "working",
-                                                    right: d.id,
+                                                    left: d.id,
+                                                    right: "working",
                                                 });
                                                 setPanel(null);
                                             }}
@@ -1253,18 +1280,9 @@ export default function WritelyApp({
                                             </span>
                                         </span>
                                         <button
-                                            className="revision-save text-ink! h-9! min-h-9! gap-1.5! rounded-lg! px-3! text-[12px]! font-medium hover:bg-[color-mix(in_srgb,var(--surface)_70%,transparent)]!"
-                                            onClick={saveOpen}
-                                        >
-                                            <Save
-                                                size={15}
-                                                aria-hidden="true"
-                                            />
-                                            Save draft
-                                        </button>
-                                        <button
                                             className={`${PRIMARY_BUTTON} revision-finish h-9! min-h-9! gap-1.5! rounded-lg! px-3! text-[12px]! font-medium`}
                                             onClick={finish}
+                                            title="Mark this goal complete. Your text autosaves; no new draft is created."
                                         >
                                             <Check
                                                 size={15}
@@ -1474,8 +1492,9 @@ export default function WritelyApp({
                                             />
                                         </div>
                                         <p>
-                                            A name makes it easier to find your
-                                            way back.
+                                            {rename
+                                                ? "Choose a name that is easy to find later."
+                                                : "Keep a snapshot of your current writing. You’ll stay in the editor."}
                                         </p>
                                         <label htmlFor="draft-name">
                                             Draft name
@@ -1495,11 +1514,10 @@ export default function WritelyApp({
                                                     "save-explanation bg-paper text-muted mt-4 rounded-lg p-4 text-[12px] leading-[1.7]"
                                                 }
                                             >
-                                                This saves a version and opens
-                                                comparison.
-                                                <br />
-                                                Your revision stays open until
-                                                you finish it.
+                                                This keeps an optional milestone
+                                                without ending your revision.
+                                                Choose Finish revision when the
+                                                goal is complete.
                                             </div>
                                         )}
                                         <div className={DIALOG_ACTIONS}>
@@ -1590,10 +1608,12 @@ export default function WritelyApp({
                                             />
                                         </div>
                                         <p>
-                                            Your current text will be saved as a
-                                            version first. Your thought cards
-                                            and revision goal stay with the
-                                            document.
+                                            Your current text will be kept in
+                                            Drafts as a restore backup first.
+                                            Your thought cards and revision goal
+                                            stay with the document; card links
+                                            to replaced text may need
+                                            reconnecting.
                                         </p>
                                         <div className={DIALOG_ACTIONS}>
                                             <Button

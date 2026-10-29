@@ -31,7 +31,7 @@ function Lines({ count, gap }: { count: number; gap: number }) {
 }
 
 /**
- * Appearance: theme and the writing column's font, size, spacing and width. Each choice carries a
+ * Appearance: the writing column's font, size, spacing and width. Each choice carries a
  * small drawing of its effect, so the writer can see it without a separate preview.
  */
 export function AppearanceSettings({
@@ -46,18 +46,6 @@ export function AppearanceSettings({
     );
     return (
         <SettingsCard>
-            <SettingRow id="setting-theme" label="Theme">
-                <Segmented
-                    labelledBy="setting-theme"
-                    value={preferences.theme}
-                    options={[
-                        { value: "light", label: "Light" },
-                        { value: "dark", label: "Dark" },
-                        { value: "system", label: "System" },
-                    ]}
-                    onChange={(theme) => setPreferences({ theme })}
-                />
-            </SettingRow>
             <SettingRow id="setting-font" label="Font">
                 <Segmented
                     labelledBy="setting-font"

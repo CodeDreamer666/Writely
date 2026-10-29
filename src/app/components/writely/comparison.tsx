@@ -93,7 +93,7 @@ function Pieces({
     });
 }
 
-/** A whole paragraph that was removed or added, as a tinted section of its own. */
+/** A changed paragraph keeps normal, readable text with a quiet edge and a change label. */
 function WholeParagraph({
     block,
     current,
@@ -106,17 +106,13 @@ function WholeParagraph({
         <div
             data-change={block.change}
             data-current={block.change === current || undefined}
-            className={`-mx-3 rounded-lg px-3 py-2 ${removed ? "bg-[var(--diff-remove)]" : "bg-[var(--diff-add)]"} ${CURRENT}`}
+            className={`border-l-2 pl-4 ${removed ? "border-[color-mix(in_srgb,var(--danger)_40%,transparent)]" : "border-[color-mix(in_srgb,var(--success)_45%,transparent)]"} ${CURRENT}`}
         >
-            <p
-                className={
-                    removed
-                        ? "text-ink/80 line-through decoration-[color-mix(in_srgb,var(--danger)_70%,transparent)] decoration-1"
-                        : ""
-                }
-            >
-                <span className="sr-only">
-                    {removed ? "Removed paragraph: " : "Added paragraph: "}
+            <p className={"text-ink/85"}>
+                <span
+                    className={`mb-2 block font-sans text-[10px] font-medium tracking-wide uppercase ${removed ? "text-danger" : "text-success"}`}
+                >
+                    {removed ? "Removed paragraph" : "Added paragraph"}
                 </span>
                 {block.text}
             </p>
@@ -177,7 +173,7 @@ function rowsOf(blocks: Block[], current: number): Row[] {
 }
 
 const PROSE =
-    "font-serif text-[18px] leading-[1.7] [overflow-wrap:anywhere] max-[760px]:text-[17px] [&_p]:m-0 [&_del+ins]:ml-[0.25em]";
+    "font-serif text-[16px] leading-[1.85] [overflow-wrap:anywhere] [&_p]:m-0 [&_del+ins]:ml-[0.25em]";
 
 /**
  * Two versions of a document compared. Wide screens show them side by side in one scrolling area,
@@ -199,7 +195,7 @@ export default function Comparison({
 }) {
     const working = {
         id: "working",
-        name: "Working text (autosaved)",
+        name: "Current writing",
         html: doc.html,
     };
     const all: (Draft | typeof working)[] = [working, ...doc.drafts];
@@ -243,11 +239,22 @@ export default function Comparison({
         });
     };
     const rows = rowsOf(result.blocks, current);
+    const restoreTarget =
+        right.id !== "working" ? right : left.id !== "working" ? left : null;
+    const isEmpty = (html: string) => !plain(html).trim();
+    const emptyVersion = (working: boolean) => (
+        <div className="text-muted border-line flex min-h-24 flex-col items-center justify-center rounded-lg border border-dashed px-6 py-6 text-center font-sans">
+            <p className="text-[14px] font-medium">This version is empty</p>
+            <p className="mt-2! text-[12px]">
+                {working
+                    ? "Your current document has no text."
+                    : "No writing had been added when it was saved."}
+            </p>
+        </div>
+    );
     const select = (side: "left" | "right", label: string) => (
-        <label className="flex min-w-0 items-center gap-2 max-[760px]:flex-col max-[760px]:items-stretch max-[760px]:gap-0.5">
-            <span className="text-muted shrink-0 text-[12px] font-semibold max-[760px]:text-[11px]">
-                {label}
-            </span>
+        <label className="flex min-w-0 flex-col gap-1.5">
+            <span className="text-muted text-[11px] font-medium">{label}</span>
             <select
                 aria-label={
                     side === "left" ? "Baseline draft" : "Revised draft"
@@ -256,7 +263,7 @@ export default function Comparison({
                 onChange={(e) =>
                     setComparison((c) => c && { ...c, [side]: e.target.value })
                 }
-                className="min-h-10! w-full min-w-0 truncate py-2! text-[13px]!"
+                className="comparison-version border-line! bg-surface! min-h-10! w-full! min-w-0! truncate rounded-lg! py-2! text-[13px]!"
             >
                 {all.map((v) => (
                     <option key={v.id} value={v.id}>
@@ -271,20 +278,20 @@ export default function Comparison({
             aria-label="Draft comparison"
             className="comparison m-0 flex h-full min-h-0 flex-col p-0"
         >
-            <header className="comparison-top border-line bg-paper shrink-0 border-b px-8 pt-4 pb-3 max-[760px]:px-3 max-[760px]:pt-1 max-[760px]:pb-2">
-                <div className="mx-auto flex max-w-[1100px] items-center gap-2">
+            <header className="comparison-top bg-paper shrink-0 px-8 pt-5 pb-4 max-[760px]:px-4 max-[760px]:pt-3">
+                <div className="mx-auto flex max-w-[1120px] items-center gap-2">
                     <Button
                         icon={ArrowLeft}
                         label="Back to editing"
                         onClick={() => setComparison(null)}
                         className="size-10! min-h-10! min-w-10! shrink-0 rounded-lg! p-0!"
                     />
-                    <h2 className="min-w-0 flex-1 truncate font-serif text-[24px] leading-tight font-normal tracking-[-0.02em] max-[760px]:text-[19px]">
+                    <h2 className="m-0 min-w-0 flex-1 truncate font-sans text-[18px] leading-tight font-semibold tracking-[-0.02em] max-[760px]:text-[15px]">
                         Draft comparison
                     </h2>
                     <nav
                         aria-label="Changes"
-                        className="flex shrink-0 items-center gap-1"
+                        className="border-line bg-surface flex shrink-0 items-center gap-0.5 rounded-lg border p-0.5"
                     >
                         <Button
                             icon={ChevronUp}
@@ -312,35 +319,40 @@ export default function Comparison({
                         />
                     </nav>
                 </div>
-                <div className="mx-auto mt-2 flex max-w-[1100px] flex-wrap items-center gap-x-6 gap-y-1.5 pl-12 max-[760px]:mt-1 max-[760px]:pl-0">
-                    <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-4 gap-y-2 max-[760px]:basis-full max-[760px]:gap-x-2">
-                        {select("left", "Before")}
-                        {select("right", "After")}
+                <div className="mx-auto mt-4 grid max-w-[1120px] gap-3">
+                    <div className="grid min-w-0 grid-cols-2 gap-x-8 gap-y-2 max-[760px]:gap-x-3">
+                        {select("left", "Version")}
+                        {select("right", "Compare with")}
                     </div>
-                    <p
-                        aria-label="Legend"
-                        className="text-muted m-0 flex shrink-0 items-center gap-4 text-[12px]"
-                    >
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                aria-hidden="true"
-                                className="inline-block h-3 w-5 rounded-[3px] bg-[var(--diff-remove)] [background-image:linear-gradient(transparent_45%,color-mix(in_srgb,var(--danger)_70%,transparent)_45%,color-mix(in_srgb,var(--danger)_70%,transparent)_55%,transparent_55%)]"
-                            />
-                            Removed
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                aria-hidden="true"
-                                className="inline-block h-3 w-5 rounded-[3px] bg-[var(--diff-add)]"
-                            />
-                            Added
-                        </span>
-                    </p>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-muted m-0 text-[11px]">
+                            Read-only comparison · your writing stays unchanged
+                        </p>
+                        <p
+                            aria-label="Legend"
+                            className="text-muted m-0 flex shrink-0 items-center gap-3 text-[11px]"
+                        >
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    aria-hidden="true"
+                                    className="inline-block h-2 w-2 rounded-full bg-[color-mix(in_srgb,var(--danger)_55%,var(--surface))]"
+                                />
+                                Removed
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    aria-hidden="true"
+                                    className="inline-block h-2 w-2 rounded-full bg-[color-mix(in_srgb,var(--success)_55%,var(--surface))]"
+                                />
+                                Added
+                            </span>
+                        </p>
+                    </div>
                 </div>
             </header>
             <div
                 ref={scroller}
-                className="comparison-scroll min-h-0 flex-1 overflow-auto overscroll-contain px-8 pb-16 max-[760px]:px-5"
+                className="comparison-scroll min-h-0 flex-1 overflow-auto overscroll-contain px-8 pb-8 max-[760px]:px-4"
             >
                 {result.changes === 0 && (
                     <p className="text-muted mx-auto mt-6 mb-0 max-w-[680px] text-center text-[13.5px]">
@@ -349,37 +361,33 @@ export default function Comparison({
                 )}
                 {/* Side by side, on wider screens. One scrolling area keeps the sides in step. */}
                 <div
-                    className={`compare-split mx-auto max-w-[1100px] max-[760px]:hidden ${PROSE}`}
+                    className={`compare-split border-line bg-surface mx-auto max-w-[1120px] overflow-hidden rounded-xl border px-7 pt-6 pb-2 max-[760px]:hidden ${PROSE}`}
                 >
-                    <div className="bg-paper sticky top-0 z-[1] grid grid-cols-2 gap-x-12 pt-6 pb-3">
-                        {(
-                            [
-                                ["Before", left.name],
-                                ["After", right.name],
-                            ] as const
-                        ).map(([label, name]) => (
-                            <p
-                                key={label}
-                                className="border-line truncate border-b pb-2 font-sans text-[12px]"
-                            >
-                                <span className="text-muted font-semibold">
-                                    {label}
-                                </span>{" "}
-                                <span className="text-muted">· {name}</span>
-                            </p>
-                        ))}
-                    </div>
                     <div className="grid grid-cols-2 gap-x-12 bg-[linear-gradient(var(--border),var(--border))] bg-[length:1px_100%] [background-position:center] bg-no-repeat">
+                        {!rows.length && (
+                            <>
+                                <div className="pb-6">
+                                    {emptyVersion(left.id === "working")}
+                                </div>
+                                <div className="pb-6">
+                                    {emptyVersion(right.id === "working")}
+                                </div>
+                            </>
+                        )}
                         {rows.map((row, i) => (
                             <div key={i} className="contents">
                                 <div
                                     data-side="before"
                                     className="min-w-0 pb-6"
                                 >
-                                    {row.before}
+                                    {i === 0 && isEmpty(left.html)
+                                        ? emptyVersion(left.id === "working")
+                                        : row.before}
                                 </div>
                                 <div data-side="after" className="min-w-0 pb-6">
-                                    {row.after}
+                                    {i === 0 && isEmpty(right.html)
+                                        ? emptyVersion(right.id === "working")
+                                        : row.after}
                                 </div>
                             </div>
                         ))}
@@ -387,8 +395,15 @@ export default function Comparison({
                 </div>
                 {/* One text, on phones: each removal sits right before what replaced it. */}
                 <div
-                    className={`compare-unified mx-auto grid max-w-[680px] gap-5 pt-5 min-[761px]:hidden ${PROSE}`}
+                    className={`compare-unified border-line bg-surface mx-auto grid max-w-[680px] gap-5 rounded-xl border p-5 min-[761px]:hidden ${PROSE}`}
                 >
+                    {(isEmpty(left.html) || isEmpty(right.html)) && (
+                        <p className="text-muted font-sans text-[12px]">
+                            {isEmpty(left.html) ? left.name : right.name} is
+                            empty. The writing shown below belongs to the other
+                            version.
+                        </p>
+                    )}
                     {result.blocks.map((block, i) =>
                         block.kind === "same" ? (
                             <p key={i}>{block.text}</p>
@@ -410,22 +425,32 @@ export default function Comparison({
                     )}
                 </div>
             </div>
-            <div className="comparison-bottom border-line bg-paper m-0 flex min-h-[64px] shrink-0 flex-row items-center justify-end gap-2 border-t px-8 py-3 pb-[max(12px,env(safe-area-inset-bottom))] max-[760px]:px-4">
-                <Button
-                    className="comparison-restore border-line! border! hover:bg-[var(--control-hover)]!"
-                    disabled={right.id === "working"}
-                    onClick={() => {
-                        if (right.id !== "working") onRestore(right as Draft);
-                    }}
-                >
-                    Restore this version
-                </Button>
-                <Button
-                    className={PRIMARY_BUTTON}
-                    onClick={() => setComparison(null)}
-                >
-                    Continue editing
-                </Button>
+            <div className="comparison-bottom border-line bg-paper m-0 shrink-0 border-t px-8 py-3 pb-[max(12px,env(safe-area-inset-bottom))] max-[760px]:px-4">
+                <div className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-end gap-2">
+                    <p className="text-muted mr-auto min-w-0 flex-1 truncate text-[11px] max-[760px]:hidden">
+                        {restoreTarget
+                            ? `Restore “${restoreTarget.name}” to replace your current writing.`
+                            : "Choose a saved draft to restore it."}
+                    </p>
+                    <Button
+                        className="comparison-restore border-line! min-h-10! rounded-lg! border! px-3! text-[12px]! hover:bg-[var(--control-hover)]!"
+                        disabled={
+                            !restoreTarget || restoreTarget.html === doc.html
+                        }
+                        onClick={() => {
+                            if (restoreTarget)
+                                onRestore(restoreTarget as Draft);
+                        }}
+                    >
+                        Restore this version
+                    </Button>
+                    <Button
+                        className={`${PRIMARY_BUTTON} min-h-10! rounded-lg! px-4! text-[12px]!`}
+                        onClick={() => setComparison(null)}
+                    >
+                        Continue editing
+                    </Button>
+                </div>
             </div>
         </section>
     );

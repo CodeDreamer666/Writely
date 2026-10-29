@@ -5,18 +5,8 @@ import type { Preferences } from "../lib/writely/preferences";
  * The rules for reading and saving preferences live in src/lib/writely/preferences.ts.
  */
 
-/**
- * What: The colour themes a writer can choose.
- *
- * Used in:
- * - src/lib/writely/preferences.ts (preferencesSchema)
- * - src/app/layout.tsx (serverTheme)
- *
- * Effect: Only these names are accepted when saving or reading the theme.
- * Removing one makes accounts that chose it fall back to the default theme.
- * A new name also needs matching colours in src/styles/globals.css.
- */
-export const THEMES = ["light", "dark", "system"] as const;
+/** Only light is supported; older saved themes fall back to the default. */
+export const THEMES = ["light"] as const;
 
 /**
  * What: The widths of the writing column, with the label Settings shows
@@ -154,7 +144,7 @@ export const EXPORT_FONTS = {
  * keep it.
  */
 export const DEFAULT_PREFERENCES: Preferences = {
-    theme: "system",
+    theme: "light",
     libraryView: "cards",
     editorWidth: "standard",
     fontSize: 16,
