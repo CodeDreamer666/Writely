@@ -3,7 +3,7 @@ import {
     FEEDBACK_MAX,
     FEEDBACK_MIN,
     feedbackSchema,
-} from "~/lib/writely/feedback";
+} from "../../src/lib/writely/feedback";
 
 const valid = {
     category: "idea" as const,
