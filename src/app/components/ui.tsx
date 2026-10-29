@@ -14,6 +14,7 @@ import {
     useState,
     type ButtonHTMLAttributes,
     type ReactNode,
+    type TouchEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -139,6 +140,12 @@ export function ActionMenu({
 }) {
     // On phones the menu rises from the bottom of the screen as a sheet, like Google Docs.
     const [sheet, setSheet] = useState(false);
+    const [entered, setEntered] = useState(false);
+    const [leaving, setLeaving] = useState(false);
+    const [dragY, setDragY] = useState<number | null>(null);
+    const drag = useRef<{ y: number; time: number; active: boolean } | null>(
+        null,
+    );
     const [open, setOpen] = useState(false),
         [submenu, setSubmenu] = useState<MenuItem | null>(null),
         [menuPosition, setMenuPosition] = useState<{
@@ -177,12 +184,54 @@ export function ActionMenu({
             window.removeEventListener("resize", dismissResize);
         };
     }, [open, sheet]);
+    useEffect(() => {
+        if (open) {
+            setLeaving(false);
+            setDragY(null);
+            // Two frames, so the sheet paints off-screen before it slides up.
+            let second = 0;
+            const first = requestAnimationFrame(() => {
+                second = requestAnimationFrame(() => setEntered(true));
+            });
+            return () => {
+                cancelAnimationFrame(first);
+                cancelAnimationFrame(second);
+            };
+        }
+        if (!sheet) return;
+        setLeaving(true);
+        const done = setTimeout(() => setLeaving(false), 300);
+        return () => clearTimeout(done);
+    }, [open, sheet]);
+    const touchStart = (e: TouchEvent<HTMLDivElement>) => {
+        // Only a pull from the top of the sheet closes it; otherwise the list scrolls.
+        drag.current = {
+            y: e.touches[0]!.clientY,
+            time: e.timeStamp,
+            active: e.currentTarget.scrollTop <= 0,
+        };
+    };
+    const touchMove = (e: TouchEvent<HTMLDivElement>) => {
+        const start = drag.current;
+        if (!start?.active) return;
+        const dy = e.touches[0]!.clientY - start.y;
+        setDragY(dy > 0 ? dy : 0);
+    };
+    const touchEnd = (e: TouchEvent<HTMLDivElement>) => {
+        const start = drag.current;
+        drag.current = null;
+        if (!start?.active || dragY === null) return;
+        const speed = dragY / Math.max(1, e.timeStamp - start.time);
+        if (dragY > 100 || (dragY > 24 && speed > 0.5)) setOpen(false);
+        else setDragY(null);
+    };
     const menuItems = () => [
         ...(menu.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ??
             []),
     ];
     const reveal = (last = false) => {
         setSubmenu(null);
+        setEntered(false);
         setSheet(window.matchMedia("(max-width: 640px)").matches);
         const rect = trigger.current!.getBoundingClientRect();
         setMenuPosition({
@@ -291,13 +340,25 @@ export function ActionMenu({
                     <MoreHorizontal size={16} strokeWidth={1.6} />
                 )}
             </button>
-            {open &&
+            {(open || leaving) &&
                 createPortal(
                     <>
                     {sheet && (
                         <div
                             aria-hidden="true"
-                            className="fixed inset-0 z-[34] bg-black/40"
+                            className="fixed inset-0 z-[34] bg-black/40 motion-reduce:transition-none"
+                            style={{
+                                opacity:
+                                    open && entered
+                                        ? dragY === null
+                                            ? 1
+                                            : Math.max(0, 1 - dragY / 400)
+                                        : 0,
+                                transition:
+                                    dragY === null
+                                        ? "opacity 280ms cubic-bezier(0.32, 0.72, 0, 1)"
+                                        : "none",
+                            }}
                         />
                     )}
                     <div
@@ -307,9 +368,23 @@ export function ActionMenu({
                                 ? "document-menu fixed inset-x-0 bottom-0 z-[35] max-h-[85dvh] w-full overflow-y-auto rounded-t-[28px] border-0 bg-[var(--surface)] px-2 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] [&_button]:w-full [&_button]:justify-start [&_button]:text-[var(--text)]"
                                 : "document-menu fixed [right:auto] [z-index:35] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)]"
                         }
+                        onTouchStart={sheet ? touchStart : undefined}
+                        onTouchMove={sheet ? touchMove : undefined}
+                        onTouchEnd={sheet ? touchEnd : undefined}
+                        onTouchCancel={sheet ? () => setDragY(null) : undefined}
                         style={
                             sheet
-                                ? undefined
+                                ? {
+                                      transform:
+                                          open && entered
+                                              ? `translateY(${dragY ?? 0}px)`
+                                              : "translateY(100%)",
+                                      transition:
+                                          dragY === null
+                                              ? "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)"
+                                              : "none",
+                                      overscrollBehavior: "contain",
+                                  }
                                 : {
                                       ...menuPosition,
                                       width: menuWidth,
