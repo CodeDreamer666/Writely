@@ -320,11 +320,6 @@ export default function Comparison({
                 ref={scroller}
                 className="comparison-scroll min-h-0 flex-1 overflow-auto overscroll-contain px-8 pb-8 max-[760px]:px-4"
             >
-                {result.changes === 0 && (
-                    <p className="text-muted mx-auto mt-6 mb-0 max-w-[680px] text-center text-[13.5px]">
-                        These two versions are the same.
-                    </p>
-                )}
                 {/* Side by side, on wider screens. One scrolling area keeps the sides in step. */}
                 <div
                     className={`compare-split border-line bg-surface mx-auto max-w-[1120px] overflow-hidden rounded-xl border px-7 pt-6 pb-2 max-[760px]:hidden ${PROSE}`}
