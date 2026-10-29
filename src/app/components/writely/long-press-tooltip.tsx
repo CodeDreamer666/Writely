@@ -1,7 +1,6 @@
 "use client";
 import {
     createContext,
-    useCallback,
     useContext,
     useEffect,
     useLayoutEffect,
@@ -15,7 +14,12 @@ import { TOOLTIP_CLASS } from "~/config/ui";
 
 /**
  * Touch screens have no hover, so toolbar buttons inside <LongPressTooltips> show their name when
- * held. A short tap runs the button as usual; after a hold, the release is swallowed.
+ * held. A short tap runs the button as usual; after a hold, the release does nothing.
+ *
+ * The whole gesture is handled here rather than left to the browser. A finger resting on a button
+ * would otherwise make the browser move focus out of the editor (dropping and re-raising the
+ * keyboard), so touches that start on a toolbar button are claimed at once: taps are turned into
+ * clicks, and sideways drags scroll the toolbar row by hand.
  */
 
 /** How long a finger must rest on a button before its tooltip appears. */
@@ -24,71 +28,150 @@ const LONG_PRESS_MS = 500;
 const MOVE_TOLERANCE = 10;
 /** Space kept between a tooltip and the screen edge, and between it and its button. */
 const EDGE = 8;
+/** Per-frame fraction of speed a flick keeps while the row coasts to a stop. */
+const FRICTION = 0.95;
 
 type Tip = { label: string; rect: DOMRect };
-type Tips = {
-    show: (label: string, el: HTMLElement) => void;
-    hide: () => void;
-    /** A finger is down on a toolbar button: the editor must keep focus. */
-    touching: (on: boolean) => void;
+
+const Active = createContext(false);
+
+/** The button a touch landed on, if it is a plain toolbar button (not a menu or the link form). */
+const pressTarget = (target: EventTarget | null) => {
+    const button = target instanceof Element ? target.closest("button") : null;
+    return button && !button.closest('[role="menu"], form') ? button : null;
 };
 
-const TipContext = createContext<Tips | null>(null);
+type Gesture = {
+    button: HTMLButtonElement;
+    row: HTMLElement | null;
+    x: number;
+    scroll: number;
+    lastX: number;
+    lastTime: number;
+    velocity: number;
+    moved: boolean;
+    held: boolean;
+};
 
 export function LongPressTooltips({ children }: { children: ReactNode }) {
     const [tip, setTip] = useState<Tip | null>(null);
+    const area = useRef<HTMLDivElement>(null);
     const node = useRef<HTMLDivElement>(null);
-    const show = useCallback(
-        (label: string, el: HTMLElement) =>
-            setTip({ label, rect: el.getBoundingClientRect() }),
-        [],
-    );
-    const hide = useCallback(() => setTip(null), []);
-    const touch = useRef(0);
-    const touching = useCallback((on: boolean) => {
-        window.clearTimeout(touch.current);
-        // Stay guarded a moment past release, when the browser may still move focus.
-        if (on) touch.current = -1;
-        else touch.current = window.setTimeout(() => (touch.current = 0), 400);
-    }, []);
-    const tips = useRef<Tips>({ show, hide, touching }).current;
 
-    // A hold on a toolbar button must not take focus from the editor, or the keyboard drops and
-    // rises again. Put focus straight back before the keyboard has time to react.
     useEffect(() => {
-        const keep = (event: FocusEvent) => {
-            const el = event.target;
-            if (
-                !touch.current ||
-                event.relatedTarget ||
-                !(el instanceof HTMLElement) ||
-                !el.isContentEditable
-            )
-                return;
-            queueMicrotask(() => el.focus({ preventScroll: true }));
+        const el = area.current;
+        if (!el) return;
+        let timer: number | undefined;
+        let frame = 0;
+        let gesture: Gesture | null = null;
+        const stop = () => {
+            window.clearTimeout(timer);
+            timer = undefined;
         };
-        document.addEventListener("focusout", keep, true);
+        const coast = (row: HTMLElement, velocity: number) => {
+            cancelAnimationFrame(frame);
+            const step = () => {
+                velocity *= FRICTION;
+                if (Math.abs(velocity) < 0.02) return;
+                row.scrollLeft += velocity * 16;
+                frame = requestAnimationFrame(step);
+            };
+            frame = requestAnimationFrame(step);
+        };
+        const start = (event: TouchEvent) => {
+            const button = pressTarget(event.target);
+            const touch = event.touches[0];
+            if (!button || !touch || event.touches.length > 1) return;
+            // Claiming the touch keeps focus (and the keyboard) exactly where it was.
+            event.preventDefault();
+            cancelAnimationFrame(frame);
+            const row = button.closest<HTMLElement>(".editor-toolbar-shell");
+            const current: Gesture = {
+                button,
+                row,
+                x: touch.clientX,
+                scroll: row?.scrollLeft ?? 0,
+                lastX: touch.clientX,
+                lastTime: event.timeStamp,
+                velocity: 0,
+                moved: false,
+                held: false,
+            };
+            gesture = current;
+            timer = window.setTimeout(() => {
+                if (gesture !== current || current.moved) return;
+                current.held = true;
+                setTip({
+                    label:
+                        current.button.getAttribute("aria-label") ??
+                        current.button.textContent?.trim() ??
+                        "",
+                    rect: current.button.getBoundingClientRect(),
+                });
+            }, LONG_PRESS_MS);
+        };
+        const move = (event: TouchEvent) => {
+            const touch = event.touches[0];
+            if (!gesture || !touch) return;
+            event.preventDefault();
+            const dx = touch.clientX - gesture.x;
+            if (!gesture.moved && Math.abs(dx) > MOVE_TOLERANCE) {
+                gesture.moved = true;
+                stop();
+                setTip(null);
+            }
+            if (!gesture.moved || !gesture.row) return;
+            gesture.row.scrollLeft = gesture.scroll - dx;
+            const dt = event.timeStamp - gesture.lastTime;
+            if (dt > 0)
+                gesture.velocity = (gesture.lastX - touch.clientX) / dt;
+            gesture.lastX = touch.clientX;
+            gesture.lastTime = event.timeStamp;
+        };
+        const end = (event: TouchEvent) => {
+            const done = gesture;
+            gesture = null;
+            stop();
+            setTip(null);
+            if (!done) return;
+            event.preventDefault();
+            if (done.moved) {
+                if (done.row) coast(done.row, done.velocity);
+            } else if (!done.held && !done.button.disabled) done.button.click();
+        };
+        const cancel = () => {
+            gesture = null;
+            stop();
+            setTip(null);
+        };
+        // preventDefault only counts on listeners that are not passive.
+        const options = { passive: false } as const;
+        el.addEventListener("touchstart", start, options);
+        el.addEventListener("touchmove", move, options);
+        el.addEventListener("touchend", end, options);
+        el.addEventListener("touchcancel", cancel);
         return () => {
-            document.removeEventListener("focusout", keep, true);
-            window.clearTimeout(touch.current);
+            stop();
+            cancelAnimationFrame(frame);
+            el.removeEventListener("touchstart", start);
+            el.removeEventListener("touchmove", move);
+            el.removeEventListener("touchend", end);
+            el.removeEventListener("touchcancel", cancel);
         };
     }, []);
 
-    // Releasing, cancelling, scrolling or touching elsewhere all dismiss it.
+    // The keyboard moving means the button the tooltip points at has moved too.
     useEffect(() => {
         if (!tip) return;
-        const events = ["pointerup", "pointercancel", "pointerdown"] as const;
-        for (const name of events) window.addEventListener(name, hide);
-        window.addEventListener("scroll", hide, true);
-        // The keyboard moving means the button the tooltip points at has moved too.
+        const hide = () => setTip(null);
         const viewport = window.visualViewport;
         viewport?.addEventListener("resize", hide);
+        window.addEventListener("scroll", hide, true);
         return () => {
             viewport?.removeEventListener("resize", hide);
-            for (const name of events) window.removeEventListener(name, hide);
             window.removeEventListener("scroll", hide, true);
         };
-    }, [tip, hide]);
+    }, [tip]);
 
     // Centre over the button, then slide back inside the visible viewport if it overhangs.
     useLayoutEffect(() => {
@@ -103,104 +186,42 @@ export function LongPressTooltips({ children }: { children: ReactNode }) {
     }, [tip]);
 
     return (
-        <TipContext.Provider value={tips}>
-            {children}
+        <Active.Provider value={true}>
+            {/* No box of its own: it only gives the touch listeners something to sit on. */}
+            <div ref={area} className="contents">
+                {children}
+            </div>
             {tip &&
                 createPortal(
                     <div
                         ref={node}
                         role="tooltip"
-                        className={`${TOOLTIP_CLASS} pointer-events-none fixed -translate-y-full [padding:6px_10px] whitespace-nowrap`}
+                        className={`${TOOLTIP_CLASS} pointer-events-none fixed -translate-y-full whitespace-nowrap [padding:6px_10px]`}
                     >
                         {tip.label}
                     </div>,
                     document.body,
                 )}
-        </TipContext.Provider>
+        </Active.Provider>
     );
 }
 
-/**
- * Press handlers for one toolbar button. Outside <LongPressTooltips> (desktop) they do nothing and
- * `enabled` is false, so the hover tooltip stays in charge.
- */
-export function useLongPress(label: string) {
-    const tips = useContext(TipContext);
-    const timer = useRef<number | undefined>(undefined);
-    const origin = useRef<{ x: number; y: number } | null>(null);
-    const held = useRef(false);
-    const prior = useRef<Element | null>(null);
-    // Holding a button can pull focus (and the keyboard) away from the editor; hand it back.
-    const restoreFocus = () => {
-        const before = prior.current;
-        if (
-            before instanceof HTMLElement &&
-            before.isContentEditable &&
-            document.activeElement !== before
-        )
-            before.focus({ preventScroll: true });
-    };
-    const clear = () => {
-        window.clearTimeout(timer.current);
-        timer.current = undefined;
-        origin.current = null;
-    };
-    useEffect(() => () => window.clearTimeout(timer.current), []);
+const NO_PROPS: HTMLAttributes<HTMLElement> = {};
+const BLOCK_MENU: HTMLAttributes<HTMLElement> = {
+    onContextMenu: (event) => event.preventDefault(),
+};
+const same = <A extends unknown[]>(run: (...args: A) => void) => run;
 
-    if (!tips)
-        return {
-            enabled: false,
-            props: {} as HTMLAttributes<HTMLElement>,
-            click: <A extends unknown[]>(run: (...args: A) => void) => run,
-        };
+/**
+ * Props for one toolbar button. Outside <LongPressTooltips> (desktop) they do nothing and
+ * `enabled` is false, so the hover tooltip stays in charge. Inside it, the provider drives the
+ * touches and this only stops the browser's own long-press menu.
+ */
+export function useLongPress(_label?: string) {
+    const enabled = useContext(Active);
     return {
-        enabled: true,
-        props: {
-            onPointerDown: (event) => {
-                if (event.pointerType === "mouse") return;
-                held.current = false;
-                tips.touching(true);
-                prior.current = document.activeElement;
-                origin.current = { x: event.clientX, y: event.clientY };
-                const el = event.currentTarget;
-                timer.current = window.setTimeout(() => {
-                    held.current = true;
-                    restoreFocus();
-                    tips.show(label, el);
-                }, LONG_PRESS_MS);
-            },
-            onPointerMove: (event) => {
-                const start = origin.current;
-                if (
-                    start &&
-                    Math.hypot(
-                        event.clientX - start.x,
-                        event.clientY - start.y,
-                    ) > MOVE_TOLERANCE
-                )
-                    clear();
-            },
-            onPointerUp: () => {
-                tips.touching(false);
-                clear();
-                if (held.current) restoreFocus();
-            },
-            onPointerCancel: () => {
-                tips.touching(false);
-                clear();
-                if (held.current) restoreFocus();
-                tips.hide();
-            },
-            onContextMenu: (event) => event.preventDefault(),
-        } satisfies HTMLAttributes<HTMLElement>,
-        click:
-            <A extends unknown[]>(run: (...args: A) => void) =>
-            (...args: A) => {
-                if (held.current) {
-                    held.current = false;
-                    return;
-                }
-                run(...args);
-            },
+        enabled,
+        props: enabled ? BLOCK_MENU : NO_PROPS,
+        click: same,
     };
 }
