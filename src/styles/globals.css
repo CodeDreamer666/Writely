@@ -364,11 +364,12 @@ body {
 @media (max-width: 600px) {
     .app .paper {
         width: calc(100% - 36px);
-        padding-top: 24px;
+        padding-top: 8px;
     }
     .app .editor-header {
         gap: 2px;
         padding-inline: 4px;
+        height: calc(48px + env(safe-area-inset-top));
     }
     .app .editor-header > :first-child span {
         position: absolute;
