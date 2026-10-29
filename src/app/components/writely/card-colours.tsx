@@ -52,12 +52,13 @@ export function CardColours({
                           : 0;
                 if (!step) return;
                 e.preventDefault();
+                const group = e.currentTarget;
                 const count = CARD_COLOUR_PRESETS.length;
                 const next = (Math.max(0, index) + step + count) % count;
                 const [, bg, fg] = CARD_COLOUR_PRESETS[next]!;
                 onChange(bg, fg);
                 requestAnimationFrame(() =>
-                    e.currentTarget
+                    group
                         .querySelector<HTMLElement>(`[data-index="${next}"]`)
                         ?.focus(),
                 );
@@ -79,21 +80,25 @@ export function CardColours({
                             onChange(bg, fg);
                             onPick?.();
                         }}
-                        className="min-h-0! min-w-0! shrink-0 rounded-full! border! border-[color-mix(in_srgb,var(--text)_18%,transparent)]! p-0! transition-transform hover:scale-110 motion-reduce:hover:scale-100"
-                        style={{
-                            width: size,
-                            height: size,
-                            background: bg,
-                            color: fg,
-                        }}
+                        className="size-11! min-h-11! min-w-11! shrink-0 rounded-full! border-0! bg-transparent! p-0! focus-visible:[box-shadow:0_0_0_2px_var(--control-focus)]!"
                     >
-                        {checked && (
-                            <Check
-                                size={Math.round(size * 0.55)}
-                                strokeWidth={2.2}
-                                aria-hidden="true"
-                            />
-                        )}
+                        <span
+                            aria-hidden="true"
+                            className="flex items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--text)_35%,transparent)]"
+                            style={{
+                                width: size,
+                                height: size,
+                                background: `color-mix(in srgb, ${bg} var(--card-strength), var(--card-base))`,
+                                color: `var(--card-text-override, ${fg})`,
+                            }}
+                        >
+                            {checked && (
+                                <Check
+                                    size={Math.round(size * 0.65)}
+                                    strokeWidth={3}
+                                />
+                            )}
+                        </span>
                     </button>
                 );
             })}
@@ -216,7 +221,7 @@ export function CardColourPopover({
                 size={24}
                 onChange={onChange}
                 onPick={dismiss}
-                className="gap-2 [&_[aria-checked=true]]:outline-2 [&_[aria-checked=true]]:outline-offset-2 [&_[aria-checked=true]]:outline-[color-mix(in_srgb,var(--text)_28%,transparent)] [&_[aria-checked=true]]:outline-solid"
+                className="gap-0"
             />
         </div>,
         document.body,

@@ -1,6 +1,8 @@
 "use client";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
+    ChevronLeft,
+    ChevronRight,
     MoreHorizontal,
     X,
     type LucideIcon,
@@ -14,6 +16,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import {
+    DANGER_BUTTON,
+    DIALOG_ACTIONS,
     DIALOG_CLASS,
     DIALOG_HEADING,
     OVERLAY_CLASS,
@@ -104,7 +108,8 @@ export function IconButton({
 
 export type MenuItem = {
     label: string;
-    onSelect: () => void;
+    onSelect?: () => void;
+    children?: MenuItem[];
     danger?: boolean;
     separator?: boolean;
 };
@@ -127,6 +132,7 @@ export function ActionMenu({
     menuWidth?: number;
 }) {
     const [open, setOpen] = useState(false),
+        [submenu, setSubmenu] = useState<MenuItem | null>(null),
         [menuPosition, setMenuPosition] = useState<{
             top?: number;
             left?: number;
@@ -162,13 +168,14 @@ export function ActionMenu({
         ) ?? []),
     ];
     const reveal = (last = false) => {
+        setSubmenu(null);
         const rect = trigger.current!.getBoundingClientRect();
         setMenuPosition({
             top: Math.max(
                 8,
-                rect.bottom + items.length * 40 + 12 <= window.innerHeight
+                rect.bottom + items.length * 48 + 16 <= window.innerHeight
                     ? rect.bottom + 4
-                    : rect.top - items.length * 40 - 12,
+                    : rect.top - items.length * 48 - 16,
             ),
             left: Math.max(
                 8,
@@ -189,6 +196,10 @@ export function ActionMenu({
         trigger.current?.focus();
         action();
     };
+    const showSubmenu = (item: MenuItem | null) => {
+        setSubmenu(item);
+        requestAnimationFrame(() => menuItems()[0]?.focus());
+    };
     return (
         <div
             className={
@@ -198,8 +209,27 @@ export function ActionMenu({
             onKeyDown={(e) => {
                 if (e.key === "Escape") {
                     e.stopPropagation();
-                    setOpen(false);
-                    trigger.current?.focus();
+                    if (submenu) showSubmenu(null);
+                    else {
+                        setOpen(false);
+                        trigger.current?.focus();
+                    }
+                }
+                if (e.key === "ArrowLeft" && submenu) {
+                    e.preventDefault();
+                    showSubmenu(null);
+                }
+                if (e.key === "ArrowRight" && !submenu) {
+                    const current = items.find(
+                        (item) =>
+                            item.children &&
+                            item.label ===
+                                document.activeElement?.textContent?.trim(),
+                    );
+                    if (current) {
+                        e.preventDefault();
+                        showSubmenu(current);
+                    }
                 }
                 if (e.key === "Tab") setOpen(false);
                 if (
@@ -249,7 +279,7 @@ export function ActionMenu({
             {open && (
                 <div
                     className={
-                        "document-menu fixed [top:100%] [right:auto] [z-index:15] [width:144px] [min-width:144px] [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)] [.draft-meta_&]:absolute [.draft-meta_&]:[top:calc(100%_+_4px)]! [.draft-meta_&]:[right:0] [.draft-meta_&]:[left:auto]! [.draft-meta_&]:[z-index:30] [.draft-meta_&]:[width:144px]"
+                        "document-menu fixed [top:100%] [right:auto] [z-index:15] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)] [.draft-meta_&]:absolute [.draft-meta_&]:[top:calc(100%_+_4px)]! [.draft-meta_&]:[right:0] [.draft-meta_&]:[left:auto]! [.draft-meta_&]:[z-index:30] [.draft-meta_&]:[width:144px]"
                     }
                     style={{
                         ...menuPosition,
@@ -257,16 +287,36 @@ export function ActionMenu({
                         minWidth: menuWidth,
                     }}
                     role="menu"
-                    aria-label={menuLabel}
+                    aria-label={submenu ? submenu.label : menuLabel}
                 >
-                    {items.map((item) => (
+                    {submenu && (
+                        <button
+                            role="menuitem"
+                            onClick={() => showSubmenu(null)}
+                        >
+                            <ChevronLeft size={14} aria-hidden="true" /> Back
+                        </button>
+                    )}
+                    {(submenu?.children ?? items).map((item) => (
                         <button
                             key={item.label}
                             role="menuitem"
                             className={`${item.danger ? "danger [color:var(--danger)] [.account-actions_button&]:[border-top-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-right-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-bottom-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-left-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[color:var(--danger)] [.account-actions_button&]:[background:color-mix(in_srgb,_var(--danger)_8%,_var(--bg))] [.account-actions_button&:active]:[color:var(--danger)] [.account-actions_button&:active]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.account-actions_button&:hover]:[color:var(--danger)] [.account-actions_button&:hover]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.document-menu_button&]:[color:var(--danger)]" : ""} ${item.separator ? "menu-separated [.document-menu_&]:[margin-top:4px] [.document-menu_&]:[border-radius:0_0_4px_4px] [.document-menu_&]:[border-top-width:1px] [.document-menu_&]:[border-top-style:solid] [.document-menu_&]:[border-top-color:var(--border)] [.document-menu_&]:[padding-top:10px]" : ""}`}
-                            onClick={() => choose(item.onSelect)}
+                            aria-haspopup={item.children ? "menu" : undefined}
+                            onClick={() =>
+                                item.children
+                                    ? showSubmenu(item)
+                                    : item.onSelect && choose(item.onSelect)
+                            }
                         >
                             {item.label}
+                            {item.children && (
+                                <ChevronRight
+                                    size={14}
+                                    className="ml-auto"
+                                    aria-hidden="true"
+                                />
+                            )}
                         </button>
                     ))}
                 </div>
@@ -356,5 +406,58 @@ export function Dialog({
             </section>
         </div>,
         document.body,
+    );
+}
+
+/** Confirm a destructive action only after the user types the required word. */
+export function DeleteDialog({
+    title,
+    description,
+    onClose,
+    onConfirm,
+}: {
+    title: string;
+    description: ReactNode;
+    onClose: () => void;
+    onConfirm: () => void;
+}) {
+    const [confirmation, setConfirmation] = useState("");
+    return (
+        <Dialog
+            title={title}
+            onClose={onClose}
+            describedBy="delete-dialog-description"
+        >
+            <form
+                onSubmit={(event) => {
+                    event.preventDefault();
+                    if (confirmation === "delete") onConfirm();
+                }}
+            >
+                <p id="delete-dialog-description">{description}</p>
+                <label htmlFor="delete-dialog-confirmation">
+                    Type delete to confirm
+                </label>
+                <input
+                    id="delete-dialog-confirmation"
+                    value={confirmation}
+                    onChange={(event) => setConfirmation(event.target.value)}
+                    autoComplete="off"
+                    spellCheck={false}
+                />
+                <div className={DIALOG_ACTIONS}>
+                    <button type="button" onClick={onClose}>
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        className={DANGER_BUTTON}
+                        disabled={confirmation !== "delete"}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </Dialog>
     );
 }

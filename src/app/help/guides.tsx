@@ -460,10 +460,10 @@ export const GUIDES: Guide[] = [
                         body: (
                             <>
                                 In the card’s row, click the <Ui>bin</Ui> on the
-                                right. The card is removed straight away and
-                                can’t be brought back, so copy any words you
-                                want to keep first. Your page text is never
-                                affected.
+                                right. Type <Ui>delete</Ui> in the confirmation
+                                dialog and confirm to remove the card. Copy any
+                                words you want to keep first. Your page text is
+                                never affected.
                             </>
                         ),
                     },
@@ -792,25 +792,12 @@ export const GUIDES: Guide[] = [
                 title: "Turn focus mode on",
                 steps: [
                     {
-                        title: "Click ⋯ at the top-right",
+                        title: "Click Enter focus mode",
                         body: (
                             <>
-                                In the top bar of a document, the last button on
-                                the right is three dots, <Ui>⋯</Ui> (its label
-                                is <Ui>Document options</Ui>). Click it to open
-                                the menu.
-                            </>
-                        ),
-                        shot: "focus-menu",
-                        alt: "The Document options menu open under the three-dot button. The button and Turn on focus mode are ringed.",
-                        caption: "The same menu holds export and shortcuts.",
-                    },
-                    {
-                        title: "Click Turn on focus mode",
-                        body: (
-                            <>
-                                The screen clears at once and only your text is
-                                left.
+                                Click the focus icon at the top-right of the
+                                document. The screen clears and only your text
+                                is left.
                             </>
                         ),
                         notes: [
@@ -1417,72 +1404,23 @@ export const GUIDES: Guide[] = [
                 title: "Export a document",
                 steps: [
                     {
-                        title: "Open the document and click ⋯",
+                        title: "Open the document menu",
                         body: (
                             <>
-                                Open the document you want. In the top bar,
-                                click the three dots <Ui>⋯</Ui> at the far right
-                                (its label is <Ui>Document options</Ui>).
-                            </>
-                        ),
-                        shot: "export-menu",
-                        alt: "The Document options menu with the three-dot button, Export as Word and Export as PDF ringed.",
-                    },
-                    {
-                        title: "Click Export as Word or Export as PDF",
-                        body: (
-                            <>
-                                Choose <Ui>Export as Word (.docx)</Ui> for a
-                                file you can keep editing in Word or Google
-                                Docs, or <Ui>Export as PDF (.pdf)</Ui> for a
-                                file that looks the same everywhere.
+                                In your document library, open the three-dot
+                                menu for the document you want to export.
                             </>
                         ),
                     },
                     {
-                        title: "Wait for the download",
+                        title: "Choose an export format",
                         body: (
                             <>
-                                While the file is being made, the <Ui>⋯</Ui>{" "}
-                                button shows a spinning circle. Then your
-                                browser downloads the file, usually to your{" "}
-                                <em>Downloads</em> folder, named after the
-                                document’s title.
+                                Choose <Ui>Export</Ui>, then{" "}
+                                <Ui>Word (.docx)</Ui> or <Ui>PDF (.pdf)</Ui>.
+                                Your browser downloads the file.
                             </>
                         ),
-                        notes: [
-                            {
-                                kind: "missing",
-                                text: (
-                                    <>
-                                        If a message says your latest changes
-                                        aren’t saved yet, check your connection,
-                                        wait for <Ui>Saved</Ui> at the
-                                        top-right, and try again. Writely won’t
-                                        export an out-of-date copy.
-                                    </>
-                                ),
-                            },
-                        ],
-                    },
-                ],
-            },
-            {
-                title: "Export on a phone",
-                steps: [
-                    {
-                        title: "Tap ⋯, then an Export item",
-                        body: (
-                            <>
-                                On a phone, tap <Ui>⋯</Ui> at the top-right of
-                                the document. The menu is longer (it also opens{" "}
-                                <Ui>Cards</Ui>, <Ui>Saved drafts</Ui> and{" "}
-                                <Ui>Revision goals</Ui>); the two export items
-                                are in the middle.
-                            </>
-                        ),
-                        shot: "export-phone",
-                        alt: "The document menu on a phone with the three-dot button and Export as Word ringed.",
                     },
                 ],
             },

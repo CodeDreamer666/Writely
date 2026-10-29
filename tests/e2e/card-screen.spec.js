@@ -8,10 +8,7 @@ import {
 test.setTimeout(90_000);
 
 const cardsMenu = async (page) => {
-    await page
-        .getByRole("button", { name: "Document options", exact: true })
-        .click();
-    await page.getByRole("menuitem", { name: "Cards", exact: true }).click();
+    await page.getByRole("button", { name: "Thoughts", exact: true }).click();
 };
 const screen = (page) => page.getByRole("dialog", { name: /card$/ });
 const cardText = (page) =>

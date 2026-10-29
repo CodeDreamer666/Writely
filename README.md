@@ -39,7 +39,8 @@ uses the newest stable 7.x release rather than the Prisma 8 release candidate.
 Create a PostgreSQL database before starting the app. Set `DATABASE_URL` to its
 connection string, for example `postgresql://USER:PASSWORD@HOST:5432/writely?schema=public`.
 URL-encode special characters in credentials and use the TLS settings required by
-your database provider. If the runtime connection uses a pooler, optionally set
+your database provider. For TLS with certificate and hostname verification, use
+`sslmode=verify-full` in the connection URL. If the runtime connection uses a pooler, optionally set
 `DIRECT_URL` to the direct connection for Prisma migrations.
 
 Prisma configuration lives in `prisma7.config.ts`. Run `npm run db:migrate` to apply

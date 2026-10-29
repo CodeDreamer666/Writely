@@ -1,5 +1,6 @@
 "use client";
 import {
+    ArrowLeft,
     Feather,
     Settings,
 } from "lucide-react";
@@ -21,8 +22,10 @@ export async function logOut() {
  */
 export function AppHeader({
     search,
+    back,
 }: {
     search?: ReactNode;
+    back?: { href: string; label: string; onClick?: () => void };
 }) {
     return (
         <header
@@ -47,12 +50,32 @@ export function AppHeader({
                 className="ml-auto flex items-center gap-1 justify-self-end"
             >
                 <Link
-                    href="/settings"
-                    aria-label="Settings"
-                    title="Settings"
+                    href={back?.href ?? "/settings"}
+                    aria-label={back?.label ?? "Settings"}
+                    title={back?.label ?? "Settings"}
+                    onNavigate={
+                        back?.onClick
+                            ? (event) => {
+                                  event.preventDefault();
+                                  back.onClick?.();
+                              }
+                            : undefined
+                    }
                     className="text-muted hover:text-ink inline-flex size-11 items-center justify-center rounded-lg no-underline hover:bg-[var(--control-hover)] focus-visible:[box-shadow:0_0_0_2px_var(--control-ring)] focus-visible:outline-none"
                 >
-                    <Settings size={18} strokeWidth={1.6} />
+                    {back ? (
+                        <ArrowLeft
+                            size={18}
+                            strokeWidth={1.6}
+                            aria-hidden="true"
+                        />
+                    ) : (
+                        <Settings
+                            size={18}
+                            strokeWidth={1.6}
+                            aria-hidden="true"
+                        />
+                    )}
                 </Link>
             </nav>
         </header>

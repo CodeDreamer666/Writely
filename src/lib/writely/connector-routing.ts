@@ -350,10 +350,182 @@ export function roundedConnectorPath(points: XY[], obstacles: TextObstacle[]) {
                 break;
             radius /= 2;
         }
-        if (radius <= 0.1) path += ` L ${b.x} ${b.y}`;
-        else
-            path += ` L ${entry.x} ${entry.y} Q ${b.x} ${b.y} ${exit.x} ${exit.y}`;
+        path += ` L ${entry.x} ${entry.y} Q ${b.x} ${b.y} ${exit.x} ${exit.y}`;
     }
     const last = points.at(-1)!;
     return `${path} L ${last.x} ${last.y}`;
+}
+
+/** Pick a smooth, outward-facing curve from the visible card edge to its text. */
+export function smoothCardConnector(
+    card: Rect,
+    target: XY,
+    obstacles: TextObstacle[],
+    collapsed = false,
+): string | null {
+    type Port = { point: XY; normal: XY };
+    const clamp = (n: number, min: number, max: number) =>
+        Math.max(min, Math.min(max, n));
+    const make = (x: number, y: number, nx: number, ny: number): Port => ({
+        point: { x: card.x + x * card.width, y: card.y + y * card.height },
+        normal: { x: nx, y: ny },
+    });
+    // The leaf has an irregular outline, so sample its actual Bézier boundary.
+    const leafPorts = (): Port[] => {
+        const curves: XY[][] = [
+            [
+                { x: 8, y: 41 },
+                { x: 4, y: 29 },
+                { x: 9, y: 12 },
+                { x: 23, y: 7 },
+            ],
+            [
+                { x: 23, y: 7 },
+                { x: 31, y: 3 },
+                { x: 38, y: 6 },
+            ],
+            [
+                { x: 38, y: 6 },
+                { x: 42, y: 19 },
+                { x: 33, y: 29 },
+            ],
+            [
+                { x: 33, y: 29 },
+                { x: 23, y: 39 },
+                { x: 8, y: 41 },
+            ],
+        ];
+        const evaluate = (points: XY[], t: number): XY => {
+            let row = points;
+            while (row.length > 1)
+                row = row.slice(1).map((p, i) => ({
+                    x: row[i]!.x * (1 - t) + p.x * t,
+                    y: row[i]!.y * (1 - t) + p.y * t,
+                }));
+            return row[0]!;
+        };
+        return curves.flatMap((curve) =>
+            [0.2, 0.5, 0.8].map((t) => {
+                const p = evaluate(curve, t),
+                    before = evaluate(curve, t - 0.001),
+                    after = evaluate(curve, t + 0.001);
+                const dx = ((after.x - before.x) * card.width) / 44,
+                    dy = ((after.y - before.y) * card.height) / 48;
+                const size = Math.hypot(dx, dy) || 1;
+                return make(p.x / 44, p.y / 48, dy / size, -dx / size);
+            }),
+        );
+    };
+    const ports: Port[] = collapsed
+        ? leafPorts()
+        : [
+              ...[
+                  clamp((target.y - card.y) / card.height, 0.12, 0.88),
+                  0.25,
+                  0.5,
+                  0.75,
+              ].flatMap((y) => [make(0, y, -1, 0), make(1, y, 1, 0)]),
+              ...[
+                  clamp((target.x - card.x) / card.width, 0.12, 0.88),
+                  0.25,
+                  0.5,
+                  0.75,
+              ].flatMap((x) => [make(x, 0, 0, -1), make(x, 1, 0, 1)]),
+          ];
+    if (!collapsed) {
+        for (const point of clearCardPorts(card, obstacles)) {
+            const normal =
+                point.x === card.x
+                    ? { x: -1, y: 0 }
+                    : point.x === card.x + card.width
+                      ? { x: 1, y: 0 }
+                      : point.y === card.y
+                        ? { x: 0, y: -1 }
+                        : { x: 0, y: 1 };
+            ports.push({ point, normal });
+        }
+    }
+    const candidates = ports
+        .map((port) => {
+            const dx = target.x - port.point.x,
+                dy = target.y - port.point.y;
+            const dist = Math.hypot(dx, dy);
+            const facing =
+                (dx * port.normal.x + dy * port.normal.y) / Math.max(dist, 1);
+            return {
+                ...port,
+                dist,
+                facing,
+                score: dist + Math.max(0, 0.55 - facing) * 140,
+            };
+        })
+        .filter((port) => port.facing > 0.05)
+        .sort((a, b) => a.score - b.score);
+    for (const port of candidates) {
+        const reach = Math.min(90, Math.max(8, port.dist * 0.32));
+        const p0 = port.point;
+        const p1 = {
+            x: p0.x + port.normal.x * reach,
+            y: p0.y + port.normal.y * reach,
+        };
+        const p2 = {
+            x: target.x - (target.x - p0.x) * 0.25,
+            y: target.y - (target.y - p0.y) * 0.25,
+        };
+        let previous = p0,
+            clear = true;
+        for (let i = 1; i <= 24; i++) {
+            const t = i / 24,
+                u = 1 - t;
+            const point = {
+                x:
+                    u ** 3 * p0.x +
+                    3 * u * u * t * p1.x +
+                    3 * u * t * t * p2.x +
+                    t ** 3 * target.x,
+                y:
+                    u ** 3 * p0.y +
+                    3 * u * u * t * p1.y +
+                    3 * u * t * t * p2.y +
+                    t ** 3 * target.y,
+            };
+            if (!segmentIsClear(previous, point, obstacles)) {
+                clear = false;
+                break;
+            }
+            previous = point;
+        }
+        if (clear)
+            return `M ${p0.x} ${p0.y} C ${p1.x} ${p1.y} ${p2.x} ${p2.y} ${target.x} ${target.y}`;
+    }
+    // When text blocks a direct curve, route through whitespace and round its turns.
+    const routeObstacles = collapsed
+        ? obstacles
+        : [
+              ...obstacles,
+              {
+                  left: card.x + 1,
+                  right: card.x + card.width - 1,
+                  top: card.y + 1,
+                  bottom: card.y + card.height - 1,
+              },
+          ];
+    const routes = candidates.slice(0, 4).flatMap((port) => {
+        const route = routeConnector(target, port.point, routeObstacles);
+        return route
+            ? [
+                  {
+                      route,
+                      score:
+                          length(route) +
+                          route.length * 12 +
+                          Math.max(0, 0.55 - port.facing) * 140,
+                  },
+              ]
+            : [];
+    });
+    routes.sort((a, b) => a.score - b.score);
+    return routes[0]
+        ? roundedConnectorPath(routes[0].route.reverse(), routeObstacles)
+        : null;
 }

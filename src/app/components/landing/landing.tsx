@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import {
     useEffect,
+    useRef,
     useState,
     type CSSProperties,
     type ReactNode,
@@ -134,12 +135,6 @@ export default function Landing() {
                             className={`text-ink flex min-h-11 items-center rounded-lg px-3 text-[15px] font-medium no-underline ${FOCUS}`}
                         >
                             Sign in
-                        </Link>
-                        <Link
-                            href={SIGN_UP}
-                            className={`${PRIMARY} min-h-10 px-4 text-[14px] max-sm:hidden`}
-                        >
-                            Start writing
                         </Link>
                     </nav>
                 </div>
@@ -618,7 +613,7 @@ function SettingCard({
             </p>
             <div
                 aria-hidden="true"
-                className="bg-paper h-[132px] [scrollbar-width:none] overflow-y-auto overscroll-contain rounded-[10px] px-4 py-3.5 [&::-webkit-scrollbar]:hidden"
+                className="bg-paper h-[132px] overflow-hidden rounded-[10px] px-4 py-3.5"
                 style={previewStyle}
             >
                 {preview}
@@ -635,7 +630,7 @@ function Customize() {
         useState<keyof typeof LINE_SPACINGS>("spacious");
     const [width, setWidth] = useState<keyof typeof EDITOR_WIDTHS>("narrow");
     const [typewriter, setTypewriter] = useState(true);
-    const [card, setCard] = useState(0);
+    const drag = useRef<{ x: number; left: number } | null>(null);
     const total = 6;
     const pick = <T extends Record<string, { label: string }>>(choices: T) =>
         Object.entries(choices).map(
@@ -648,14 +643,41 @@ function Customize() {
                     Set it up the way you write.
                 </h2>
                 <p className="text-muted mt-3 text-[16px] leading-[1.6]">
-                    Almost everything is yours to change. Swipe to try a few.
+                    Almost everything is yours to change. Drag or swipe to try a
+                    few.
                 </p>
             </div>
             <ul
-                onScroll={(e) =>
-                    setCard(Math.round(e.currentTarget.scrollLeft / (282 + 12)))
-                }
-                className="mt-7 mb-0 flex snap-x snap-mandatory [scrollbar-width:none] list-none gap-3 overflow-x-auto px-[max(24px,calc((100%-1072px)/2))] pb-2 [&::-webkit-scrollbar]:hidden"
+                aria-label="Appearance previews"
+                tabIndex={0}
+                onPointerDown={(e) => {
+                    if (
+                        e.pointerType !== "mouse" ||
+                        e.button !== 0 ||
+                        (e.target as Element).closest("button, input, a")
+                    )
+                        return;
+                    drag.current = {
+                        x: e.clientX,
+                        left: e.currentTarget.scrollLeft,
+                    };
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                    e.currentTarget.style.scrollSnapType = "none";
+                }}
+                onPointerMove={(e) => {
+                    if (!drag.current) return;
+                    e.currentTarget.scrollLeft =
+                        drag.current.left - (e.clientX - drag.current.x);
+                }}
+                onPointerUp={(e) => {
+                    drag.current = null;
+                    e.currentTarget.style.scrollSnapType = "";
+                }}
+                onPointerCancel={(e) => {
+                    drag.current = null;
+                    e.currentTarget.style.scrollSnapType = "";
+                }}
+                className="mt-7 mb-0 flex snap-x snap-mandatory [scrollbar-width:none] list-none gap-3 overflow-x-auto px-[max(24px,calc((100%-1072px)/2))] pb-2 select-none [&::-webkit-scrollbar]:hidden [@media(pointer:fine)]:cursor-grab [@media(pointer:fine)]:active:cursor-grabbing"
             >
                 <SettingCard
                     title="Font"
@@ -809,17 +831,6 @@ function Customize() {
                     </p>
                 </SettingCard>
             </ul>
-            <div
-                aria-hidden="true"
-                className="mt-4 flex justify-center gap-1.5"
-            >
-                {Array.from({ length: total }, (_, i) => (
-                    <span
-                        key={i}
-                        className={`h-1.5 rounded-full transition-[width] ${i === card ? "bg-ink w-[18px]" : "bg-line w-1.5"}`}
-                    />
-                ))}
-            </div>
         </section>
     );
 }
@@ -852,7 +863,7 @@ function FinalCta() {
             aria-labelledby="cta-title"
             className="mx-auto w-full max-w-[592px] px-6 pt-32 pb-28"
         >
-            <div className="relative py-[72px]">
+            <div className="relative pt-[72px] pb-16">
                 <h2
                     id="cta-title"
                     className="font-serif text-[32px] leading-[1.12] font-normal tracking-[-0.03em] text-balance sm:text-[36px]"
@@ -867,6 +878,15 @@ function FinalCta() {
                         className="bg-accent ml-1 inline-block h-8 w-0.5 translate-y-1.5 animate-[caret-blink_1.1s_steps(1)_infinite] motion-reduce:animate-none"
                     />
                 </h2>
+                <div className="mt-6 flex justify-start lg:justify-end">
+                    <Link
+                        href={SIGN_UP}
+                        className={`${PRIMARY} w-full sm:w-auto`}
+                    >
+                        Start your first piece
+                        <ArrowRight size={17} aria-hidden="true" />
+                    </Link>
+                </div>
                 <ul className="m-0 list-none p-0">
                     {PROMISES.map(([Icon, label, field, spot]) => (
                         <li
@@ -883,10 +903,6 @@ function FinalCta() {
                     ))}
                 </ul>
             </div>
-            <Link href={SIGN_UP} className={`${PRIMARY} mt-6 w-full sm:w-auto`}>
-                Start your first piece
-                <ArrowRight size={17} aria-hidden="true" />
-            </Link>
         </section>
     );
 }

@@ -9,6 +9,7 @@ import {
     List,
     ListChecks,
     LoaderCircle,
+    MoreHorizontal,
     MoreVertical,
     Pin,
     Plus,
@@ -34,7 +35,10 @@ import {
 import { formatEdited } from "~/lib/writely/edited-date";
 import { makeDoc } from "~/lib/writely/model";
 import { highlightParts } from "~/lib/writely/plain-text";
-import type { Preferences } from "~/lib/writely/preferences";
+import {
+    exportOptions,
+    type Preferences,
+} from "~/lib/writely/preferences";
 import type {
     DocumentFilter,
     DocumentSummary,
@@ -46,6 +50,7 @@ import {
 } from "../app-header";
 import { EmptyState } from "../empty-state";
 import { usePreferences } from "../preferences";
+import { useDocumentExport } from "../use-document-export";
 import {
     ActionMenu,
     Button,
@@ -120,6 +125,7 @@ export default function Library({
         params = useSearchParams();
     const [preferences, setPreferences] = usePreferences(initialPreferences);
     const view = preferences.libraryView;
+    const exporter = useDocumentExport();
     const filter: DocumentFilter =
         params.get("filter") === "archived"
             ? "archived"
@@ -265,6 +271,37 @@ export default function Library({
                 setRenaming(doc);
             },
         },
+        {
+            label: "Export",
+            children: [
+                {
+                    label: "Word (.docx)",
+                    onSelect: () =>
+                        void exporter.run(
+                            doc.id,
+                            "docx",
+                            exportOptions(preferences),
+                        ),
+                },
+                {
+                    label: "PDF (.pdf)",
+                    onSelect: () =>
+                        void exporter.run(
+                            doc.id,
+                            "pdf",
+                            exportOptions(preferences),
+                        ),
+                },
+            ],
+        },
+        {
+            label: "Delete",
+            danger: true,
+            onSelect: () => {
+                setConfirmation("");
+                setDeleting(doc);
+            },
+        },
         ...(doc.archived
             ? []
             : [
@@ -296,15 +333,6 @@ export default function Library({
                             setError("Couldn’t update the document."),
                     },
                 ),
-        },
-        {
-            label: "Delete",
-            danger: true,
-            separator: true,
-            onSelect: () => {
-                setConfirmation("");
-                setDeleting(doc);
-            },
         },
     ];
 
@@ -546,7 +574,7 @@ export default function Library({
                                     menuWidth={208}
                                     triggerClassName="pointer-events-auto! h-[54px]! min-h-[54px]! w-11! min-w-11! rounded-xl! border! border-[var(--border)]! bg-[var(--surface)]! p-0! text-[var(--muted)]! opacity-100! shadow-none! hover:bg-[var(--control-hover)]! hover:text-[var(--text)]! focus-visible:[box-shadow:0_0_0_2px_var(--control-ring)]!"
                                     trigger={
-                                        <MoreVertical
+                                        <MoreHorizontal
                                             size={19}
                                             strokeWidth={1.6}
                                         />
@@ -707,6 +735,9 @@ export default function Library({
                                                                     }
                                                                 />
                                                             </span>
+                                                            {doc.pinned && (
+                                                                <PinnedIndicator />
+                                                            )}
                                                         </span>
                                                         <EditedTime
                                                             date={doc.updated}
@@ -765,14 +796,21 @@ export default function Library({
                                                                 size={20}
                                                             />
                                                         </span>
-                                                        <span className="truncate font-serif text-[16px] leading-6">
-                                                            <Highlighted
-                                                                text={
-                                                                    doc.title ||
-                                                                    "Untitled"
-                                                                }
-                                                                terms={terms}
-                                                            />
+                                                        <span className="flex min-w-0 items-center gap-2">
+                                                            <span className="truncate font-serif text-[16px] leading-6">
+                                                                <Highlighted
+                                                                    text={
+                                                                        doc.title ||
+                                                                        "Untitled"
+                                                                    }
+                                                                    terms={
+                                                                        terms
+                                                                    }
+                                                                />
+                                                            </span>
+                                                            {doc.pinned && (
+                                                                <PinnedIndicator />
+                                                            )}
                                                         </span>
                                                         <EditedTime
                                                             date={doc.updated}
@@ -899,19 +937,26 @@ export default function Library({
                         </div>
                     </Dialog>
                 )}
-                {(notice || error) && (
+                {(notice || error || exporter.error) && (
                     <div
-                        role={error ? "alert" : "status"}
+                        role={error || exporter.error ? "alert" : "status"}
                         className="border-line bg-surface fixed bottom-6 left-1/2 z-50 flex max-w-[calc(100vw-32px)] -translate-x-1/2 items-center gap-3 rounded-lg border px-4 py-2.5 text-[13px] shadow-[0_4px_16px_color-mix(in_srgb,var(--shadow)_10%,transparent)]"
                     >
-                        <span className={error ? "text-danger" : ""}>
-                            {error || notice}
+                        <span
+                            className={
+                                error || exporter.error ? "text-danger" : ""
+                            }
+                        >
+                            {error || exporter.error || notice}
                         </span>
-                        {error && (
+                        {(error || exporter.error) && (
                             <button
                                 aria-label="Dismiss"
                                 className="size-8! min-h-8! min-w-8! p-0!"
-                                onClick={() => setError("")}
+                                onClick={() => {
+                                    setError("");
+                                    exporter.setError("");
+                                }}
                             >
                                 <X size={14} />
                             </button>
@@ -933,6 +978,15 @@ function DocIcon({ size = 17 }: { size?: number }) {
             strokeWidth={1.7}
             className="text-accent shrink-0"
         />
+    );
+}
+
+function PinnedIndicator() {
+    return (
+        <span className="text-accent inline-flex shrink-0" title="Pinned">
+            <Pin size={15} strokeWidth={1.8} aria-hidden="true" />
+            <span className="sr-only">Pinned</span>
+        </span>
     );
 }
 

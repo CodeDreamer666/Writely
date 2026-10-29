@@ -1,7 +1,6 @@
 "use client";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
-    ArrowLeft,
     ChevronRight,
     CircleHelp,
     FileDown,
@@ -16,7 +15,6 @@ import {
     UserRound,
     type LucideIcon,
 } from "lucide-react";
-import Link from "next/link";
 import {
     useEffect,
     useRef,
@@ -46,10 +44,10 @@ import { WritingSettings } from "./writing-settings";
 import { TopicList } from "../../help/topic-list";
 import {
     Button,
+    DeleteDialog,
     Dialog,
 } from "../ui";
 import {
-    BACK_LINK,
     DANGER_BUTTON,
     DIALOG_ACTIONS,
     PRIMARY_BUTTON,
@@ -101,12 +99,9 @@ export default function SettingsPage({
     // wide screens show the first section and narrow screens show the list of sections.
     const [section, setSection] = useState<Section | null>(null);
     const shown = section ?? SECTIONS[0][0];
-    // Set when opening a section from the narrow list added a history entry, so Back can undo it.
-    const pushed = useRef(false);
     useEffect(() => {
         const sync = () => {
             const next = sectionFromHash() ?? null;
-            if (!next) pushed.current = false;
             setSection(next);
         };
         sync();
@@ -119,21 +114,8 @@ export default function SettingsPage({
             section === null && window.matchMedia("(max-width: 860px)").matches;
         setSection(value);
         if (fromList) {
-            pushed.current = true;
             window.history.pushState(null, "", `#${value}`);
         } else window.history.replaceState(null, "", `#${value}`);
-    };
-    const showList = () => {
-        if (pushed.current) {
-            window.history.back();
-            return;
-        }
-        setSection(null);
-        window.history.replaceState(
-            null,
-            "",
-            window.location.pathname + window.location.search,
-        );
     };
 
     // Universal goals save straight away; the editor reads them when a document opens.
@@ -174,6 +156,7 @@ export default function SettingsPage({
     };
 
     const [dialog, setDialog] = useState<"delete-account" | null>(null);
+    const [goalToDelete, setGoalToDelete] = useState<RevisionGoal | null>(null);
     const [confirmation, setConfirmation] = useState("");
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
@@ -203,7 +186,7 @@ export default function SettingsPage({
     return (
         <Tooltip.Provider delayDuration={450}>
             <div className="bg-paper text-ink min-h-dvh">
-                <AppHeader />
+                <AppHeader back={{ href: "/", label: "Back to Documents" }} />
                 <main
                     className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(240px,300px)_minmax(0,1fr)] max-[860px]:grid-cols-1 max-[860px]:content-start"
                     aria-labelledby="settings-title"
@@ -214,25 +197,14 @@ export default function SettingsPage({
                             section ? "max-[860px]:hidden" : ""
                         }`}
                     >
-                        <div className="flex flex-col gap-2 max-[860px]:gap-1">
-                            <Link href="/" className={BACK_LINK}>
-                                <ArrowLeft
-                                    size={17}
-                                    strokeWidth={1.6}
-                                    aria-hidden="true"
-                                />
-                                <span className="sr-only">Back to </span>
-                                Documents
-                            </Link>
-                            <h1
-                                id="settings-title"
-                                tabIndex={-1}
-                                ref={heading}
-                                className="px-2 font-serif text-[36px] leading-tight font-normal tracking-[-0.03em] outline-none focus-visible:border-transparent! focus-visible:shadow-none! max-[860px]:px-0 max-[860px]:text-[28px]"
-                            >
-                                Settings
-                            </h1>
-                        </div>
+                        <h1
+                            id="settings-title"
+                            tabIndex={-1}
+                            ref={heading}
+                            className="sr-only"
+                        >
+                            Settings
+                        </h1>
                         <nav aria-label="Settings sections" className="min-w-0">
                             <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[860px]:gap-0">
                                 {SECTIONS.map(([value, label, Icon]) => {
@@ -285,27 +257,10 @@ export default function SettingsPage({
                     </aside>
 
                     <div
-                        className={`flex w-full max-w-[820px] min-w-0 flex-col px-12 pt-[72px] pb-24 max-[1100px]:px-8 max-[860px]:px-6 max-[860px]:pt-2 max-sm:px-4 ${
+                        className={`flex w-full max-w-[820px] min-w-0 flex-col px-12 pt-4 pb-24 max-[1100px]:px-8 max-[860px]:px-6 max-[860px]:pt-2 max-sm:px-4 ${
                             section ? "" : "max-[860px]:hidden"
                         }`}
                     >
-                        {/* Wide screens keep the section list beside the panel, so only narrow ones need a way back to it. */}
-                        <Link
-                            href="/settings"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                showList();
-                            }}
-                            className={`${BACK_LINK} mb-1 min-[861px]:hidden`}
-                        >
-                            <ArrowLeft
-                                size={17}
-                                strokeWidth={1.6}
-                                aria-hidden="true"
-                            />
-                            <span className="sr-only">Back to </span>
-                            Settings
-                        </Link>
                         {shown === "appearance" && (
                             <SettingsSection
                                 id="appearance-title"
@@ -395,12 +350,8 @@ export default function SettingsPage({
                                                         label={`Delete universal goal: ${goal.text}`}
                                                         className="hover:text-danger!"
                                                         onClick={() =>
-                                                            changeGoals(
-                                                                goals.filter(
-                                                                    (g) =>
-                                                                        g.id !==
-                                                                        goal.id,
-                                                                ),
+                                                            setGoalToDelete(
+                                                                goal,
                                                             )
                                                         }
                                                     />
@@ -543,6 +494,26 @@ export default function SettingsPage({
                             </div>
                         </form>
                     </Dialog>
+                )}
+                {goalToDelete && (
+                    <DeleteDialog
+                        title="Delete universal goal?"
+                        description={
+                            <>
+                                Delete {goalToDelete.text} from your universal
+                                goals?
+                            </>
+                        }
+                        onClose={() => setGoalToDelete(null)}
+                        onConfirm={() => {
+                            changeGoals(
+                                goals.filter(
+                                    (goal) => goal.id !== goalToDelete.id,
+                                ),
+                            );
+                            setGoalToDelete(null);
+                        }}
+                    />
                 )}
                 {dialog === "delete-account" && (
                     <Dialog

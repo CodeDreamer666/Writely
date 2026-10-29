@@ -1,5 +1,6 @@
 "use client";
 import {
+    Palette,
     Pencil,
     Plus,
     StickyNote,
@@ -7,6 +8,7 @@ import {
     Unlink,
     X,
 } from "lucide-react";
+import { useState } from "react";
 import type { Card } from "~/lib/writely/types";
 import { PRIMARY_BUTTON } from "~/config/ui";
 import { EmptyState } from "../empty-state";
@@ -16,6 +18,7 @@ import {
     primeKeyboard,
 } from "./card-screen";
 import { Drawer } from "./dock";
+import { CardColourPopover } from "./card-colours";
 
 /**
  * Compact screens keep cards in a sheet for reading them; only their text highlights belong on
@@ -52,6 +55,10 @@ export function CompactCards({
     smartPunctuation: boolean;
 }) {
     const current = cards.find((card) => card.id === editing);
+    const [colouring, setColouring] = useState<{
+        id: string;
+        anchor: HTMLElement;
+    } | null>(null);
     return (
         <>
             <Drawer
@@ -140,6 +147,36 @@ export function CompactCards({
                                             </span>
                                         </button>
                                         <div className="border-line flex justify-end border-t px-2 py-1">
+                                            <Button
+                                                icon={Palette}
+                                                label={`Change colour of card ${index + 1}`}
+                                                aria-haspopup="dialog"
+                                                aria-expanded={
+                                                    colouring?.id === card.id
+                                                }
+                                                onClick={(event) =>
+                                                    setColouring({
+                                                        id: card.id,
+                                                        anchor: event.currentTarget,
+                                                    })
+                                                }
+                                            />
+                                            {colouring?.id === card.id && (
+                                                <CardColourPopover
+                                                    anchor={colouring.anchor}
+                                                    label={`Colour of card ${index + 1}`}
+                                                    value={card.bg}
+                                                    onChange={(bg, fg) =>
+                                                        onPatch(card.id, {
+                                                            bg,
+                                                            fg,
+                                                        })
+                                                    }
+                                                    onClose={() =>
+                                                        setColouring(null)
+                                                    }
+                                                />
+                                            )}
                                             <Button
                                                 icon={Pencil}
                                                 label={`Edit card ${index + 1}`}

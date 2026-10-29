@@ -1,7 +1,6 @@
 import {
     ArrowLeft,
     ArrowRight,
-    ChevronLeft,
     CircleAlert,
     CircleCheck,
     Lightbulb,
@@ -126,33 +125,18 @@ export default async function GuidePage(props: {
     const index = GUIDES.indexOf(guide);
     const previous = GUIDES[index - 1],
         next = GUIDES[index + 1];
-    const Icon = guide.icon;
     return (
         <div className="bg-paper text-ink min-h-dvh">
-            <AppHeader />
-            <main className="mx-auto w-full max-w-[760px] px-6 pt-4 pb-24 max-sm:px-4 max-sm:pt-2">
-                <Link
-                    href="/help"
-                    className="text-muted hover:text-ink -ml-1 inline-flex h-10 items-center gap-1 rounded-lg pr-3 pl-1 text-[14px] no-underline hover:bg-[var(--control-hover)]"
-                >
-                    <ChevronLeft
-                        size={18}
-                        strokeWidth={1.6}
-                        aria-hidden="true"
-                    />
-                    Help
-                </Link>
-                <header className="mt-4 mb-8">
-                    <span className="bg-tint text-accent flex size-11 items-center justify-center rounded-xl">
-                        <Icon size={21} strokeWidth={1.6} aria-hidden="true" />
-                    </span>
-                    <h1 className="mt-4 mb-0 font-serif text-[44px] leading-[1.05] font-normal tracking-[-0.03em] max-sm:text-[34px]">
+            <style>{`@media (prefers-reduced-motion: no-preference) { html:has(.help-guide) { scroll-behavior: smooth; } }`}</style>
+            <AppHeader
+                back={{ href: "/settings#help", label: "Back to Help" }}
+            />
+            <main className="help-guide mx-auto w-full max-w-[760px] px-6 pt-4 pb-24 max-sm:px-4 max-sm:pt-2">
+                <header className="mb-8">
+                    <h1 className="mt-0 mb-0 font-serif text-[44px] leading-[1.05] font-normal tracking-[-0.03em] max-sm:text-[34px]">
                         {guide.title}
                     </h1>
-                    <h2 className="text-muted mt-6 mb-1.5 text-[13px] font-medium">
-                        What it does
-                    </h2>
-                    <p className="[&_a]:text-accent m-0 text-[16px] leading-[1.65]">
+                    <p className="[&_a]:text-accent mt-6 mb-0 text-[16px] leading-[1.65]">
                         {guide.about}
                     </p>
                 </header>
@@ -228,7 +212,7 @@ export default async function GuidePage(props: {
                         <span className="max-sm:hidden" />
                     )}
                     <Link
-                        href={next ? `/help/${next.slug}` : "/help"}
+                        href={next ? `/help/${next.slug}` : "/settings#help"}
                         className="border-line bg-surface text-ink flex flex-col items-end gap-1 rounded-2xl border px-5 py-4 text-right no-underline hover:border-[var(--control-focus)] max-sm:items-start max-sm:text-left"
                     >
                         <span className="text-muted flex items-center gap-1 text-[12.5px]">

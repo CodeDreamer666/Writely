@@ -20,8 +20,6 @@ import {
 import { createPortal } from "react-dom";
 import {
     cardArrowAnchor,
-    cardArrowPoint,
-    anchorPoint,
     selectionTarget,
     type Rect,
     type SelectionSnapshot,
@@ -51,16 +49,12 @@ import { setCardHighlights } from "~/lib/writely/editor/card-highlights";
 import { textConnectionPoint } from "~/lib/writely/text-connection-point";
 import {
     measureTextObstacles,
-    clearCardPorts,
-    routeConnector,
-    roundedConnectorPath,
+    smoothCardConnector,
     type TextObstacle,
 } from "~/lib/writely/connector-routing";
 import type {
-    Anchor,
     Card,
     ConnectorTarget,
-    Point,
 } from "~/lib/writely/types";
 import InlineThoughtText from "./inline-thought-text";
 
@@ -590,59 +584,34 @@ export default function Annotations({
         geometry.paperBottom + 32,
         ...Object.values(actual).map((r) => r.y + r.height + 40),
     );
-    const connectionPoints = (card: Card): Partial<Record<Anchor, Point>> =>
-        card.collapsed
-            ? { left: [0.18, 0.5], right: [0.81, 0.5] }
-            : layouts[card.id]!.anchors;
-    const routedPoints = new Map<string, Point>();
-    const arrows = cards
-        .flatMap((c) =>
-            (c.connectors ?? []).slice(0, 1).map((link) => {
-                const rect = actual[c.id];
-                if (!rect) return null;
-                const start = cardArrowPoint(rect, connectionPoints(c)),
-                    end = getTargetPoint(link.target, start);
-                const obstacles = textObstacles.current;
-                let route: XY[] | null = null;
-                if (end) {
-                    const anchors = [
-                        cardArrowAnchor(rect),
-                        "top",
-                        "bottom",
-                        "left",
-                        "right",
-                    ] as Anchor[];
-                    const ports = [...new Set(anchors)]
-                        .filter((anchor) => connectionPoints(c)[anchor])
-                        .map((anchor) =>
-                            anchorPoint(rect, anchor, connectionPoints(c)),
-                        );
-                    if (!c.collapsed)
-                        ports.push(...clearCardPorts(rect, obstacles));
-                    for (const port of ports) {
-                        route = routeConnector(end, port, obstacles);
-                        if (route) {
-                            routedPoints.set(c.id, [
-                                (port.x - rect.x) / rect.width,
-                                (port.y - rect.y) / rect.height,
-                            ]);
-                            break;
-                        }
-                    }
-                }
-                return end && route
-                    ? {
+    const arrows = cards.flatMap((card) =>
+        (card.connectors ?? []).slice(0, 1).flatMap((link) => {
+            const rect = actual[card.id];
+            if (!rect) return [];
+            const target = getTargetPoint(link.target, {
+                x: rect.x + rect.width / 2,
+                y: rect.y + rect.height / 2,
+            });
+            if (!target) return [];
+            const path = smoothCardConnector(
+                rect,
+                target,
+                textObstacles.current,
+                !!card.collapsed,
+            );
+            return path
+                ? [
+                      {
                           id: link.id,
-                          cardId: c.id,
-                          path: roundedConnectorPath(route, obstacles),
-                          end,
-                          color: connectorColor(c),
-                          active: (selected ?? hoveredCard) === c.id,
-                      }
-                    : null;
-            }),
-        )
-        .filter((arrow) => arrow !== null);
+                          cardId: card.id,
+                          path,
+                          color: connectorColor(card),
+                          active: (selected ?? hoveredCard) === card.id,
+                      },
+                  ]
+                : [];
+        }),
+    );
     const register = (id: string) => (el: HTMLElement | null) => {
         if (el) nodes.current.set(id, el);
         else nodes.current.delete(id);
@@ -655,7 +624,7 @@ export default function Annotations({
         >
             <svg
                 className={
-                    "annotation-connectors pointer-events-none absolute [top:0] [left:0] overflow-visible [fill:none] [color:color-mix(in_srgb,_var(--accent)_48%,_var(--muted))] [&_circle]:[fill:currentColor] [&_circle]:[stroke:none] [&_circle]:[opacity:0.85] [&_g_>_path]:[stroke:currentColor] [&_g_>_path]:[stroke-width:1.6] [&_g_>_path]:[opacity:0.82]"
+                    "annotation-connectors pointer-events-none absolute [top:0] [left:0] overflow-visible [fill:none] [color:color-mix(in_srgb,_var(--accent)_48%,_var(--muted))] [&_g_>_path]:[stroke:currentColor] [&_g_>_path]:[stroke-width:1.4] [&_g_>_path]:[opacity:0.82] [&_g_>_path]:[stroke-linecap:round] [&_g_>_path]:[stroke-linejoin:round]"
                 }
                 width={geometry.width}
                 height={height}
@@ -668,13 +637,12 @@ export default function Annotations({
                         data-connection-card={a.cardId}
                         className={
                             a.active
-                                ? "connector-active [.annotation-connectors_&_circle]:[opacity:1] [.annotation-connectors_&_path]:[stroke-width:1.9] [.annotation-connectors_&_path]:[opacity:1]"
+                                ? "connector-active [.annotation-connectors_&_path]:[stroke-width:1.9] [.annotation-connectors_&_path]:[opacity:1]"
                                 : ""
                         }
                         style={{ color: a.color }}
                     >
                         <path d={a.path} />
-                        <circle cx={a.end.x} cy={a.end.y} r="2.5" />
                     </g>
                 ))}
             </svg>
@@ -756,10 +724,7 @@ export default function Annotations({
                             </svg>
                         </button>
                     );
-                const layout = layouts[c.id]!,
-                    point =
-                        routedPoints.get(c.id) ??
-                        layout.anchors[cardArrowAnchor(r)];
+                const layout = layouts[c.id]!;
                 const accent = cardAccentVariant(c.id);
                 return (
                     <div
@@ -925,20 +890,6 @@ export default function Annotations({
                                     ))}
                                 </div>
                             )}
-                        <span
-                            className={
-                                "cloud-anchor absolute [height:12px] [min-height:12px] [width:12px] [min-width:12px] cursor-crosshair touch-none [border-radius:50%] [border-width:1px] [border-style:solid] [border-top-color:var(--control-focus)] [border-right-color:var(--control-focus)] [border-bottom-color:var(--control-focus)] [border-left-color:var(--control-focus)] [padding:0] [opacity:0] [background:var(--surface)] [border-image:none] [&::after]:absolute [&::after]:[inset:-8px] [&::after]:[border-radius:50%] [&::after]:[content:''] [.annotation-cloud.is-selected_&]:[opacity:1] [.annotation-cloud:focus-within_&]:[opacity:1] [.annotation-cloud:hover_&]:[opacity:1] [@media(hover:_none)]:[opacity:1]"
-                            }
-                            aria-hidden="true"
-                            style={{
-                                background: connectorColor(c),
-                                borderColor: connectorColor(c),
-                                left: `${point[0] * 100}%`,
-                                top: `${point[1] * 100}%`,
-                                transform: "translate(-50%,-50%)",
-                                pointerEvents: "none",
-                            }}
-                        />
                     </div>
                 );
             })}

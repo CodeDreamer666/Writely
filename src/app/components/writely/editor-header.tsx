@@ -6,6 +6,7 @@ import {
     Check,
     CloudOff,
     LoaderCircle,
+    ScanLine,
     Redo2,
     Undo2,
 } from "lucide-react";
@@ -14,11 +15,7 @@ import {
     useRef,
     useState,
 } from "react";
-import type { ExportFormat } from "~/lib/writely/export";
-import {
-    ActionMenu,
-    Button,
-} from "../ui";
+import { Button } from "../ui";
 import type { SaveStatus } from "./use-autosave";
 
 /**
@@ -61,15 +58,7 @@ export default function EditorHeader({
     onBack,
     backLabel = "Documents",
     editor,
-    onExport,
-    exporting,
-    focusMode,
     onToggleFocusMode,
-    onShortcuts,
-    compact = false,
-    onCards,
-    onDrafts,
-    onGoals,
     onRetrySave,
 }: {
     title: string;
@@ -78,16 +67,7 @@ export default function EditorHeader({
     onBack: () => void;
     backLabel?: string;
     editor: Editor | null;
-    /** Word and PDF export for this document; left out where there's nothing saved to export. */
-    onExport?: (format: ExportFormat) => void;
-    exporting?: ExportFormat | null;
-    focusMode: boolean;
     onToggleFocusMode: () => void;
-    onShortcuts: () => void;
-    compact?: boolean;
-    onCards?: () => void;
-    onDrafts?: () => void;
-    onGoals?: () => void;
     onRetrySave?: () => void;
 }) {
     const history = useEditorState({
@@ -199,66 +179,11 @@ export default function EditorHeader({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => editor?.chain().focus().redo().run()}
                 />
-                <ActionMenu
-                    label="Document options"
-                    menuLabel="Document options"
-                    menuWidth={220}
-                    triggerClassName="pointer-events-auto! opacity-100! h-9! min-h-9! w-9! min-w-9! rounded-lg! p-0! text-muted! hover:text-ink!"
-                    trigger={
-                        exporting ? (
-                            <LoaderCircle
-                                size={16}
-                                aria-label="Exporting"
-                                className="animate-[save-spin_900ms_linear_infinite] motion-reduce:animate-none"
-                            />
-                        ) : undefined
-                    }
-                    items={[
-                        ...(compact
-                            ? [
-                                  {
-                                      label: "Cards",
-                                      onSelect: () => onCards?.(),
-                                  },
-                                  {
-                                      label: "Saved drafts",
-                                      onSelect: () => onDrafts?.(),
-                                  },
-                                  {
-                                      label: "Revision goals",
-                                      onSelect: () => onGoals?.(),
-                                  },
-                              ]
-                            : []),
-                        ...(onExport
-                            ? [
-                                  {
-                                      label: "Export as Word (.docx)",
-                                      onSelect: () => onExport("docx"),
-                                  },
-                                  {
-                                      label: "Export as PDF (.pdf)",
-                                      onSelect: () => onExport("pdf"),
-                                  },
-                              ]
-                            : []),
-                        {
-                            label: focusMode
-                                ? "Turn off focus mode"
-                                : "Turn on focus mode",
-                            onSelect: onToggleFocusMode,
-                            separator: !!onExport,
-                        },
-                        {
-                            label: "Keyboard shortcuts",
-                            onSelect: onShortcuts,
-                        },
-                        {
-                            // A new tab, so the guide sits beside the document.
-                            label: "Help",
-                            onSelect: () => window.open("/help", "_blank"),
-                        },
-                    ]}
+                <Button
+                    icon={ScanLine}
+                    label="Enter focus mode"
+                    className={HISTORY_BUTTON}
+                    onClick={onToggleFocusMode}
                 />
             </div>
         </header>

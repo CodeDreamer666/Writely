@@ -244,7 +244,7 @@ export function AuthForm({
                                 className={`${link} -my-3 min-h-11! text-[13px]!`}
                                 onClick={() => go("forgot")}
                             >
-                                Forgot?
+                                Forgot password?
                             </button>
                         )}
                     </div>

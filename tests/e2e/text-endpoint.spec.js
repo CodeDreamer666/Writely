@@ -7,7 +7,7 @@ import {
 import { initial } from "../../src/lib/writely/model.ts";
 import { LEGACY_STORAGE_KEY as KEY } from "../../src/config/storage.ts";
 
-test("connector dots sit beneath the final highlighted line through reflow, zoom and collapse", async ({
+test("connector ends sit beneath the final highlighted line through reflow, zoom and collapse", async ({
     page,
 }) => {
     const seed = initial(),
@@ -63,8 +63,11 @@ test("connector dots sit beneath the final highlighted line through reflow, zoom
             ),
         ).toHaveCount(0);
         await expect(
-            page.locator(".annotation-connectors g>circle"),
-        ).toHaveCount(2);
+            page.locator(".annotation-connectors g>circle, .cloud-anchor"),
+        ).toHaveCount(0);
+        await expect(page.locator(".annotation-connectors g>path")).toHaveCount(
+            2,
+        );
         const errors = await page.evaluate(() => {
             const w = document.querySelector(".workspace"),
                 wr = w.getBoundingClientRect(),
@@ -78,23 +81,21 @@ test("connector dots sit beneath the final highlighted line through reflow, zoom
                     line = rects.filter(
                         (r) => r.top < last.bottom && r.bottom > last.top,
                     ),
-                    dot = document.querySelectorAll(
-                        ".annotation-connectors g>circle",
+                    path = document.querySelectorAll(
+                        ".annotation-connectors g>path",
                     )[i],
-                    d = dot.getBoundingClientRect();
+                    d = path
+                        .getPointAtLength(path.getTotalLength())
+                        .matrixTransform(path.getScreenCTM());
                 return {
                     x: Math.abs(
-                        d.x +
-                            d.width / 2 -
+                        d.x -
                             (Math.min(...line.map((r) => r.left)) +
                                 Math.max(...line.map((r) => r.right))) /
                                 2,
                     ),
                     y: Math.abs(
-                        d.y +
-                            d.height / 2 -
-                            Math.max(...line.map((r) => r.bottom)) -
-                            3.5 * sy,
+                        d.y - Math.max(...line.map((r) => r.bottom)) - 3.5 * sy,
                     ),
                 };
             });

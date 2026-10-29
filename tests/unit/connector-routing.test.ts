@@ -3,6 +3,7 @@ import {
     test,
 } from "vitest";
 import {
+    smoothCardConnector,
     routeConnector,
     clearCardPorts,
     roundedConnectorPath,
@@ -71,4 +72,33 @@ test("diagonal collision checks detect word intersections, including zero-length
     expect(segmentIsClear({ x: 0, y: 34 }, { x: 200, y: 34 }, words)).toBe(
         true,
     );
+});
+
+test.each([
+    [{ x: 0, y: 50, width: 80, height: 50 }, { x: 200, y: 75 }, "right"],
+    [{ x: 200, y: 50, width: 80, height: 50 }, { x: 0, y: 75 }, "left"],
+    [{ x: 50, y: 0, width: 80, height: 50 }, { x: 90, y: 200 }, "bottom"],
+    [{ x: 50, y: 200, width: 80, height: 50 }, { x: 90, y: 0 }, "top"],
+] as const)(
+    "smooth connector leaves the %s card toward the target",
+    (rect, target, side) => {
+        const path = smoothCardConnector(rect, target, []);
+        expect(path).toMatch(/^M .* C /);
+        const [x, y] = /^M ([\d.]+) ([\d.]+)/.exec(path!)!.slice(1).map(Number);
+        if (side === "right") expect(x).toBe(rect.x + rect.width);
+        if (side === "left") expect(x).toBe(rect.x);
+        if (side === "bottom") expect(y).toBe(rect.y + rect.height);
+        if (side === "top") expect(y).toBe(rect.y);
+    },
+);
+
+test("a collapsed leaf also uses a curved connector", () => {
+    expect(
+        smoothCardConnector(
+            { x: 10, y: 10, width: 44, height: 48 },
+            { x: 200, y: 40 },
+            [],
+            true,
+        ),
+    ).toMatch(/^M .* C /);
 });

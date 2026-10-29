@@ -18,7 +18,7 @@ const chrome = (page) => [
     page.locator(".editor-header"),
     page.getByRole("navigation", { name: "Writing tools" }),
     page.getByRole("button", { name: "Undo (Ctrl+Z)" }),
-    page.getByRole("button", { name: "Document options" }),
+    page.getByRole("button", { name: "Enter focus mode" }),
 ];
 
 test("focus mode hides everything but the text and gives it all back", async ({
@@ -206,8 +206,7 @@ test("the exit control appears near the top edge and works by keyboard", async (
     await expect(editorOf(page)).toBeFocused();
 
     // The ⋯ menu turns it on too, and writing carries on without another click.
-    await page.getByRole("button", { name: "Document options" }).click();
-    await page.getByRole("menuitem", { name: "Turn on focus mode" }).click();
+    await page.getByRole("button", { name: "Enter focus mode" }).click();
     await expect(page.locator(".app.focus-mode")).toHaveCount(1);
     await expect(editorOf(page)).toBeFocused();
 });
@@ -290,3 +289,20 @@ for (const [name, size] of [
         ).toBe(true);
         await page.screenshot({ path: `test-results/focus-${name}.png` });
     });
+
+test("selected text can be formatted in focus mode", async ({ page }) => {
+    await openSample(page);
+    const editor = editorOf(page);
+    await editor.click();
+    await page.keyboard.press("Control+Shift+F");
+    await page.keyboard.press("Control+Home");
+    await page.keyboard.press("Control+Shift+ArrowRight");
+    const toolbar = page.getByRole("toolbar", {
+        name: "Text formatting",
+        exact: true,
+    });
+    await expect(toolbar).toBeVisible();
+    await toolbar.getByRole("button", { name: "Bold", exact: true }).click();
+    await expect(editor.locator("strong").first()).toBeVisible();
+    await expect(page.locator(".app.focus-mode")).toHaveCount(1);
+});

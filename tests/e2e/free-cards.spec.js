@@ -101,7 +101,7 @@ test("expanded cards move over the page while leaves stay in their margin, each 
     // Overlapping the document changes nothing about its layout or text.
     expect(await prose()).toEqual(layout);
     await expect(page.locator(".annotation-connectors g>path")).toHaveCount(1);
-    await expect(card.locator(".cloud-anchor")).toHaveCount(1);
+    await expect(card.locator(".cloud-anchor")).toHaveCount(0);
     await expect
         .poll(async () => current(await read(page)).cards[0].placement)
         .toBe("free");

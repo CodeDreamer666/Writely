@@ -79,11 +79,9 @@ import type { AccountUser } from "../app-header";
 import { usePreferences } from "../preferences";
 import {
     editorStyle,
-    exportOptions,
     type Preferences,
 } from "~/lib/writely/preferences";
 import { EmptyState } from "../empty-state";
-import { useDocumentExport } from "../use-document-export";
 import EditorHeader from "./editor-header";
 import { CompactCards } from "./compact-cards";
 import { useCompactLayout } from "./use-compact-layout";
@@ -91,9 +89,9 @@ import { ShortcutsDialog } from "./shortcuts";
 import {
     ActionMenu,
     Button,
+    DeleteDialog,
 } from "../ui";
 import {
-    DANGER_BUTTON,
     DIALOG_ACTIONS,
     DIALOG_CLASS,
     DIALOG_HEADING,
@@ -156,6 +154,11 @@ export default function WritelyApp({
         [comparison, setComparison] = useState<ComparisonState | null>(null),
         [notice, setNotice] = useState(""),
         [rename, setRename] = useState<string | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<{
+        kind: "card" | "check";
+        id: string;
+        name: string;
+    } | null>(null);
     const [draftToDelete, setDraftToDelete] = useState<{
         documentId: string;
         id: string;
@@ -218,12 +221,6 @@ export default function WritelyApp({
         await autosave.flush().catch(() => false);
         router.push(href);
     };
-    // Export reads the saved copy, so pending edits are saved first; a failed save stops the export.
-    const exporter = useDocumentExport();
-    const exportDocument = (format: "docx" | "pdf") =>
-        void exporter.run(doc.id, format, exportOptions(preferences), () =>
-            autosave.flush().catch(() => false),
-        );
     const update = (
         patch:
             | Partial<WritingDocument>
@@ -622,19 +619,8 @@ export default function WritelyApp({
                 >
                     <EditorHeader
                         editor={editor}
-                        onExport={exportDocument}
-                        exporting={exporter.exporting}
-                        focusMode={focusMode}
                         onToggleFocusMode={toggleFocusMode}
-                        onShortcuts={() => setShortcutsOpen(true)}
-                        compact={compact}
-                        onCards={() => {
-                            setEditingCard(null);
-                            setPanel("thoughts");
-                        }}
                         onRetrySave={autosave.retry}
-                        onDrafts={() => toggle("drafts")}
-                        onGoals={() => toggle("checklist")}
                         title={doc.title}
                         onRename={(title) => update({ title })}
                         status={autosave.status}
@@ -743,7 +729,13 @@ export default function WritelyApp({
                             editing={editingCard}
                             onEdit={setEditingCard}
                             onPatch={patchCard}
-                            onDelete={deleteCard}
+                            onDelete={(id) =>
+                                setItemToDelete({
+                                    kind: "card",
+                                    id,
+                                    name: "this thought card",
+                                })
+                            }
                             onAdd={addCard}
                             onReveal={revealCard}
                             connecting={!!connectionSelection}
@@ -858,7 +850,11 @@ export default function WritelyApp({
                                                 label={`Delete thought ${i + 1}`}
                                                 className="hover:text-danger!"
                                                 onClick={() =>
-                                                    deleteCard(card.id)
+                                                    setItemToDelete({
+                                                        kind: "card",
+                                                        id: card.id,
+                                                        name: "this thought card",
+                                                    })
                                                 }
                                             />
                                             {panel === "thoughts" &&
@@ -984,13 +980,13 @@ export default function WritelyApp({
                                                             icon={Trash2}
                                                             label={`Delete check: ${c.text}`}
                                                             onClick={() =>
-                                                                update((d) => ({
-                                                                    checks: d.checks.filter(
-                                                                        (v) =>
-                                                                            v.id !==
-                                                                            c.id,
-                                                                    ),
-                                                                }))
+                                                                setItemToDelete(
+                                                                    {
+                                                                        kind: "check",
+                                                                        id: c.id,
+                                                                        name: c.text,
+                                                                    },
+                                                                )
                                                             }
                                                             disabled={active}
                                                         />
@@ -1376,21 +1372,6 @@ export default function WritelyApp({
                         <button onClick={autosave.retry}>Retry</button>
                     </div>
                 )}
-                {exporter.error && (
-                    <div
-                        className="export-failure-notice bg-surface text-danger fixed top-[68px] right-4 z-[60] flex max-w-[min(440px,calc(100vw-32px))] items-start gap-2 rounded-2xl border border-[color-mix(in_srgb,var(--danger)_35%,var(--border))] py-2.5 pr-1.5 pl-4 text-[12.5px] leading-[1.5] [box-shadow:0_8px_24px_-10px_color-mix(in_srgb,var(--shadow)_18%,transparent)]"
-                        role="alert"
-                    >
-                        <span className="flex-1">{exporter.error}</span>
-                        <button
-                            aria-label="Dismiss"
-                            className="text-danger! h-7! min-h-7! w-7! min-w-7! shrink-0 rounded-full! p-0!"
-                            onClick={() => exporter.setError("")}
-                        >
-                            <X size={14} />
-                        </button>
-                    </div>
-                )}
                 {shortcutsOpen && (
                     <ShortcutsDialog onClose={() => setShortcutsOpen(false)} />
                 )}
@@ -1405,7 +1386,38 @@ export default function WritelyApp({
                         {notice}
                     </div>
                 )}
+                {itemToDelete && (
+                    <DeleteDialog
+                        title={
+                            itemToDelete.kind === "card"
+                                ? "Delete thought card?"
+                                : "Delete revision goal?"
+                        }
+                        description={<>Delete {itemToDelete.name}?</>}
+                        onClose={() => setItemToDelete(null)}
+                        onConfirm={() => {
+                            if (itemToDelete.kind === "card")
+                                deleteCard(itemToDelete.id);
+                            else
+                                update((d) => ({
+                                    checks: d.checks.filter(
+                                        (check) => check.id !== itemToDelete.id,
+                                    ),
+                                }));
+                            setItemToDelete(null);
+                        }}
+                    />
+                )}
+                {modal === "draft-delete" && (
+                    <DeleteDialog
+                        title={`Delete ${targetDraft?.name ?? "this draft"}?`}
+                        description="This permanently deletes the saved draft. Your current writing and other drafts will be kept."
+                        onClose={() => setModal(null)}
+                        onConfirm={deleteDraft}
+                    />
+                )}
                 {modal &&
+                    modal !== "draft-delete" &&
                     createPortal(
                         <div
                             className={OVERLAY_CLASS}
@@ -1419,11 +1431,7 @@ export default function WritelyApp({
                                 role="dialog"
                                 aria-modal="true"
                                 aria-labelledby="dialog-title"
-                                aria-describedby={
-                                    modal === "draft-delete"
-                                        ? "draft-delete-description"
-                                        : undefined
-                                }
+
                                 ref={dialog}
                                 onKeyDown={(e) => {
                                     if (e.key === "Tab") {
@@ -1450,43 +1458,6 @@ export default function WritelyApp({
                                     }
                                 }}
                             >
-                                {modal === "draft-delete" && (
-                                    <>
-                                        <div className={DIALOG_HEADING}>
-                                            <h2 id="dialog-title">
-                                                Delete “
-                                                {targetDraft?.name ??
-                                                    "this draft"}
-                                                ”?
-                                            </h2>
-                                            <Button
-                                                icon={X}
-                                                label="Close dialog"
-                                                onClick={() => setModal(null)}
-                                            />
-                                        </div>
-                                        <p id="draft-delete-description">
-                                            This permanently deletes the saved
-                                            draft. This action cannot be undone.
-                                            Your current writing and other
-                                            drafts will be kept.
-                                        </p>
-                                        <div className={DIALOG_ACTIONS}>
-                                            <Button
-                                                onClick={() => setModal(null)}
-                                            >
-                                                Cancel
-                                            </Button>
-                                            <Button
-                                                className={`draft-delete-confirm ${DANGER_BUTTON}`}
-                                                onClick={deleteDraft}
-                                                disabled={!targetDraft}
-                                            >
-                                                Delete draft
-                                            </Button>
-                                        </div>
-                                    </>
-                                )}
                                 {modal === "save" && (
                                     <form onSubmit={saveDraft}>
                                         <div className={DIALOG_HEADING}>

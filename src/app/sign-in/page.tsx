@@ -27,7 +27,7 @@ export default async function SignInPage(props: {
         <main className="auth-hero bg-paper text-ink grid min-h-dvh grid-cols-[minmax(0,1fr)_minmax(0,1fr)] max-[900px]:grid-cols-1">
             <aside
                 aria-hidden="true"
-                className="landing-field field-butter relative flex flex-col justify-between overflow-hidden bg-[var(--field)] px-12 py-10 text-[var(--field-text)] max-[900px]:hidden"
+                className="landing-field field-butter sticky top-0 flex h-dvh flex-col justify-between self-start overflow-y-auto bg-[var(--field)] px-12 py-10 text-[var(--field-text)] max-[900px]:hidden"
             >
                 <span className="flex items-center gap-2.5">
                     <Feather size={20} strokeWidth={1.5} />
@@ -46,19 +46,17 @@ export default async function SignInPage(props: {
                         </p>
                     </div>
                 </div>
-                <span className="text-[13px] opacity-70">
-                    Sample thought · your own writing stays private to your
-                    account
-                </span>
+                <div aria-hidden="true" className="h-4" />
             </aside>
             {/* Phones get the full-screen layout from AuthForm; this frame is for wider screens only. */}
             <div className="flex min-h-dvh flex-col px-6 py-6 max-[900px]:p-0">
                 <Link
                     href="/"
-                    className="text-muted hover:text-ink inline-flex min-h-10 items-center gap-2 self-start rounded-md px-1 text-[13px] no-underline focus-visible:[box-shadow:0_0_0_2px_var(--hover)] focus-visible:outline-none max-[900px]:hidden"
+                    aria-label="Back to Writely home"
+                    title="Back to Writely home"
+                    className="text-muted hover:text-ink inline-flex size-11 items-center justify-center self-start rounded-md no-underline focus-visible:[box-shadow:0_0_0_2px_var(--hover)] focus-visible:outline-none max-[900px]:hidden"
                 >
                     <ArrowLeft size={15} aria-hidden="true" />
-                    Writely home
                 </Link>
                 <div className="flex flex-1 items-center justify-center py-10 max-[900px]:block max-[900px]:py-0">
                     <AuthForm

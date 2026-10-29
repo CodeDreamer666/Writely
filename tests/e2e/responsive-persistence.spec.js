@@ -11,10 +11,7 @@ const text = (page) =>
     page.getByRole("textbox", { name: "Document text", exact: true });
 
 async function cardsMenu(page) {
-    await page
-        .getByRole("button", { name: "Document options", exact: true })
-        .click();
-    await page.getByRole("menuitem", { name: "Cards", exact: true }).click();
+    await page.getByRole("button", { name: "Thoughts", exact: true }).click();
 }
 
 async function selectWords(page, words) {
@@ -285,10 +282,7 @@ test("laptop retains spatial cards", async ({ page }) => {
     await openSample(page);
     await expect(page.locator(".annotation-layer")).toBeVisible();
     await expect(page.locator(".annotation-cloud").first()).toBeVisible();
-    await page
-        .getByRole("button", { name: "Document options", exact: true })
-        .click();
     await expect(
-        page.getByRole("menuitem", { name: "Cards", exact: true }),
+        page.getByRole("button", { name: "Document options", exact: true }),
     ).toHaveCount(0);
 });

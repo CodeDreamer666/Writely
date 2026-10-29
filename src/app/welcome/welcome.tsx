@@ -136,7 +136,7 @@ export default function Welcome({ name }: { name: string }) {
                             Open a blank draft and begin.
                         </span>
                     </button>
-                    <Link href="/help" className={`${CHOICE} field-sky`}>
+                    <Link href="/settings#help" className={`${CHOICE} field-sky`}>
                         <BookOpen
                             size={20}
                             strokeWidth={1.5}

@@ -409,7 +409,7 @@ export default function EditorToolbar({
                             !!root.current?.contains(document.activeElement))))
             }
             className={
-                "floating-formatting-toolbar [z-index:24] [width:max-content] [max-width:calc(100vw_-_16px)] [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [background:var(--surface)] [border-image:none] [body:has(.focus-mode)_&]:hidden!"
+                "floating-formatting-toolbar [z-index:24] [width:max-content] [max-width:calc(100vw_-_16px)] [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [background:var(--surface)] [border-image:none]"
             }
         >
             <div

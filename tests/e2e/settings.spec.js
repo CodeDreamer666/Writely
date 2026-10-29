@@ -23,6 +23,43 @@ const settled = (page) =>
             response.ok(),
     );
 
+test("settings header returns to the correct parent", async ({ page }) => {
+    test.setTimeout(90_000);
+    await openSample(page);
+    for (const width of [1440, 768, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto("/");
+        await page.getByRole("link", { name: "Settings", exact: true }).click();
+        const documents = page.getByRole("link", { name: "Back to Documents" });
+        await expect(documents).toBeVisible();
+        const bounds = await documents.boundingBox();
+        expect(bounds.width).toBeGreaterThanOrEqual(44);
+        expect(bounds.height).toBeGreaterThanOrEqual(44);
+        for (const hash of [
+            "appearance",
+            "writing",
+            "export",
+            "checklist",
+            "shortcuts",
+            "help",
+            "account",
+        ]) {
+            await page.goto(`/settings#${hash}`);
+            const back = page.getByRole("link", { name: "Back to Documents" });
+            await expect(back).toBeVisible();
+            await expect(
+                page
+                    .locator("main")
+                    .getByRole("link", {
+                        name: /Back to (Settings|Documents)/,
+                    }),
+            ).toHaveCount(0);
+            await back.click();
+            await expect(page).toHaveURL(/\/$/);
+        }
+    }
+});
+
 test("settings shows one section at a time from the sidebar and keeps writing and export choices", async ({
     page,
 }) => {
