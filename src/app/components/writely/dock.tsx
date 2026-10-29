@@ -8,7 +8,9 @@ import {
     useEffect,
     useRef,
     useState,
+    useSyncExternalStore,
     type ReactNode,
+    type TouchEvent,
 } from "react";
 import { Button } from "../ui";
 import { useLongPress } from "./long-press-tooltip";
@@ -95,6 +97,14 @@ export const DockDivider = () => (
     <span aria-hidden="true" className="bg-line mx-1 h-5 w-px shrink-0" />
 );
 
+const PHONE = "(max-width: 720px)";
+const subscribePhone = (notify: () => void) => {
+    const media = window.matchMedia(PHONE);
+    media.addEventListener("change", notify);
+    return () => media.removeEventListener("change", notify);
+};
+const phoneSnapshot = () => window.matchMedia(PHONE).matches;
+
 /**
  * A bottom drawer. It stays mounted for its closing animation, moves focus inside when it opens and
  * hands focus back to whatever opened it when it closes.
@@ -116,9 +126,60 @@ export function Drawer({
     id?: string;
 }) {
     const [shown, setShown] = useState(open);
+    // On phones it is a sheet: it slides up and down, and a swipe down closes it.
+    const sheet = useSyncExternalStore(
+        subscribePhone,
+        phoneSnapshot,
+        () => false,
+    );
+    const [entered, setEntered] = useState(false);
+    const [dragY, setDragY] = useState<number | null>(null);
+    const drag = useRef<{ y: number; time: number; active: boolean } | null>(
+        null,
+    );
     const ref = useRef<HTMLElement>(null);
     const opener = useRef<HTMLElement | null>(null);
     if (open && !shown) setShown(true);
+    useEffect(() => {
+        if (!open) {
+            setEntered(false);
+            return;
+        }
+        setDragY(null);
+        // Two frames, so the sheet paints off-screen before it slides up.
+        let second = 0;
+        const first = requestAnimationFrame(() => {
+            second = requestAnimationFrame(() => setEntered(true));
+        });
+        return () => {
+            cancelAnimationFrame(first);
+            cancelAnimationFrame(second);
+        };
+    }, [open]);
+    const touchStart = (e: TouchEvent<HTMLElement>) => {
+        const body = (e.target as HTMLElement).closest(".drawer-body");
+        // Pulling the list down only closes the sheet once the list is at its top.
+        drag.current = {
+            y: e.touches[0]!.clientY,
+            time: e.timeStamp,
+            active: !body || body.scrollTop <= 0,
+        };
+    };
+    const touchMove = (e: TouchEvent<HTMLElement>) => {
+        const start = drag.current;
+        if (!start?.active) return;
+        const dy = e.touches[0]!.clientY - start.y;
+        if (dy <= 0 && dragY === null) return;
+        setDragY(Math.max(0, dy));
+    };
+    const touchEnd = (e: TouchEvent<HTMLElement>) => {
+        const start = drag.current;
+        drag.current = null;
+        if (!start?.active || dragY === null) return;
+        const speed = dragY / Math.max(1, e.timeStamp - start.time);
+        if (dragY > 100 || (dragY > 24 && speed > 0.5)) onClose();
+        else setDragY(null);
+    };
     useEffect(() => {
         if (open) {
             opener.current = document.activeElement as HTMLElement | null;
@@ -134,7 +195,7 @@ export function Drawer({
             );
             return;
         }
-        const timer = setTimeout(() => setShown(false), 200);
+        const timer = setTimeout(() => setShown(false), sheet ? 300 : 200);
         if (ref.current?.contains(document.activeElement))
             opener.current?.focus?.({ preventScroll: true });
         return () => clearTimeout(timer);
@@ -146,7 +207,7 @@ export function Drawer({
                 aria-label="Close writing panel"
                 tabIndex={-1}
                 onClick={onClose}
-                className={`drawer-scrim fixed! inset-0 z-[17] m-0! h-full! w-full! cursor-default! rounded-none! border-0! bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! p-0! transition-opacity duration-200 hover:bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! max-[720px]:bg-[color-mix(in_srgb,var(--shadow)_18%,transparent)]! ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                className={`drawer-scrim fixed! inset-0 z-[17] m-0! h-full! w-full! cursor-default! rounded-none! border-0! bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! p-0! transition-opacity duration-300 hover:bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! max-[720px]:bg-[color-mix(in_srgb,var(--shadow)_18%,transparent)]! ${open && (!sheet || entered) ? "opacity-100" : "pointer-events-none opacity-0"}`}
             />
             <aside
                 ref={ref}
@@ -160,7 +221,25 @@ export function Drawer({
                         onClose();
                     }
                 }}
-                className={`drawer border-line bg-surface text-ink fixed bottom-[calc(var(--dock-height,64px)+28px)] left-1/2 z-[18] flex max-h-[min(68dvh,620px)] w-[min(560px,calc(100vw-24px))] -translate-x-1/2 flex-col overflow-hidden rounded-[18px] border [box-shadow:0_24px_64px_-12px_color-mix(in_srgb,var(--shadow)_22%,transparent),0_2px_6px_color-mix(in_srgb,var(--shadow)_5%,transparent)] transition-[opacity,translate,clip-path] duration-200 ease-out motion-reduce:transition-none max-[720px]:bottom-0 max-[720px]:z-[21] max-[720px]:max-h-[82dvh] max-[720px]:w-full max-[720px]:rounded-t-[9px] max-[720px]:rounded-b-none max-[720px]:border-b-0 max-[720px]:pb-[env(safe-area-inset-bottom)] ${open ? "translate-y-0 opacity-100 [clip-path:inset(0_0_0_0_round_18px)] max-[720px]:[clip-path:inset(0_0_0_0_round_9px_9px_0_0)]" : "pointer-events-none translate-y-3 opacity-0 [clip-path:inset(40%_0_0_0_round_18px)] max-[720px]:[clip-path:inset(40%_0_0_0_round_9px_9px_0_0)]"}`}
+                onTouchStart={sheet ? touchStart : undefined}
+                onTouchMove={sheet ? touchMove : undefined}
+                onTouchEnd={sheet ? touchEnd : undefined}
+                onTouchCancel={sheet ? () => setDragY(null) : undefined}
+                style={
+                    sheet
+                        ? {
+                              transform:
+                                  open && entered
+                                      ? `translateY(${dragY ?? 0}px)`
+                                      : "translateY(100%)",
+                              transition:
+                                  dragY === null
+                                      ? "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)"
+                                      : "none",
+                          }
+                        : undefined
+                }
+                className={`drawer border-line bg-surface text-ink fixed bottom-[calc(var(--dock-height,64px)+28px)] left-1/2 z-[18] flex max-h-[min(68dvh,620px)] w-[min(560px,calc(100vw-24px))] -translate-x-1/2 flex-col overflow-hidden rounded-[18px] border [box-shadow:0_24px_64px_-12px_color-mix(in_srgb,var(--shadow)_22%,transparent),0_2px_6px_color-mix(in_srgb,var(--shadow)_5%,transparent)] max-[720px]:bottom-0 max-[720px]:z-[21] max-[720px]:max-h-[82dvh] max-[720px]:w-full max-[720px]:rounded-t-[9px] max-[720px]:rounded-b-none max-[720px]:border-b-0 max-[720px]:pb-[env(safe-area-inset-bottom)] max-[720px]:[box-shadow:0_-8px_32px_rgba(0,0,0,0.18)] ${sheet ? "" : "transition-[opacity,translate,clip-path] duration-200 ease-out motion-reduce:transition-none"} ${open ? "translate-y-0 opacity-100 [clip-path:inset(0_0_0_0_round_18px)] max-[720px]:[clip-path:none]" : "pointer-events-none translate-y-3 opacity-0 [clip-path:inset(40%_0_0_0_round_18px)] max-[720px]:translate-y-0 max-[720px]:opacity-100 max-[720px]:[clip-path:none]"}`}
             >
                 <span
                     aria-hidden="true"
