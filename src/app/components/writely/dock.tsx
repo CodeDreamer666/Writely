@@ -199,7 +199,7 @@ export function Drawer({
         if (ref.current?.contains(document.activeElement))
             opener.current?.focus?.({ preventScroll: true });
         return () => clearTimeout(timer);
-    }, [open]);
+    }, [open, sheet]);
     if (!shown) return null;
     return (
         <>
