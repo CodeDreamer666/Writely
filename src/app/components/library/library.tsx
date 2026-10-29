@@ -480,7 +480,7 @@ export default function Library({
                                 })}
                             </ul>
                         </nav>
-                        <div className="border-line border-t pt-7 max-[1279px]:hidden">
+                        <div className="border-line border-t pt-7 max-[1279px]:pt-4 min-[1024px]:max-[1279px]:hidden">
                             <WritingWeek />
                         </div>
                     </aside>
