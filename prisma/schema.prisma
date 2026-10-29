@@ -24,6 +24,7 @@ model User {
   documents     Document[]
   revisionGoals RevisionGoal[]
   writingDays   WritingDay[]
+  feedback      Feedback[]
 
   @@unique([email])
   @@map("user")
@@ -185,4 +186,22 @@ model Card {
   data        Json
 
   @@index([documentKey])
+}
+
+// Feedback written from Settings. It outlives the account that sent it: deleting the account
+// clears `userId`, and `contactEmail` is only filled when the writer agreed to be contacted.
+model Feedback {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // idea | bug | praise | other
+  category     String
+  message      String
+  contactEmail String?
+  page         String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
 }

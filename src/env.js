@@ -17,6 +17,8 @@ export const env = createEnv({
         // Sends the 6-digit password reset codes through Resend. Without it, codes are only logged in development.
         RESEND_API_KEY: z.string().optional(),
         EMAIL_FROM: z.string().optional(),
+        // Where feedback from Settings is also emailed (needs the two above). It is always saved to the database.
+        FEEDBACK_EMAIL: z.string().email().optional(),
         DATABASE_URL: z
             .url()
             .regex(
@@ -43,6 +45,7 @@ export const env = createEnv({
         GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
         RESEND_API_KEY: process.env.RESEND_API_KEY,
         EMAIL_FROM: process.env.EMAIL_FROM,
+        FEEDBACK_EMAIL: process.env.FEEDBACK_EMAIL,
         DATABASE_URL: process.env.DATABASE_URL,
         NODE_ENV: process.env.NODE_ENV,
     },

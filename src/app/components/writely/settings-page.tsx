@@ -7,6 +7,7 @@ import {
     Keyboard,
     ListChecks,
     Mail,
+    MessageSquare,
     Palette,
     Pencil,
     PenLine,
@@ -36,6 +37,7 @@ import { EmptyState } from "../empty-state";
 import { usePreferences } from "../preferences";
 import { AppearanceSettings } from "./appearance-settings";
 import { ExportSettings } from "./export-settings";
+import { FeedbackSettings } from "./feedback-settings";
 import {
     SettingsCard,
     SettingsSection,
@@ -73,6 +75,7 @@ const SECTIONS = [
     ["checklist", "Revision checklist", ListChecks],
     ["shortcuts", "Keyboard shortcuts", Keyboard],
     ["help", "Help", CircleHelp],
+    ["feedback", "Feedback", MessageSquare],
     ["account", "Account", UserRound],
 ] as const satisfies readonly (readonly [string, string, LucideIcon])[];
 
@@ -431,6 +434,15 @@ export default function SettingsPage({
                                 hint="Step-by-step guides with pictures. Every step is one action and shows exactly where to click."
                             >
                                 <TopicList />
+                            </SettingsSection>
+                        )}
+                        {shown === "feedback" && (
+                            <SettingsSection
+                                id="feedback-title"
+                                title="Feedback"
+                                hint="Tell us what’s working, what isn’t, or what you wish Writely did. Every message is read."
+                            >
+                                <FeedbackSettings email={user.email} />
                             </SettingsSection>
                         )}
                         {shown === "account" && (
