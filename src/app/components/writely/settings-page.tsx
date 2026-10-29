@@ -21,6 +21,7 @@ import {
     useState,
     type FormEvent,
 } from "react";
+import { useRouter } from "next/navigation";
 import { uid } from "~/lib/writely/model";
 import type { Preferences } from "~/lib/writely/preferences";
 import type { RevisionGoal } from "~/lib/writely/types";
@@ -114,8 +115,34 @@ export default function SettingsPage({
             section === null && window.matchMedia("(max-width: 860px)").matches;
         setSection(value);
         if (fromList) {
+            pushedSection.current = true;
             window.history.pushState(null, "", `#${value}`);
         } else window.history.replaceState(null, "", `#${value}`);
+    };
+
+    // On a phone, the header's back arrow leaves an open section for the list of sections; from
+    // the list (or on a wide screen) it returns to the documents.
+    const router = useRouter();
+    const pushedSection = useRef(false);
+    const [narrow, setNarrow] = useState(false);
+    useEffect(() => {
+        const query = window.matchMedia("(max-width: 860px)");
+        const update = () => setNarrow(query.matches);
+        update();
+        query.addEventListener("change", update);
+        return () => query.removeEventListener("change", update);
+    }, []);
+    const backToList = narrow && section !== null;
+    const goBack = () => {
+        if (!backToList) {
+            router.push("/");
+        } else if (pushedSection.current) {
+            pushedSection.current = false;
+            window.history.back();
+        } else {
+            window.history.replaceState(null, "", window.location.pathname);
+            setSection(null);
+        }
     };
 
     // Universal goals save straight away; the editor reads them when a document opens.
@@ -186,7 +213,15 @@ export default function SettingsPage({
     return (
         <Tooltip.Provider delayDuration={450}>
             <div className="bg-paper text-ink min-h-dvh">
-                <AppHeader back={{ href: "/", label: "Back to Documents" }} />
+                <AppHeader
+                    back={{
+                        href: backToList ? "/settings" : "/",
+                        label: backToList
+                            ? "Back to Settings"
+                            : "Back to Documents",
+                        onClick: goBack,
+                    }}
+                />
                 <main
                     className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(240px,300px)_minmax(0,1fr)] max-[860px]:grid-cols-1 max-[860px]:content-start"
                     aria-labelledby="settings-title"
