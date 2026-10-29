@@ -29,6 +29,8 @@ type Tip = { label: string; rect: DOMRect };
 type Tips = {
     show: (label: string, el: HTMLElement) => void;
     hide: () => void;
+    /** A finger is down on a toolbar button: the editor must keep focus. */
+    touching: (on: boolean) => void;
 };
 
 const TipContext = createContext<Tips | null>(null);
@@ -42,7 +44,35 @@ export function LongPressTooltips({ children }: { children: ReactNode }) {
         [],
     );
     const hide = useCallback(() => setTip(null), []);
-    const tips = useRef<Tips>({ show, hide }).current;
+    const touch = useRef(0);
+    const touching = useCallback((on: boolean) => {
+        window.clearTimeout(touch.current);
+        // Stay guarded a moment past release, when the browser may still move focus.
+        if (on) touch.current = -1;
+        else touch.current = window.setTimeout(() => (touch.current = 0), 400);
+    }, []);
+    const tips = useRef<Tips>({ show, hide, touching }).current;
+
+    // A hold on a toolbar button must not take focus from the editor, or the keyboard drops and
+    // rises again. Put focus straight back before the keyboard has time to react.
+    useEffect(() => {
+        const keep = (event: FocusEvent) => {
+            const el = event.target;
+            if (
+                !touch.current ||
+                event.relatedTarget ||
+                !(el instanceof HTMLElement) ||
+                !el.isContentEditable
+            )
+                return;
+            queueMicrotask(() => el.focus({ preventScroll: true }));
+        };
+        document.addEventListener("focusout", keep, true);
+        return () => {
+            document.removeEventListener("focusout", keep, true);
+            window.clearTimeout(touch.current);
+        };
+    }, []);
 
     // Releasing, cancelling, scrolling or touching elsewhere all dismiss it.
     useEffect(() => {
@@ -129,6 +159,7 @@ export function useLongPress(label: string) {
             onPointerDown: (event) => {
                 if (event.pointerType === "mouse") return;
                 held.current = false;
+                tips.touching(true);
                 prior.current = document.activeElement;
                 origin.current = { x: event.clientX, y: event.clientY };
                 const el = event.currentTarget;
@@ -150,10 +181,12 @@ export function useLongPress(label: string) {
                     clear();
             },
             onPointerUp: () => {
+                tips.touching(false);
                 clear();
                 if (held.current) restoreFocus();
             },
             onPointerCancel: () => {
+                tips.touching(false);
                 clear();
                 if (held.current) restoreFocus();
                 tips.hide();
