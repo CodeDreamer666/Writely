@@ -659,7 +659,7 @@ export default function WritelyApp({
                     />
                     <div className="workspace-shell relative flex min-h-0 flex-1">
                         <main
-                            className={`workspace relative min-w-0 flex-1 overflow-auto [scroll-behavior:auto] [overflow-anchor:none] [&:has(.annotation-layer)]:overflow-x-hidden [.focus-mode_&_.annotation-layer]:invisible ${comparison ? "comparison-workspace overflow-hidden" : ""}`}
+                            className={`workspace relative min-w-0 flex-1 overflow-auto [@media(pointer:coarse)]:[.focus-mode_&]:mt-[10dvh] [scroll-behavior:auto] [overflow-anchor:none] [&:has(.annotation-layer)]:overflow-x-hidden [.focus-mode_&_.annotation-layer]:invisible ${comparison ? "comparison-workspace overflow-hidden" : ""}`}
                             ref={workspace}
                         >
                             {comparison ? (
