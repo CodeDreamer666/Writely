@@ -1163,29 +1163,6 @@ export default function WritelyApp({
                                             <div className="draft-row flex min-w-0 [&_strong]:min-w-0 [&_strong]:truncate [&_strong]:font-serif [&_strong]:text-[15px] [&_strong]:leading-[1.45] [&_strong]:font-normal">
                                                 <DraftTitle title={d.name} />
                                             </div>
-                                            {d.goal && (
-                                                <p
-                                                    className="text-muted mt-0.5 truncate text-[11px]"
-                                                    title={d.goal}
-                                                >
-                                                    Goal: {d.goal}
-                                                </p>
-                                            )}
-                                            {(d.name.startsWith(
-                                                "Before revision:",
-                                            ) ||
-                                                d.name.startsWith("Before:") ||
-                                                d.name.startsWith(
-                                                    "Before restoring ",
-                                                )) && (
-                                                <span className="text-muted mt-1 block text-[11px] leading-relaxed">
-                                                    {d.name.startsWith(
-                                                        "Before restoring ",
-                                                    )
-                                                        ? "Restore backup · your text before restoring"
-                                                        : "Revision starting point · saved automatically"}
-                                                </span>
-                                            )}
                                         </div>
                                         <button
                                             className="draft-compare border-line! text-accent! hover:bg-tint! h-9! min-h-9! shrink-0 rounded-lg! border! px-3! text-[12px]! font-medium"
