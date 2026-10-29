@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import {
     ChartNoAxesColumnIncreasing,
     Check,
-    CheckCheck,
     ChevronDown,
     ChevronRight,
     ChevronUp,
@@ -151,7 +150,6 @@ export default function WritelyApp({
         [draftName, setDraftName] = useState(""),
         [selected, setSelected] = useState<string | null>(null),
         [comparison, setComparison] = useState<ComparisonState | null>(null),
-        [notice, setNotice] = useState(""),
         [rename, setRename] = useState<string | null>(null);
     const [itemToDelete, setItemToDelete] = useState<{
         kind: "card" | "check";
@@ -308,11 +306,6 @@ export default function WritelyApp({
             setComparison(null);
         }
         setFocusMode(!focusMode);
-        setNotice(
-            focusMode
-                ? "Focus mode is off."
-                : "Focus mode is on. Press Escape to leave.",
-        );
     };
     useLayoutEffect(() => {
         const before = caretTop.current;
@@ -349,11 +342,6 @@ export default function WritelyApp({
         return () => el.removeEventListener("scroll", sync);
     }, []);
     useEffect(() => {
-        if (!notice) return;
-        const t = setTimeout(() => setNotice(""), 3500);
-        return () => clearTimeout(t);
-    }, [notice]);
-    useEffect(() => {
         if (modal) {
             priorFocus.current = document.activeElement;
             requestAnimationFrame(() =>
@@ -378,7 +366,6 @@ export default function WritelyApp({
         update(completeRevision);
         setComparison(null);
         setPanel(null);
-        setNotice("Revision complete. Goal marked done; no new draft created.");
     };
     const addCard = () => {
         const id = uid();
@@ -412,14 +399,10 @@ export default function WritelyApp({
     };
     const begin = (c: RevisionCheck) => {
         if (doc.session) {
-            setNotice(
-                "Finish your current revision before choosing another goal.",
-            );
             return;
         }
         update((d) => startRevision(d, c));
         setPanel(null);
-        setNotice("Revision started. Your starting text is kept in Drafts.");
         editor?.commands.focus();
     };
     useEffect(() => {
@@ -476,9 +459,6 @@ export default function WritelyApp({
         editor?.commands.setContent(d.html, { emitUpdate: false });
         setComparison(null);
         setPanel(null);
-        setNotice(
-            "Draft restored. Your previous text is kept in Drafts as a restore backup.",
-        );
     };
     const targetDraft = data.docs
         .find((d) => d.id === draftToDelete?.documentId)
@@ -507,7 +487,6 @@ export default function WritelyApp({
             setComparison(null);
         setModal(null);
         setDraftToDelete(null);
-        setNotice("Draft permanently deleted.");
         requestAnimationFrame(() =>
             document.querySelector<HTMLButtonElement>(".draft-save")?.focus(),
         );
@@ -520,7 +499,6 @@ export default function WritelyApp({
                     v.id === rename ? { ...v, name: draftName.trim() } : v,
                 ),
             }));
-            setNotice("Draft renamed.");
         } else {
             const d = snapshot(doc, draftName.trim(), {
                 goal: doc.session?.goal,
@@ -529,9 +507,6 @@ export default function WritelyApp({
             update((v) => ({ drafts: [...v.drafts, d] }));
             setComparison(null);
             setPanel(null);
-            setNotice(
-                `“${d.name}” kept in Drafts.${doc.session ? " Your revision is still in progress." : " You can keep writing."}`,
-            );
             requestAnimationFrame(() =>
                 editor?.commands.focus(null, { scrollIntoView: false }),
             );
@@ -606,7 +581,6 @@ export default function WritelyApp({
             editor && selectionTarget(editor.state.doc, connectionSelection);
         if (!target) {
             setConnectionSelection(null);
-            setNotice("Select words in the document to attach a card.");
             return;
         }
         const attached = { ...card, connectors: [{ id: uid(), target }] };
@@ -1392,17 +1366,6 @@ export default function WritelyApp({
                 )}
                 {shortcutsOpen && (
                     <ShortcutsDialog onClose={() => setShortcutsOpen(false)} />
-                )}
-                {notice && (
-                    <div
-                        className={
-                            "toast border-line bg-surface [&_svg]:text-accent fixed top-2 left-1/2 z-30 flex max-w-[calc(100%-32px)] -translate-x-1/2 [animation:appear_200ms_ease-out] items-center gap-2.5 rounded-full border py-2.5 pr-5 pl-4 text-[12.5px] [box-shadow:0_12px_32px_-10px_color-mix(in_srgb,var(--shadow)_18%,transparent)] motion-reduce:animate-none [.focus-mode_&]:sr-only"
-                        }
-                        role="status"
-                    >
-                        <CheckCheck size={16} />
-                        {notice}
-                    </div>
                 )}
                 {itemToDelete && (
                     <DeleteDialog
