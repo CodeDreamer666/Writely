@@ -365,7 +365,7 @@ export function ActionMenu({
                         ref={menu}
                         className={
                             sheet
-                                ? "document-menu fixed inset-x-0 bottom-0 z-[35] max-h-[85dvh] w-full overflow-y-auto rounded-t-[28px] border-0 bg-[var(--surface)] px-2 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] [&_button]:w-full [&_button]:justify-start [&_button]:text-[var(--text)]"
+                                ? "document-menu fixed inset-x-0 bottom-0 z-[35] max-h-[85dvh] w-full overflow-y-auto rounded-t-[14px] border-0 bg-[var(--surface)] px-2 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] [&_button]:w-full [&_button]:justify-start [&_button]:text-[var(--text)]"
                                 : "document-menu fixed [right:auto] [z-index:35] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)]"
                         }
                         onTouchStart={sheet ? touchStart : undefined}

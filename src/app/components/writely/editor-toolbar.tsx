@@ -30,12 +30,24 @@ import {
 import {
     useCallback,
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
+    useSyncExternalStore,
     type KeyboardEvent,
     type RefObject,
 } from "react";
+import { createPortal } from "react-dom";
 import { TOOLTIP_CLASS } from "~/config/ui";
+
+/** Touch devices up to tablet size get a toolbar docked above the keyboard. */
+const MOBILE_TOOLBAR = "(max-width: 1024px) and (pointer: coarse)";
+const subscribeMobile = (notify: () => void) => {
+    const media = window.matchMedia(MOBILE_TOOLBAR);
+    media.addEventListener("change", notify);
+    return () => media.removeEventListener("change", notify);
+};
+const mobileSnapshot = () => window.matchMedia(MOBILE_TOOLBAR).matches;
 
 /**
  * What: The look of the formatting buttons (bold, italic, lists and so on)
@@ -213,7 +225,117 @@ export default function EditorToolbar({
     const moreTrigger = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const linkInput = useRef<HTMLInputElement>(null);
+    const dock = useRef<HTMLDivElement>(null);
+    const mobile = useSyncExternalStore(
+        subscribeMobile,
+        mobileSnapshot,
+        () => false,
+    );
+    const [docked, setDocked] = useState(false);
     const bookmark = useRef<SelectionBookmark | null>(null);
+    // Mobile: show while the editor or the toolbar holds focus.
+    useEffect(() => {
+        if (!mobile || editor.isDestroyed) return;
+        let frame = 0;
+        const update = () => {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(() =>
+                setDocked(
+                    editor.view.hasFocus() ||
+                        !!root.current?.contains(document.activeElement),
+                ),
+            );
+        };
+        update();
+        editor.on("focus", update);
+        editor.on("blur", update);
+        document.addEventListener("focusin", update);
+        document.addEventListener("focusout", update);
+        return () => {
+            cancelAnimationFrame(frame);
+            editor.off("focus", update);
+            editor.off("blur", update);
+            document.removeEventListener("focusin", update);
+            document.removeEventListener("focusout", update);
+            setDocked(false);
+        };
+    }, [editor, mobile]);
+    // Mobile: sit just above the keyboard (visual viewport) and keep the caret visible.
+    useLayoutEffect(() => {
+        if (!mobile || !docked) return;
+        const viewport = window.visualViewport;
+        let frame = 0;
+        const reveal = () => {
+            if (editor.isDestroyed || !editor.view.hasFocus()) return;
+            const node = dock.current;
+            const bottom = viewport
+                ? viewport.offsetTop + viewport.height
+                : window.innerHeight;
+            const limit = bottom - (node?.offsetHeight ?? 48) - 12;
+            let rect;
+            try {
+                rect = editor.view.coordsAtPos(editor.state.selection.head);
+            } catch {
+                return;
+            }
+            if (rect.bottom > limit)
+                editor.view.dom
+                    .closest<HTMLElement>(".workspace")
+                    ?.scrollBy({ top: rect.bottom - limit });
+        };
+        const sync = () => {
+            const node = dock.current;
+            if (!node) return;
+            // Ignore pinch-zoom: its viewport changes are not the keyboard.
+            if (viewport && viewport.scale > 1.01) return;
+            const offset = viewport
+                ? Math.max(
+                      0,
+                      Math.round(
+                          window.innerHeight -
+                              viewport.offsetTop -
+                              viewport.height,
+                      ),
+                  )
+                : 0;
+            node.style.setProperty("--kb", `${offset}px`);
+            // The home-indicator inset only matters when no keyboard covers it.
+            node.style.setProperty(
+                "--kb-pad",
+                offset > 0 ? "0px" : "env(safe-area-inset-bottom, 0px)",
+            );
+            const root = document.documentElement.style;
+            root.setProperty("--tb-bottom", `${offset + node.offsetHeight}px`);
+            root.setProperty(
+                "--tb-room",
+                `${(viewport?.height ?? window.innerHeight) - node.offsetHeight - 24}px`,
+            );
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(reveal);
+        };
+        sync();
+        viewport?.addEventListener("resize", sync);
+        viewport?.addEventListener("scroll", sync);
+        window.addEventListener("resize", sync);
+        window.addEventListener("orientationchange", sync);
+        editor.on("selectionUpdate", sync);
+        return () => {
+            cancelAnimationFrame(frame);
+            viewport?.removeEventListener("resize", sync);
+            viewport?.removeEventListener("scroll", sync);
+            window.removeEventListener("resize", sync);
+            window.removeEventListener("orientationchange", sync);
+            editor.off("selectionUpdate", sync);
+            document.documentElement.style.removeProperty("--tb-bottom");
+            document.documentElement.style.removeProperty("--tb-room");
+        };
+    }, [editor, mobile, docked]);
+    const popover = mobile
+        ? MENU.replace(
+              "absolute [top:calc(100%_+_6px)]",
+              "fixed [bottom:calc(var(--tb-bottom,52px)_+_6px)] [max-height:var(--tb-room,60vh)] overflow-y-auto",
+          )
+        : MENU;
     const openLink = useCallback(() => {
         if (editor.state.selection.empty && editor.isActive("link"))
             editor.commands.extendMarkRange("link");
@@ -382,6 +504,461 @@ export default function EditorToolbar({
         ]?.focus();
     };
     if (editor.isDestroyed) return null;
+    const body = (
+        <div
+            className={
+                mobile
+                    ? "editor-toolbar-shell relative [z-index:13] flex [max-width:100vw] [flex:0_0_auto] [scrollbar-width:none] flex-nowrap items-center justify-start [gap:4px_8px] [overflow-x:auto] [overscroll-behavior-x:contain] [padding:4px_6px] [color:var(--muted)]"
+                    : "editor-toolbar-shell relative [z-index:13] flex [max-width:calc(100vw_-_18px)] [flex:0_0_auto] flex-wrap items-center justify-center [gap:4px_8px] [padding:4px_6px] [color:var(--muted)] [@media(width_<=_760px)]:[z-index:12]"
+            }
+            ref={(node) => {
+                root.current = node;
+                if (containerRef) containerRef.current = node;
+            }}
+            onKeyDown={toolbarKeys}
+            onPointerDown={(event) => event.stopPropagation()}
+            onBlur={(event) => {
+                if (
+                    !root.current?.contains(event.relatedTarget) &&
+                    !editor.view.dom.contains(event.relatedTarget)
+                )
+                    onBlurOutside?.();
+            }}
+        >
+            <div
+                className={`editor-formatting-toolbar flex items-center [gap:4px] [@media(width_<=_760px)]:[gap:4px_2px] ${mobile ? "[width:max-content] flex-nowrap [&>*]:shrink-0" : "[max-width:100%] flex-wrap justify-center"}`}
+                role="toolbar"
+                aria-label={label}
+            >
+                <div className="format-menu relative">
+                    <button
+                        type="button"
+                        ref={paragraphTrigger}
+                        className="paragraph-select toolbar-control text-muted! hover:text-ink! aria-expanded:bg-tint! aria-expanded:text-accent! inline-flex! h-8! min-h-8! w-[124px]! items-center! justify-between! gap-1.5! rounded-[5px]! border-0! bg-transparent! px-2! text-[12px]! shadow-none! hover:bg-[var(--control-hover)]! max-[760px]:w-[112px]!"
+                        aria-label="Text style"
+                        aria-haspopup="menu"
+                        aria-expanded={menu === "paragraph"}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => toggleMenu("paragraph")}
+                        onKeyDown={(event) => triggerKeys("paragraph", event)}
+                    >
+                        <span className="truncate">
+                            {PARAGRAPH_STYLES[state.heading]?.[1]}
+                        </span>
+                        <ChevronDown
+                            size={14}
+                            strokeWidth={1.8}
+                            aria-hidden="true"
+                            className="shrink-0 transition-transform duration-150 [[aria-expanded='true']>&]:rotate-180"
+                        />
+                    </button>
+                    {menu === "paragraph" && (
+                        <div
+                            ref={menuRef}
+                            className={`${popover} ${mobile ? "left-2" : "left-0"}`}
+                            role="menu"
+                            aria-label="Text style"
+                            onKeyDown={menuKeys}
+                        >
+                            {PARAGRAPH_STYLES.map(([level, name, size]) => (
+                                <button
+                                    type="button"
+                                    key={level}
+                                    role="menuitemradio"
+                                    aria-checked={state.heading === level}
+                                    className={MENU_ITEM}
+                                    onMouseDown={(event) =>
+                                        event.preventDefault()
+                                    }
+                                    onClick={() => {
+                                        setMenu(null);
+                                        const chain = editor
+                                            .chain()
+                                            .focus(undefined, {
+                                                scrollIntoView: false,
+                                            });
+                                        if (level)
+                                            chain.setHeading({ level }).run();
+                                        else chain.setParagraph().run();
+                                    }}
+                                >
+                                    <span className={`flex-1 ${size}`}>
+                                        {name}
+                                    </span>
+                                    {state.heading === level && (
+                                        <Check
+                                            size={14}
+                                            strokeWidth={2}
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <span
+                    className={
+                        "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                    }
+                    role="separator"
+                    aria-orientation="vertical"
+                />
+                <div className={"format-group flex items-center [gap:2px]"}>
+                    <FormatButton
+                        icon={Bold}
+                        label="Bold"
+                        shortcut="Ctrl+B"
+                        active={state.bold}
+                        disabled={!state.canMark}
+                        onClick={() =>
+                            editor.chain().focus().toggleBold().run()
+                        }
+                    />
+                    <FormatButton
+                        icon={Italic}
+                        label="Italic"
+                        shortcut="Ctrl+I"
+                        active={state.italic}
+                        disabled={!state.canMark}
+                        onClick={() =>
+                            editor.chain().focus().toggleItalic().run()
+                        }
+                    />
+                    <FormatButton
+                        icon={Link2}
+                        label="Insert/Edit Link"
+                        shortcut="Ctrl+K"
+                        active={state.link}
+                        disabled={!state.canLink}
+                        onClick={openLink}
+                    />
+                </div>
+                <span
+                    className={
+                        "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                    }
+                    role="separator"
+                    aria-orientation="vertical"
+                />
+                <div className={"format-group flex items-center [gap:2px]"}>
+                    <FormatButton
+                        icon={List}
+                        label="Bullet List"
+                        active={state.bullet}
+                        onClick={() =>
+                            editor.chain().focus().toggleBulletList().run()
+                        }
+                    />
+                    <FormatButton
+                        icon={ListOrdered}
+                        label="Numbered List"
+                        active={state.ordered}
+                        onClick={() =>
+                            editor.chain().focus().toggleOrderedList().run()
+                        }
+                    />
+                    <FormatButton
+                        icon={Quote}
+                        label="Blockquote"
+                        active={state.quote}
+                        onClick={() =>
+                            editor.chain().focus().toggleBlockquote().run()
+                        }
+                    />
+                </div>
+                <span
+                    className={
+                        "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                    }
+                    role="separator"
+                    aria-orientation="vertical"
+                />
+                <div className={"format-menu relative"}>
+                    <Tooltip.Root>
+                        <Tooltip.Trigger asChild>
+                            <button
+                                type="button"
+                                ref={moreTrigger}
+                                className={FORMAT_BUTTON}
+                                aria-label="More formatting"
+                                aria-haspopup="menu"
+                                aria-expanded={menu === "more"}
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => toggleMenu("more")}
+                                onKeyDown={(event) =>
+                                    triggerKeys("more", event)
+                                }
+                            >
+                                <MoreHorizontal
+                                    size={16}
+                                    strokeWidth={1.6}
+                                    aria-hidden="true"
+                                />
+                            </button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Portal>
+                            <Tooltip.Content
+                                className={TOOLTIP_CLASS}
+                                sideOffset={8}
+                            >
+                                More formatting
+                                <Tooltip.Arrow />
+                            </Tooltip.Content>
+                        </Tooltip.Portal>
+                    </Tooltip.Root>
+                    {menu === "more" && (
+                        <div
+                            ref={menuRef}
+                            className={`${popover} format-more-menu ${mobile ? "right-2" : "right-0"} w-[216px]`}
+                            role="menu"
+                            aria-label="More formatting"
+                            onKeyDown={menuKeys}
+                        >
+                            {/* Formats toggle in place and the menu stays open, so several can be stacked. */}
+                            {(
+                                [
+                                    [
+                                        Strikethrough,
+                                        "Strikethrough",
+                                        state.strike,
+                                        () =>
+                                            editor.chain().toggleStrike().run(),
+                                    ],
+                                    [
+                                        Code,
+                                        "Inline Code",
+                                        state.code,
+                                        () => editor.chain().toggleCode().run(),
+                                    ],
+                                    [
+                                        SquareCode,
+                                        "Code Block",
+                                        state.codeBlock,
+                                        () =>
+                                            editor
+                                                .chain()
+                                                .toggleCodeBlock()
+                                                .run(),
+                                    ],
+                                    [
+                                        ListTodo,
+                                        "Checklist",
+                                        state.task,
+                                        () =>
+                                            editor
+                                                .chain()
+                                                .toggleTaskList()
+                                                .run(),
+                                    ],
+                                ] as [LucideIcon, string, boolean, () => void][]
+                            ).map(([Icon, name, active, action]) => (
+                                <button
+                                    type="button"
+                                    key={name}
+                                    role="menuitemcheckbox"
+                                    aria-checked={active}
+                                    className={MENU_ITEM}
+                                    onMouseDown={(event) =>
+                                        event.preventDefault()
+                                    }
+                                    onClick={action}
+                                >
+                                    <Icon
+                                        size={16}
+                                        strokeWidth={1.6}
+                                        aria-hidden="true"
+                                    />
+                                    <span className="flex-1">{name}</span>
+                                    {active && (
+                                        <Check
+                                            size={14}
+                                            strokeWidth={2}
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                </button>
+                            ))}
+                            <div className={MENU_SEPARATOR} role="separator" />
+                            <button
+                                type="button"
+                                role="menuitem"
+                                className={MENU_ITEM}
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                    setMenu(null);
+                                    editor
+                                        .chain()
+                                        .focus()
+                                        .setHorizontalRule()
+                                        .run();
+                                }}
+                            >
+                                <Minus
+                                    size={16}
+                                    strokeWidth={1.6}
+                                    aria-hidden="true"
+                                />
+                                Horizontal Divider
+                            </button>
+                            {onConnect && (
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    className={`${MENU_ITEM} toolbar-connect`}
+                                    disabled={!state.canConnect || connecting}
+                                    onMouseDown={(event) =>
+                                        event.preventDefault()
+                                    }
+                                    onClick={() => {
+                                        setMenu(null);
+                                        onConnect();
+                                    }}
+                                >
+                                    <Link2
+                                        size={16}
+                                        strokeWidth={1.6}
+                                        aria-hidden="true"
+                                    />
+                                    Connect to thought
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+            {linkOpen && (
+                <form
+                    className={
+                        (mobile
+                            ? "format-popover link-editor fixed [right:8px] [bottom:calc(var(--tb-bottom,52px)_+_6px)] [left:8px] [z-index:30] [border-radius:8px]"
+                            : "format-popover link-editor absolute [top:calc(100%_+_6px)] [right:0] [z-index:30] [border-radius:8px]") +
+                        " [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:6px] [color:var(--text)] [background:var(--surface)] [border-image:none] [font:12px/1.5_Inter,_sans-serif] [&_input]:[width:100%] [&_input]:[min-width:0] [&_input]:[font:inherit] [&_label]:[margin-bottom:4px] [&_label]:block [&_label]:[color:var(--muted)] [&_p[role='alert']]:[margin-top:6px] [&_p[role='alert']]:[color:var(--danger)] [&.link-editor]:[right:max(12px,_calc((100%_-_680px)_/_2))] [&.link-editor]:[width:min(340px,_calc(100%_-_24px))] [&.link-editor]:[padding:14px]"
+                    }
+                    role="dialog"
+                    aria-label="Edit link"
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        const href = linkURL(url);
+                        if (!href) {
+                            setError(
+                                "Enter a valid web address, email link, or phone link.",
+                            );
+                            return;
+                        }
+                        restoreSelection();
+                        if (
+                            editor.state.selection.empty &&
+                            !editor.isActive("link")
+                        )
+                            editor.commands.insertContent({
+                                type: "text",
+                                text: href,
+                                marks: [{ type: "link", attrs: { href } }],
+                            });
+                        else editor.chain().setLink({ href }).run();
+                        setLinkOpen(false);
+                    }}
+                    onKeyDown={(event) => {
+                        if (event.key === "Escape") {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            closeLink();
+                        }
+                    }}
+                >
+                    <div
+                        className={
+                            "link-editor-heading [margin-bottom:8px] flex items-center justify-between [gap:8px] [font-weight:500] [&_button]:[min-height:28px] [&_button]:[min-width:28px] [&_button]:[padding:4px] [&_button]:[background:transparent] [&_button]:[border:0]"
+                        }
+                    >
+                        <span>Link</span>
+                        <button
+                            type="button"
+                            aria-label="Close link editor"
+                            onClick={closeLink}
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                    <label htmlFor="manuscript-link-url">URL</label>
+                    <input
+                        id="manuscript-link-url"
+                        ref={linkInput}
+                        value={url}
+                        placeholder="https://example.com"
+                        onChange={(event) => {
+                            setURL(event.target.value);
+                            setError("");
+                        }}
+                        aria-invalid={!!error}
+                        aria-describedby={error ? "link-error" : undefined}
+                    />
+                    {error && (
+                        <p id="link-error" role="alert">
+                            {error}
+                        </p>
+                    )}
+                    <div
+                        className={
+                            "link-editor-actions [margin-top:12px] flex flex-wrap items-center [gap:8px] [&_a]:inline-flex [&_a]:items-center [&_a]:[gap:5px] [&_a]:[padding:5px_6px] [&_a]:[color:var(--muted)] [&_a]:[background:transparent] [&_a]:[border:0] [&_a]:[font:inherit] [&_a]:[text-decoration:none] [&_button]:inline-flex [&_button]:items-center [&_button]:[gap:5px] [&_button]:[padding:5px_6px] [&_button]:[color:var(--muted)] [&_button]:[background:transparent] [&_button]:[border:0] [&_button]:[font:inherit] [&_button]:[text-decoration:none]"
+                        }
+                    >
+                        {state.link && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    restoreSelection();
+                                    editor.commands.unsetLink();
+                                    setLinkOpen(false);
+                                }}
+                            >
+                                <Unlink size={14} />
+                                Remove link
+                            </button>
+                        )}
+                        {linkURL(url) && (
+                            <a
+                                href={linkURL(url)!}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <ExternalLink size={14} />
+                                Open link
+                            </a>
+                        )}
+                        <button
+                            type="submit"
+                            className={
+                                "link-apply [.link-editor-actions_&]:[margin-left:auto] [.link-editor-actions_&]:[color:var(--accent)] [.link-editor-actions_&]:[background:var(--tint)]"
+                            }
+                        >
+                            Apply
+                        </button>
+                    </div>
+                </form>
+            )}
+        </div>
+    );
+    if (mobile) {
+        // Docked above the keyboard; shown only while the editor (or the toolbar) has focus.
+        if (!docked || connecting || !editor.isEditable) return null;
+        return createPortal(
+            <div
+                ref={dock}
+                className="mobile-formatting-toolbar border-line bg-surface fixed inset-x-0 [bottom:var(--kb,0px)] [z-index:40] border-t"
+                style={{
+                    paddingBottom:
+                        "var(--kb-pad, env(safe-area-inset-bottom, 0px))",
+                    paddingLeft: "env(safe-area-inset-left, 0px)",
+                    paddingRight: "env(safe-area-inset-right, 0px)",
+                }}
+            >
+                {body}
+            </div>,
+            document.body,
+        );
+    }
     return (
         <BubbleMenu
             editor={editor}
@@ -412,462 +989,7 @@ export default function EditorToolbar({
                 "floating-formatting-toolbar [z-index:24] [width:max-content] [max-width:calc(100vw_-_16px)] [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [background:var(--surface)] [border-image:none]"
             }
         >
-            <div
-                className={
-                    "editor-toolbar-shell relative [z-index:13] flex [max-width:calc(100vw_-_18px)] [flex:0_0_auto] flex-wrap items-center justify-center [gap:4px_8px] [padding:4px_6px] [color:var(--muted)] [@media(width_<=_760px)]:[z-index:12]"
-                }
-                ref={(node) => {
-                    root.current = node;
-                    if (containerRef) containerRef.current = node;
-                }}
-                onKeyDown={toolbarKeys}
-                onPointerDown={(event) => event.stopPropagation()}
-                onBlur={(event) => {
-                    if (
-                        !root.current?.contains(event.relatedTarget) &&
-                        !editor.view.dom.contains(event.relatedTarget)
-                    )
-                        onBlurOutside?.();
-                }}
-            >
-                <div
-                    className={
-                        "editor-formatting-toolbar flex [max-width:100%] flex-wrap items-center justify-center [gap:4px] [@media(width_<=_760px)]:[gap:4px_2px]"
-                    }
-                    role="toolbar"
-                    aria-label={label}
-                >
-                    <div className="format-menu relative">
-                        <button
-                            type="button"
-                            ref={paragraphTrigger}
-                            className="paragraph-select toolbar-control text-muted! hover:text-ink! aria-expanded:bg-tint! aria-expanded:text-accent! inline-flex! h-8! min-h-8! w-[124px]! items-center! justify-between! gap-1.5! rounded-[5px]! border-0! bg-transparent! px-2! text-[12px]! shadow-none! hover:bg-[var(--control-hover)]! max-[760px]:w-[112px]!"
-                            aria-label="Text style"
-                            aria-haspopup="menu"
-                            aria-expanded={menu === "paragraph"}
-                            onMouseDown={(event) => event.preventDefault()}
-                            onClick={() => toggleMenu("paragraph")}
-                            onKeyDown={(event) =>
-                                triggerKeys("paragraph", event)
-                            }
-                        >
-                            <span className="truncate">
-                                {PARAGRAPH_STYLES[state.heading]?.[1]}
-                            </span>
-                            <ChevronDown
-                                size={14}
-                                strokeWidth={1.8}
-                                aria-hidden="true"
-                                className="shrink-0 transition-transform duration-150 [[aria-expanded='true']>&]:rotate-180"
-                            />
-                        </button>
-                        {menu === "paragraph" && (
-                            <div
-                                ref={menuRef}
-                                className={`${MENU} left-0`}
-                                role="menu"
-                                aria-label="Text style"
-                                onKeyDown={menuKeys}
-                            >
-                                {PARAGRAPH_STYLES.map(([level, name, size]) => (
-                                    <button
-                                        type="button"
-                                        key={level}
-                                        role="menuitemradio"
-                                        aria-checked={state.heading === level}
-                                        className={MENU_ITEM}
-                                        onMouseDown={(event) =>
-                                            event.preventDefault()
-                                        }
-                                        onClick={() => {
-                                            setMenu(null);
-                                            const chain = editor
-                                                .chain()
-                                                .focus(undefined, {
-                                                    scrollIntoView: false,
-                                                });
-                                            if (level)
-                                                chain
-                                                    .setHeading({ level })
-                                                    .run();
-                                            else chain.setParagraph().run();
-                                        }}
-                                    >
-                                        <span className={`flex-1 ${size}`}>
-                                            {name}
-                                        </span>
-                                        {state.heading === level && (
-                                            <Check
-                                                size={14}
-                                                strokeWidth={2}
-                                                aria-hidden="true"
-                                            />
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    <span
-                        className={
-                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
-                        }
-                        role="separator"
-                        aria-orientation="vertical"
-                    />
-                    <div className={"format-group flex items-center [gap:2px]"}>
-                        <FormatButton
-                            icon={Bold}
-                            label="Bold"
-                            shortcut="Ctrl+B"
-                            active={state.bold}
-                            disabled={!state.canMark}
-                            onClick={() =>
-                                editor.chain().focus().toggleBold().run()
-                            }
-                        />
-                        <FormatButton
-                            icon={Italic}
-                            label="Italic"
-                            shortcut="Ctrl+I"
-                            active={state.italic}
-                            disabled={!state.canMark}
-                            onClick={() =>
-                                editor.chain().focus().toggleItalic().run()
-                            }
-                        />
-                        <FormatButton
-                            icon={Link2}
-                            label="Insert/Edit Link"
-                            shortcut="Ctrl+K"
-                            active={state.link}
-                            disabled={!state.canLink}
-                            onClick={openLink}
-                        />
-                    </div>
-                    <span
-                        className={
-                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
-                        }
-                        role="separator"
-                        aria-orientation="vertical"
-                    />
-                    <div className={"format-group flex items-center [gap:2px]"}>
-                        <FormatButton
-                            icon={List}
-                            label="Bullet List"
-                            active={state.bullet}
-                            onClick={() =>
-                                editor.chain().focus().toggleBulletList().run()
-                            }
-                        />
-                        <FormatButton
-                            icon={ListOrdered}
-                            label="Numbered List"
-                            active={state.ordered}
-                            onClick={() =>
-                                editor.chain().focus().toggleOrderedList().run()
-                            }
-                        />
-                        <FormatButton
-                            icon={Quote}
-                            label="Blockquote"
-                            active={state.quote}
-                            onClick={() =>
-                                editor.chain().focus().toggleBlockquote().run()
-                            }
-                        />
-                    </div>
-                    <span
-                        className={
-                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
-                        }
-                        role="separator"
-                        aria-orientation="vertical"
-                    />
-                    <div className={"format-menu relative"}>
-                        <Tooltip.Root>
-                            <Tooltip.Trigger asChild>
-                                <button
-                                    type="button"
-                                    ref={moreTrigger}
-                                    className={FORMAT_BUTTON}
-                                    aria-label="More formatting"
-                                    aria-haspopup="menu"
-                                    aria-expanded={menu === "more"}
-                                    onMouseDown={(event) =>
-                                        event.preventDefault()
-                                    }
-                                    onClick={() => toggleMenu("more")}
-                                    onKeyDown={(event) =>
-                                        triggerKeys("more", event)
-                                    }
-                                >
-                                    <MoreHorizontal
-                                        size={16}
-                                        strokeWidth={1.6}
-                                        aria-hidden="true"
-                                    />
-                                </button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Portal>
-                                <Tooltip.Content
-                                    className={TOOLTIP_CLASS}
-                                    sideOffset={8}
-                                >
-                                    More formatting
-                                    <Tooltip.Arrow />
-                                </Tooltip.Content>
-                            </Tooltip.Portal>
-                        </Tooltip.Root>
-                        {menu === "more" && (
-                            <div
-                                ref={menuRef}
-                                className={`${MENU} format-more-menu right-0 w-[216px]`}
-                                role="menu"
-                                aria-label="More formatting"
-                                onKeyDown={menuKeys}
-                            >
-                                {/* Formats toggle in place and the menu stays open, so several can be stacked. */}
-                                {(
-                                    [
-                                        [
-                                            Strikethrough,
-                                            "Strikethrough",
-                                            state.strike,
-                                            () =>
-                                                editor
-                                                    .chain()
-                                                    .toggleStrike()
-                                                    .run(),
-                                        ],
-                                        [
-                                            Code,
-                                            "Inline Code",
-                                            state.code,
-                                            () =>
-                                                editor
-                                                    .chain()
-                                                    .toggleCode()
-                                                    .run(),
-                                        ],
-                                        [
-                                            SquareCode,
-                                            "Code Block",
-                                            state.codeBlock,
-                                            () =>
-                                                editor
-                                                    .chain()
-                                                    .toggleCodeBlock()
-                                                    .run(),
-                                        ],
-                                        [
-                                            ListTodo,
-                                            "Checklist",
-                                            state.task,
-                                            () =>
-                                                editor
-                                                    .chain()
-                                                    .toggleTaskList()
-                                                    .run(),
-                                        ],
-                                    ] as [
-                                        LucideIcon,
-                                        string,
-                                        boolean,
-                                        () => void,
-                                    ][]
-                                ).map(([Icon, name, active, action]) => (
-                                    <button
-                                        type="button"
-                                        key={name}
-                                        role="menuitemcheckbox"
-                                        aria-checked={active}
-                                        className={MENU_ITEM}
-                                        onMouseDown={(event) =>
-                                            event.preventDefault()
-                                        }
-                                        onClick={action}
-                                    >
-                                        <Icon
-                                            size={16}
-                                            strokeWidth={1.6}
-                                            aria-hidden="true"
-                                        />
-                                        <span className="flex-1">{name}</span>
-                                        {active && (
-                                            <Check
-                                                size={14}
-                                                strokeWidth={2}
-                                                aria-hidden="true"
-                                            />
-                                        )}
-                                    </button>
-                                ))}
-                                <div
-                                    className={MENU_SEPARATOR}
-                                    role="separator"
-                                />
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    className={MENU_ITEM}
-                                    onMouseDown={(event) =>
-                                        event.preventDefault()
-                                    }
-                                    onClick={() => {
-                                        setMenu(null);
-                                        editor
-                                            .chain()
-                                            .focus()
-                                            .setHorizontalRule()
-                                            .run();
-                                    }}
-                                >
-                                    <Minus
-                                        size={16}
-                                        strokeWidth={1.6}
-                                        aria-hidden="true"
-                                    />
-                                    Horizontal Divider
-                                </button>
-                                {onConnect && (
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        className={`${MENU_ITEM} toolbar-connect`}
-                                        disabled={
-                                            !state.canConnect || connecting
-                                        }
-                                        onMouseDown={(event) =>
-                                            event.preventDefault()
-                                        }
-                                        onClick={() => {
-                                            setMenu(null);
-                                            onConnect();
-                                        }}
-                                    >
-                                        <Link2
-                                            size={16}
-                                            strokeWidth={1.6}
-                                            aria-hidden="true"
-                                        />
-                                        Connect to thought
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-                {linkOpen && (
-                    <form
-                        className={
-                            "format-popover link-editor absolute [top:calc(100%_+_6px)] [right:0] [z-index:30] [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:6px] [color:var(--text)] [background:var(--surface)] [border-image:none] [font:12px/1.5_Inter,_sans-serif] [&_input]:[width:100%] [&_input]:[min-width:0] [&_input]:[font:inherit] [&_label]:[margin-bottom:4px] [&_label]:block [&_label]:[color:var(--muted)] [&_p[role='alert']]:[margin-top:6px] [&_p[role='alert']]:[color:var(--danger)] [&.link-editor]:[right:max(12px,_calc((100%_-_680px)_/_2))] [&.link-editor]:[width:min(340px,_calc(100%_-_24px))] [&.link-editor]:[padding:14px]"
-                        }
-                        role="dialog"
-                        aria-label="Edit link"
-                        onSubmit={(event) => {
-                            event.preventDefault();
-                            const href = linkURL(url);
-                            if (!href) {
-                                setError(
-                                    "Enter a valid web address, email link, or phone link.",
-                                );
-                                return;
-                            }
-                            restoreSelection();
-                            if (
-                                editor.state.selection.empty &&
-                                !editor.isActive("link")
-                            )
-                                editor.commands.insertContent({
-                                    type: "text",
-                                    text: href,
-                                    marks: [{ type: "link", attrs: { href } }],
-                                });
-                            else editor.chain().setLink({ href }).run();
-                            setLinkOpen(false);
-                        }}
-                        onKeyDown={(event) => {
-                            if (event.key === "Escape") {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                closeLink();
-                            }
-                        }}
-                    >
-                        <div
-                            className={
-                                "link-editor-heading [margin-bottom:8px] flex items-center justify-between [gap:8px] [font-weight:500] [&_button]:[min-height:28px] [&_button]:[min-width:28px] [&_button]:[padding:4px] [&_button]:[background:transparent] [&_button]:[border:0]"
-                            }
-                        >
-                            <span>Link</span>
-                            <button
-                                type="button"
-                                aria-label="Close link editor"
-                                onClick={closeLink}
-                            >
-                                <X size={16} />
-                            </button>
-                        </div>
-                        <label htmlFor="manuscript-link-url">URL</label>
-                        <input
-                            id="manuscript-link-url"
-                            ref={linkInput}
-                            value={url}
-                            placeholder="https://example.com"
-                            onChange={(event) => {
-                                setURL(event.target.value);
-                                setError("");
-                            }}
-                            aria-invalid={!!error}
-                            aria-describedby={error ? "link-error" : undefined}
-                        />
-                        {error && (
-                            <p id="link-error" role="alert">
-                                {error}
-                            </p>
-                        )}
-                        <div
-                            className={
-                                "link-editor-actions [margin-top:12px] flex flex-wrap items-center [gap:8px] [&_a]:inline-flex [&_a]:items-center [&_a]:[gap:5px] [&_a]:[padding:5px_6px] [&_a]:[color:var(--muted)] [&_a]:[background:transparent] [&_a]:[border:0] [&_a]:[font:inherit] [&_a]:[text-decoration:none] [&_button]:inline-flex [&_button]:items-center [&_button]:[gap:5px] [&_button]:[padding:5px_6px] [&_button]:[color:var(--muted)] [&_button]:[background:transparent] [&_button]:[border:0] [&_button]:[font:inherit] [&_button]:[text-decoration:none]"
-                            }
-                        >
-                            {state.link && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        restoreSelection();
-                                        editor.commands.unsetLink();
-                                        setLinkOpen(false);
-                                    }}
-                                >
-                                    <Unlink size={14} />
-                                    Remove link
-                                </button>
-                            )}
-                            {linkURL(url) && (
-                                <a
-                                    href={linkURL(url)!}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <ExternalLink size={14} />
-                                    Open link
-                                </a>
-                            )}
-                            <button
-                                type="submit"
-                                className={
-                                    "link-apply [.link-editor-actions_&]:[margin-left:auto] [.link-editor-actions_&]:[color:var(--accent)] [.link-editor-actions_&]:[background:var(--tint)]"
-                                }
-                            >
-                                Apply
-                            </button>
-                        </div>
-                    </form>
-                )}
-            </div>
+            {body}
         </BubbleMenu>
     );
 }

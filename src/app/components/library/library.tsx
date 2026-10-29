@@ -276,30 +276,16 @@ export default function Library({
             },
         },
         {
-            label: "Export",
+            label: "Export as Word (.docx)",
             icon: Download,
-            children: [
-                {
-                    label: "Word (.docx)",
-                    icon: FileText,
-                    onSelect: () =>
-                        void exporter.run(
-                            doc.id,
-                            "docx",
-                            exportOptions(preferences),
-                        ),
-                },
-                {
-                    label: "PDF (.pdf)",
-                    icon: FileText,
-                    onSelect: () =>
-                        void exporter.run(
-                            doc.id,
-                            "pdf",
-                            exportOptions(preferences),
-                        ),
-                },
-            ],
+            onSelect: () =>
+                void exporter.run(doc.id, "docx", exportOptions(preferences)),
+        },
+        {
+            label: "Export as PDF (.pdf)",
+            icon: Download,
+            onSelect: () =>
+                void exporter.run(doc.id, "pdf", exportOptions(preferences)),
         },
         {
             label: "Delete",
@@ -766,7 +752,10 @@ export default function Library({
                                                     menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                     triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                     items={menuFor(doc)}
-                                                    sheetTitle={doc.title || "Untitled document"}
+                                                    sheetTitle={
+                                                        doc.title ||
+                                                        "Untitled document"
+                                                    }
                                                     trigger={
                                                         <MoreVertical
                                                             size={16}
@@ -846,7 +835,10 @@ export default function Library({
                                                         menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                         triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                         items={menuFor(doc)}
-                                                        sheetTitle={doc.title || "Untitled document"}
+                                                        sheetTitle={
+                                                            doc.title ||
+                                                            "Untitled document"
+                                                        }
                                                         trigger={
                                                             <MoreVertical
                                                                 size={16}
