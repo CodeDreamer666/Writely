@@ -3,6 +3,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
     Archive,
+    Download,
     FilePen,
     FileText,
     LayoutGrid,
@@ -11,11 +12,13 @@ import {
     LoaderCircle,
     MoreHorizontal,
     MoreVertical,
+    PenLine,
     Pin,
     Plus,
     Search,
     SearchX,
     StickyNote,
+    Trash2,
     X,
     type LucideIcon,
 } from "lucide-react";
@@ -266,6 +269,7 @@ export default function Library({
     const menuFor = (doc: DocumentSummary) => [
         {
             label: "Rename",
+            icon: PenLine,
             onSelect: () => {
                 setRenameText(doc.title);
                 setRenaming(doc);
@@ -273,9 +277,11 @@ export default function Library({
         },
         {
             label: "Export",
+            icon: Download,
             children: [
                 {
                     label: "Word (.docx)",
+                    icon: FileText,
                     onSelect: () =>
                         void exporter.run(
                             doc.id,
@@ -285,6 +291,7 @@ export default function Library({
                 },
                 {
                     label: "PDF (.pdf)",
+                    icon: FileText,
                     onSelect: () =>
                         void exporter.run(
                             doc.id,
@@ -296,6 +303,7 @@ export default function Library({
         },
         {
             label: "Delete",
+            icon: Trash2,
             danger: true,
             onSelect: () => {
                 setConfirmation("");
@@ -307,6 +315,7 @@ export default function Library({
             : [
                   {
                       label: doc.pinned ? "Unpin" : "Pin",
+                      icon: Pin,
                       onSelect: () =>
                           pin.mutate(
                               { id: doc.id, pinned: !doc.pinned },
@@ -319,6 +328,7 @@ export default function Library({
               ]),
         {
             label: doc.archived ? "Unarchive" : "Archive",
+            icon: Archive,
             onSelect: () =>
                 archive.mutate(
                     { id: doc.id, archived: !doc.archived },
@@ -756,6 +766,7 @@ export default function Library({
                                                     menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                     triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                     items={menuFor(doc)}
+                                                    sheetTitle={doc.title || "Untitled document"}
                                                     trigger={
                                                         <MoreVertical
                                                             size={16}
@@ -835,6 +846,7 @@ export default function Library({
                                                         menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                         triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                         items={menuFor(doc)}
+                                                        sheetTitle={doc.title || "Untitled document"}
                                                         trigger={
                                                             <MoreVertical
                                                                 size={16}

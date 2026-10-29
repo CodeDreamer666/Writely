@@ -3,6 +3,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import {
     ChevronLeft,
     ChevronRight,
+    FileText,
     MoreHorizontal,
     X,
     type LucideIcon,
@@ -108,6 +109,8 @@ export function IconButton({
 
 export type MenuItem = {
     label: string;
+    /** Shown beside the label when the menu opens as a bottom sheet on phones. */
+    icon?: LucideIcon;
     onSelect?: () => void;
     children?: MenuItem[];
     danger?: boolean;
@@ -121,16 +124,21 @@ export function ActionMenu({
     trigger: triggerContent,
     triggerClassName = "",
     menuWidth = 144,
+    sheetTitle,
 }: {
     label: string;
     menuLabel: string;
     items: MenuItem[];
+    /** Heading of the bottom sheet the menu becomes on phones. */
+    sheetTitle?: string;
     /** Replaces the ⋯ icon. */
     trigger?: ReactNode;
     /** Extra classes for the trigger, e.g. to keep it visible outside the document list. */
     triggerClassName?: string;
     menuWidth?: number;
 }) {
+    // On phones the menu rises from the bottom of the screen as a sheet, like Google Docs.
+    const [sheet, setSheet] = useState(false);
     const [open, setOpen] = useState(false),
         [submenu, setSubmenu] = useState<MenuItem | null>(null),
         [menuPosition, setMenuPosition] = useState<{
@@ -159,20 +167,23 @@ export function ActionMenu({
         };
         const dismissResize = () => setOpen(false);
         document.addEventListener("pointerdown", dismiss);
-        document.addEventListener("scroll", dismissScroll, true);
-        window.addEventListener("resize", dismissResize);
+        if (!sheet) {
+            document.addEventListener("scroll", dismissScroll, true);
+            window.addEventListener("resize", dismissResize);
+        }
         return () => {
             document.removeEventListener("pointerdown", dismiss);
             document.removeEventListener("scroll", dismissScroll, true);
             window.removeEventListener("resize", dismissResize);
         };
-    }, [open]);
+    }, [open, sheet]);
     const menuItems = () => [
         ...(menu.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ??
             []),
     ];
     const reveal = (last = false) => {
         setSubmenu(null);
+        setSheet(window.matchMedia("(max-width: 640px)").matches);
         const rect = trigger.current!.getBoundingClientRect();
         setMenuPosition({
             top: Math.max(
@@ -282,22 +293,61 @@ export function ActionMenu({
             </button>
             {open &&
                 createPortal(
+                    <>
+                    {sheet && (
+                        <div
+                            aria-hidden="true"
+                            className="fixed inset-0 z-[34] bg-black/40"
+                        />
+                    )}
                     <div
                         ref={menu}
                         className={
-                            "document-menu fixed [right:auto] [z-index:35] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)]"
+                            sheet
+                                ? "document-menu fixed inset-x-0 bottom-0 z-[35] max-h-[85dvh] w-full overflow-y-auto rounded-t-[28px] border-0 bg-[var(--surface)] px-2 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] [&_button]:w-full [&_button]:justify-start [&_button]:text-[var(--text)]"
+                                : "document-menu fixed [right:auto] [z-index:35] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)]"
                         }
-                        style={{
-                            ...menuPosition,
-                            width: menuWidth,
-                            minWidth: menuWidth,
-                        }}
+                        style={
+                            sheet
+                                ? undefined
+                                : {
+                                      ...menuPosition,
+                                      width: menuWidth,
+                                      minWidth: menuWidth,
+                                  }
+                        }
                         role="menu"
                         aria-label={submenu ? submenu.label : menuLabel}
                     >
+                        {sheet && (
+                            <>
+                                <span
+                                    aria-hidden="true"
+                                    className="bg-line mx-auto mb-3 block h-1 w-10 rounded-full"
+                                />
+                                {sheetTitle && (
+                                    <div className="text-ink flex items-center gap-4 truncate px-3 pt-1 pb-4 text-[20px] font-medium">
+                                        <FileText
+                                            size={22}
+                                            strokeWidth={1.6}
+                                            aria-hidden="true"
+                                            className="text-accent shrink-0"
+                                        />
+                                        <span className="truncate">
+                                            {sheetTitle}
+                                        </span>
+                                    </div>
+                                )}
+                            </>
+                        )}
                         {submenu && (
                             <button
                                 role="menuitem"
+                                className={
+                                    sheet
+                                        ? "h-14! min-h-14! gap-5! rounded-xl! border-0! bg-transparent! px-3! text-[16px]! shadow-none!"
+                                        : ""
+                                }
                                 onClick={() => showSubmenu(null)}
                             >
                                 <ChevronLeft size={14} aria-hidden="true" />{" "}
@@ -308,7 +358,7 @@ export function ActionMenu({
                             <button
                                 key={item.label}
                                 role="menuitem"
-                                className={`${item.danger ? "danger [color:var(--danger)] [.account-actions_button&]:[border-top-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-right-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-bottom-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-left-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[color:var(--danger)] [.account-actions_button&]:[background:color-mix(in_srgb,_var(--danger)_8%,_var(--bg))] [.account-actions_button&:active]:[color:var(--danger)] [.account-actions_button&:active]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.account-actions_button&:hover]:[color:var(--danger)] [.account-actions_button&:hover]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.document-menu_button&]:[color:var(--danger)]" : ""} ${item.separator ? "menu-separated [.document-menu_&]:[margin-top:4px] [.document-menu_&]:[border-radius:0_0_4px_4px] [.document-menu_&]:[border-top-width:1px] [.document-menu_&]:[border-top-style:solid] [.document-menu_&]:[border-top-color:var(--border)] [.document-menu_&]:[padding-top:10px]" : ""}`}
+                                className={`${item.danger ? "danger [color:var(--danger)] [.account-actions_button&]:[border-top-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-right-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-bottom-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-left-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[color:var(--danger)] [.account-actions_button&]:[background:color-mix(in_srgb,_var(--danger)_8%,_var(--bg))] [.account-actions_button&:active]:[color:var(--danger)] [.account-actions_button&:active]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.account-actions_button&:hover]:[color:var(--danger)] [.account-actions_button&:hover]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.document-menu_button&]:[color:var(--danger)]" : ""} ${sheet ? "h-14! min-h-14! gap-5! rounded-xl! border-0! bg-transparent! px-3! text-[16px]! shadow-none!" : ""} ${item.separator ? "menu-separated [.document-menu_&]:[margin-top:4px] [.document-menu_&]:[border-radius:0_0_4px_4px] [.document-menu_&]:[border-top-width:1px] [.document-menu_&]:[border-top-style:solid] [.document-menu_&]:[border-top-color:var(--border)] [.document-menu_&]:[padding-top:10px]" : ""}`}
                                 aria-haspopup={
                                     item.children ? "menu" : undefined
                                 }
@@ -318,6 +368,14 @@ export function ActionMenu({
                                         : item.onSelect && choose(item.onSelect)
                                 }
                             >
+                                {sheet && item.icon && (
+                                    <item.icon
+                                        size={22}
+                                        strokeWidth={1.6}
+                                        aria-hidden="true"
+                                        className="shrink-0"
+                                    />
+                                )}
                                 {item.label}
                                 {item.children && (
                                     <ChevronRight
@@ -328,7 +386,8 @@ export function ActionMenu({
                                 )}
                             </button>
                         ))}
-                    </div>,
+                    </div>
+                    </>,
                     document.body,
                 )}
         </div>
