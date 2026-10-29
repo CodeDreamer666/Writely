@@ -2,7 +2,7 @@
 import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import {
-    X,
+    ArrowLeft,
     Check,
     CloudOff,
     LoaderCircle,
@@ -94,7 +94,15 @@ export default function EditorHeader({
 
     return (
         <header className="editor-header bg-paper [.is-scrolled_&]:border-line relative z-[13] grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 border-b border-transparent px-4 transition-[border-color] duration-200 max-sm:gap-1 max-sm:px-2 [.focus-mode_&]:hidden">
-            <div aria-hidden="true" />
+            <div className="flex min-w-0 items-center">
+                <button
+                    className="text-muted hover:text-ink! h-9! min-h-9! gap-1.5! rounded-lg! px-2.5! text-[13px]!"
+                    onClick={onBack}
+                >
+                    <ArrowLeft size={15} aria-hidden="true" />
+                    <span className="max-sm:sr-only">{backLabel}</span>
+                </button>
+            </div>
             <div className="flex min-w-0 justify-center">
                 {editing ? (
                     <input
@@ -177,14 +185,6 @@ export default function EditorHeader({
                     className={HISTORY_BUTTON}
                     onClick={onToggleFocusMode}
                 />
-                <span aria-hidden="true" className="bg-line mx-1 h-4 w-px" />
-                <button
-                    className="text-muted hover:text-ink! h-9! min-h-9! gap-1.5! rounded-lg! px-2.5! text-[13px]!"
-                    onClick={onBack}
-                >
-                    <span className="max-sm:sr-only">{backLabel}</span>
-                    <X size={15} aria-hidden="true" />
-                </button>
             </div>
         </header>
     );
