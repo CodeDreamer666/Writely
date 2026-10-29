@@ -225,6 +225,29 @@ export function ActionMenu({
         if (dragY > 100 || (dragY > 24 && speed > 0.5)) setOpen(false);
         else setDragY(null);
     };
+    // A downward pull on the sheet is for closing it: stop the browser turning it into
+    // pull-to-refresh (it needs a non-passive listener to cancel the scroll).
+    useEffect(() => {
+        const el = menu.current;
+        if (!open || !sheet || !el) return;
+        const move = (e: globalThis.TouchEvent) => {
+            const start = drag.current;
+            if (
+                start?.active &&
+                e.touches[0]!.clientY > start.y &&
+                e.cancelable
+            )
+                e.preventDefault();
+        };
+        el.addEventListener("touchmove", move, { passive: false });
+        const root = document.documentElement.style;
+        const before = root.overscrollBehaviorY;
+        root.overscrollBehaviorY = "contain";
+        return () => {
+            el.removeEventListener("touchmove", move);
+            root.overscrollBehaviorY = before;
+        };
+    }, [open, sheet]);
     const menuItems = () => [
         ...(menu.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ??
             []),
@@ -343,125 +366,128 @@ export function ActionMenu({
             {(open || leaving) &&
                 createPortal(
                     <>
-                    {sheet && (
-                        <div
-                            aria-hidden="true"
-                            className="fixed inset-0 z-[34] bg-black/40 motion-reduce:transition-none"
-                            style={{
-                                opacity:
-                                    open && entered
-                                        ? dragY === null
-                                            ? 1
-                                            : Math.max(0, 1 - dragY / 400)
-                                        : 0,
-                                transition:
-                                    dragY === null
-                                        ? "opacity 280ms cubic-bezier(0.32, 0.72, 0, 1)"
-                                        : "none",
-                            }}
-                        />
-                    )}
-                    <div
-                        ref={menu}
-                        className={
-                            sheet
-                                ? "document-menu fixed inset-x-0 bottom-0 z-[35] max-h-[85dvh] w-full overflow-y-auto rounded-t-[14px] border-0 bg-[var(--surface)] px-2 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] [&_button]:w-full [&_button]:justify-start [&_button]:text-[var(--text)]"
-                                : "document-menu fixed [right:auto] [z-index:35] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)]"
-                        }
-                        onTouchStart={sheet ? touchStart : undefined}
-                        onTouchMove={sheet ? touchMove : undefined}
-                        onTouchEnd={sheet ? touchEnd : undefined}
-                        onTouchCancel={sheet ? () => setDragY(null) : undefined}
-                        style={
-                            sheet
-                                ? {
-                                      transform:
-                                          open && entered
-                                              ? `translateY(${dragY ?? 0}px)`
-                                              : "translateY(100%)",
-                                      transition:
-                                          dragY === null
-                                              ? "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)"
-                                              : "none",
-                                      overscrollBehavior: "contain",
-                                  }
-                                : {
-                                      ...menuPosition,
-                                      width: menuWidth,
-                                      minWidth: menuWidth,
-                                  }
-                        }
-                        role="menu"
-                        aria-label={submenu ? submenu.label : menuLabel}
-                    >
                         {sheet && (
-                            <>
-                                <span
-                                    aria-hidden="true"
-                                    className="bg-line mx-auto mb-3 block h-1 w-10 rounded-full"
-                                />
-                                {sheetTitle && (
-                                    <div className="text-ink flex items-center gap-4 truncate px-3 pt-1 pb-4 text-[20px] font-medium">
-                                        <FileText
+                            <div
+                                aria-hidden="true"
+                                className="fixed inset-0 z-[34] bg-black/40 motion-reduce:transition-none"
+                                style={{
+                                    opacity:
+                                        open && entered
+                                            ? dragY === null
+                                                ? 1
+                                                : Math.max(0, 1 - dragY / 400)
+                                            : 0,
+                                    transition:
+                                        dragY === null
+                                            ? "opacity 280ms cubic-bezier(0.32, 0.72, 0, 1)"
+                                            : "none",
+                                }}
+                            />
+                        )}
+                        <div
+                            ref={menu}
+                            className={
+                                sheet
+                                    ? "document-menu fixed inset-x-0 bottom-0 z-[35] max-h-[85dvh] w-full overflow-y-auto rounded-t-[14px] border-0 bg-[var(--surface)] px-2 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] [&_button]:w-full [&_button]:justify-start [&_button]:text-[var(--text)]"
+                                    : "document-menu fixed [right:auto] [z-index:35] max-h-[calc(100dvh-16px)] [width:144px] [min-width:144px] overflow-y-auto [border-radius:8px] [border-width:1px] [border-style:solid] [border-top-color:var(--border)] [border-right-color:var(--border)] [border-bottom-color:var(--border)] [border-left-color:var(--border)] [padding:4px] [box-shadow:0_4px_16px_color-mix(in_srgb,_var(--shadow)_7%,_transparent)] [background:var(--surface)] [border-image:none] [&_button]:[width:100%] [&_button]:justify-start [&_button]:[color:var(--text)]"
+                            }
+                            onTouchStart={sheet ? touchStart : undefined}
+                            onTouchMove={sheet ? touchMove : undefined}
+                            onTouchEnd={sheet ? touchEnd : undefined}
+                            onTouchCancel={
+                                sheet ? () => setDragY(null) : undefined
+                            }
+                            style={
+                                sheet
+                                    ? {
+                                          transform:
+                                              open && entered
+                                                  ? `translateY(${dragY ?? 0}px)`
+                                                  : "translateY(100%)",
+                                          transition:
+                                              dragY === null
+                                                  ? "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)"
+                                                  : "none",
+                                          overscrollBehavior: "contain",
+                                      }
+                                    : {
+                                          ...menuPosition,
+                                          width: menuWidth,
+                                          minWidth: menuWidth,
+                                      }
+                            }
+                            role="menu"
+                            aria-label={submenu ? submenu.label : menuLabel}
+                        >
+                            {sheet && (
+                                <>
+                                    <span
+                                        aria-hidden="true"
+                                        className="bg-line mx-auto mb-3 block h-1 w-10 rounded-full"
+                                    />
+                                    {sheetTitle && (
+                                        <div className="text-ink flex items-center gap-4 truncate px-3 pt-1 pb-4 text-[20px] font-medium">
+                                            <FileText
+                                                size={22}
+                                                strokeWidth={1.6}
+                                                aria-hidden="true"
+                                                className="text-accent shrink-0"
+                                            />
+                                            <span className="truncate">
+                                                {sheetTitle}
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                            {submenu && (
+                                <button
+                                    role="menuitem"
+                                    className={
+                                        sheet
+                                            ? "h-14! min-h-14! gap-5! rounded-xl! border-0! bg-transparent! px-3! text-[16px]! shadow-none!"
+                                            : ""
+                                    }
+                                    onClick={() => showSubmenu(null)}
+                                >
+                                    <ChevronLeft size={14} aria-hidden="true" />{" "}
+                                    Back
+                                </button>
+                            )}
+                            {(submenu?.children ?? items).map((item) => (
+                                <button
+                                    key={item.label}
+                                    role="menuitem"
+                                    className={`${item.danger ? "danger [color:var(--danger)] [.account-actions_button&]:[border-top-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-right-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-bottom-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-left-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[color:var(--danger)] [.account-actions_button&]:[background:color-mix(in_srgb,_var(--danger)_8%,_var(--bg))] [.account-actions_button&:active]:[color:var(--danger)] [.account-actions_button&:active]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.account-actions_button&:hover]:[color:var(--danger)] [.account-actions_button&:hover]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.document-menu_button&]:[color:var(--danger)]" : ""} ${sheet ? "h-14! min-h-14! gap-5! rounded-xl! border-0! bg-transparent! px-3! text-[16px]! shadow-none!" : ""} ${item.separator ? "menu-separated [.document-menu_&]:[margin-top:4px] [.document-menu_&]:[border-radius:0_0_4px_4px] [.document-menu_&]:[border-top-width:1px] [.document-menu_&]:[border-top-style:solid] [.document-menu_&]:[border-top-color:var(--border)] [.document-menu_&]:[padding-top:10px]" : ""}`}
+                                    aria-haspopup={
+                                        item.children ? "menu" : undefined
+                                    }
+                                    onClick={() =>
+                                        item.children
+                                            ? showSubmenu(item)
+                                            : item.onSelect &&
+                                              choose(item.onSelect)
+                                    }
+                                >
+                                    {sheet && item.icon && (
+                                        <item.icon
                                             size={22}
                                             strokeWidth={1.6}
                                             aria-hidden="true"
-                                            className="text-accent shrink-0"
+                                            className="shrink-0"
                                         />
-                                        <span className="truncate">
-                                            {sheetTitle}
-                                        </span>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                        {submenu && (
-                            <button
-                                role="menuitem"
-                                className={
-                                    sheet
-                                        ? "h-14! min-h-14! gap-5! rounded-xl! border-0! bg-transparent! px-3! text-[16px]! shadow-none!"
-                                        : ""
-                                }
-                                onClick={() => showSubmenu(null)}
-                            >
-                                <ChevronLeft size={14} aria-hidden="true" />{" "}
-                                Back
-                            </button>
-                        )}
-                        {(submenu?.children ?? items).map((item) => (
-                            <button
-                                key={item.label}
-                                role="menuitem"
-                                className={`${item.danger ? "danger [color:var(--danger)] [.account-actions_button&]:[border-top-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-right-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-bottom-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[border-left-color:color-mix(in_srgb,_var(--danger)_45%,_transparent)] [.account-actions_button&]:[color:var(--danger)] [.account-actions_button&]:[background:color-mix(in_srgb,_var(--danger)_8%,_var(--bg))] [.account-actions_button&:active]:[color:var(--danger)] [.account-actions_button&:active]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.account-actions_button&:hover]:[color:var(--danger)] [.account-actions_button&:hover]:[background:color-mix(in_srgb,_var(--danger)_14%,_var(--bg))] [.document-menu_button&]:[color:var(--danger)]" : ""} ${sheet ? "h-14! min-h-14! gap-5! rounded-xl! border-0! bg-transparent! px-3! text-[16px]! shadow-none!" : ""} ${item.separator ? "menu-separated [.document-menu_&]:[margin-top:4px] [.document-menu_&]:[border-radius:0_0_4px_4px] [.document-menu_&]:[border-top-width:1px] [.document-menu_&]:[border-top-style:solid] [.document-menu_&]:[border-top-color:var(--border)] [.document-menu_&]:[padding-top:10px]" : ""}`}
-                                aria-haspopup={
-                                    item.children ? "menu" : undefined
-                                }
-                                onClick={() =>
-                                    item.children
-                                        ? showSubmenu(item)
-                                        : item.onSelect && choose(item.onSelect)
-                                }
-                            >
-                                {sheet && item.icon && (
-                                    <item.icon
-                                        size={22}
-                                        strokeWidth={1.6}
-                                        aria-hidden="true"
-                                        className="shrink-0"
-                                    />
-                                )}
-                                {item.label}
-                                {item.children && (
-                                    <ChevronRight
-                                        size={14}
-                                        className="ml-auto"
-                                        aria-hidden="true"
-                                    />
-                                )}
-                            </button>
-                        ))}
-                    </div>
+                                    )}
+                                    {item.label}
+                                    {item.children && (
+                                        <ChevronRight
+                                            size={14}
+                                            className="ml-auto"
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
                     </>,
                     document.body,
                 )}

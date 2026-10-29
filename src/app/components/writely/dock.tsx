@@ -200,6 +200,29 @@ export function Drawer({
             opener.current?.focus?.({ preventScroll: true });
         return () => clearTimeout(timer);
     }, [open, sheet]);
+    // A downward pull on the sheet is for closing it: stop the browser turning it into
+    // pull-to-refresh (it needs a non-passive listener to cancel the scroll).
+    useEffect(() => {
+        const el = ref.current;
+        if (!open || !sheet || !el) return;
+        const move = (e: globalThis.TouchEvent) => {
+            const start = drag.current;
+            if (
+                start?.active &&
+                e.touches[0]!.clientY > start.y &&
+                e.cancelable
+            )
+                e.preventDefault();
+        };
+        el.addEventListener("touchmove", move, { passive: false });
+        const root = document.documentElement.style;
+        const before = root.overscrollBehaviorY;
+        root.overscrollBehaviorY = "contain";
+        return () => {
+            el.removeEventListener("touchmove", move);
+            root.overscrollBehaviorY = before;
+        };
+    }, [open, sheet, shown]);
     if (!shown) return null;
     return (
         <>
