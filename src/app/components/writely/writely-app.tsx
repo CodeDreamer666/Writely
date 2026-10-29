@@ -399,9 +399,7 @@ export default function WritelyApp({
         if (editingCard === id) setEditingCard(null);
     };
     const begin = (c: RevisionCheck) => {
-        if (doc.session) {
-            return;
-        }
+        if (doc.session || c.done) return;
         update((d) => startRevision(d, c));
         setPanel(null);
         editor?.commands.focus();
@@ -980,7 +978,7 @@ export default function WritelyApp({
                                                 <button
                                                     className={`check-start text-ink! min-w-0! flex-1 justify-start! gap-3! rounded-none! border-0! bg-transparent! px-3.5! py-3! text-left disabled:opacity-100! ${c.done ? "complete" : ""}`}
                                                     onClick={() => begin(c)}
-                                                    disabled={!!doc.session}
+                                                    disabled={!!doc.session || c.done}
                                                 >
                                                     <span
                                                         className={`check-box flex size-[18px] shrink-0 items-center justify-center rounded-[5px] border ${c.done ? "border-success bg-success text-[var(--on-accent)]" : active ? "border-accent" : "border-[color-mix(in_srgb,var(--muted)_55%,transparent)]"}`}
@@ -1005,7 +1003,7 @@ export default function WritelyApp({
                                                             {active
                                                                 ? "Revising now"
                                                                 : c.done
-                                                                  ? "Revise again · saves a starting draft"
+                                                                  ? "Completed"
                                                                   : "Start revision · saves a starting draft"}
                                                         </small>
                                                     </span>
