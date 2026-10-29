@@ -47,7 +47,7 @@ import { ActiveBlocks } from "~/lib/writely/editor/active-blocks";
 import { EmptyDraftPlaceholder } from "~/lib/writely/editor/empty-draft-placeholder";
 import { documentExtensions } from "~/lib/writely/editor/document-extensions";
 import { EDITOR_TEXT_CLASS } from "~/config/editor";
-import EditorToolbar from "./editor-toolbar";
+import EditorToolbar, { useMobileToolbar } from "./editor-toolbar";
 import DraftTitle from "./draft-title";
 import FocusExit from "./focus-exit";
 import { useFlowAnchor } from "~/lib/writely/editor/flow-anchor";
@@ -130,6 +130,7 @@ export default function WritelyApp({
 }) {
     const router = useRouter();
     const compact = useCompactLayout();
+    const mobileBar = useMobileToolbar();
     const [data, setData] = useState<WorkspaceData>(
         () =>
             readUnsavedWorkspace(user.id, initialWorkspace.active) ??
@@ -589,6 +590,52 @@ export default function WritelyApp({
         revealCard(attached);
     };
 
+    const toolButtons = (
+        <>
+                                    <DockButton
+                                        icon={Plus}
+                                        label="Add thought card"
+                                        onClick={addCard}
+                                    />
+                                    <DockButton
+                                        icon={StickyNote}
+                                        label="Thoughts"
+                                        text="Thoughts"
+                                        count={cardCount || undefined}
+                                        pressed={panel === "thoughts"}
+                                        onClick={() => toggle("thoughts")}
+                                    />
+                                    <DockButton
+                                        icon={ListChecks}
+                                        label="Revision checklist"
+                                        text="Checklist"
+                                        count={
+                                            allChecks.length
+                                                ? `${doneCount}/${allChecks.length}`
+                                                : undefined
+                                        }
+                                        pressed={panel === "checklist"}
+                                        onClick={() => toggle("checklist")}
+                                    />
+                                    <DockButton
+                                        icon={History}
+                                        label="Saved drafts"
+                                        text="Drafts"
+                                        count={doc.drafts.length || undefined}
+                                        pressed={panel === "drafts"}
+                                        onClick={() => toggle("drafts")}
+                                    />
+                                    <DockDivider />
+                                    <DockButton
+                                        icon={ChartNoAxesColumnIncreasing}
+                                        label="Writing statistics"
+                                        text={`${statistics.words.toLocaleString()} ${statistics.words === 1 ? "word" : "words"}`}
+                                        pressed={panel === "stats"}
+                                        onClick={() => toggle("stats")}
+                                        className="font-normal! tabular-nums"
+                                    />
+        </>
+    );
     return (
         <Tooltip.Provider delayDuration={450}>
             <div
@@ -607,8 +654,10 @@ export default function WritelyApp({
                         title={doc.title}
                         onRename={(title) => update({ title })}
                         status={autosave.status}
-                        onBack={() => void leaveTo("/")}
-                        backLabel="Documents"
+                        onBack={() =>
+                            comparison ? setComparison(null) : void leaveTo("/")
+                        }
+                        backLabel={comparison ? "Editor" : "Documents"}
                     />
                     <div className="workspace-shell relative flex min-h-0 flex-1">
                         <main
@@ -632,6 +681,20 @@ export default function WritelyApp({
                                         <EditorToolbar
                                             key={doc.id}
                                             editor={editor}
+                                            focusMode={focusMode}
+                                            tools={
+                                                <>
+                                                    {doc.session && (
+                                                        <DockButton
+                                                            icon={Check}
+                                                            label="Finish revision"
+                                                            className="text-accent!"
+                                                            onClick={finish}
+                                                        />
+                                                    )}
+                                                    {toolButtons}
+                                                </>
+                                            }
                                             connecting={!!connectionSelection}
                                             onConnect={() => {
                                                 const { from, to } =
@@ -1226,6 +1289,7 @@ export default function WritelyApp({
                         />
                     )}
                     {!comparison &&
+                        !mobileBar &&
                         (toolsOpen ? (
                             <nav
                                 ref={dock}
@@ -1270,48 +1334,7 @@ export default function WritelyApp({
                                     id="writing-tool-items"
                                     className="writing-tool-items flex items-center gap-0.5 overflow-x-auto p-1.5"
                                 >
-                                    <DockButton
-                                        icon={Plus}
-                                        label="Add thought card"
-                                        onClick={addCard}
-                                    />
-                                    <DockButton
-                                        icon={StickyNote}
-                                        label="Thoughts"
-                                        text="Thoughts"
-                                        count={cardCount || undefined}
-                                        pressed={panel === "thoughts"}
-                                        onClick={() => toggle("thoughts")}
-                                    />
-                                    <DockButton
-                                        icon={ListChecks}
-                                        label="Revision checklist"
-                                        text="Checklist"
-                                        count={
-                                            allChecks.length
-                                                ? `${doneCount}/${allChecks.length}`
-                                                : undefined
-                                        }
-                                        pressed={panel === "checklist"}
-                                        onClick={() => toggle("checklist")}
-                                    />
-                                    <DockButton
-                                        icon={History}
-                                        label="Saved drafts"
-                                        text="Drafts"
-                                        count={doc.drafts.length || undefined}
-                                        pressed={panel === "drafts"}
-                                        onClick={() => toggle("drafts")}
-                                    />
-                                    <DockDivider />
-                                    <DockButton
-                                        icon={ChartNoAxesColumnIncreasing}
-                                        label="Writing statistics"
-                                        text={`${statistics.words.toLocaleString()} ${statistics.words === 1 ? "word" : "words"}`}
-                                        pressed={panel === "stats"}
-                                        onClick={() => toggle("stats")}
-                                        className="font-normal! tabular-nums"
-                                    />
+                                    {toolButtons}
                                     <DockButton
                                         icon={ChevronDown}
                                         label="Hide writing tools"

@@ -21,8 +21,10 @@ import {
     Strikethrough,
     Code,
     SquareCode,
+    LayoutGrid,
     ListTodo,
     ExternalLink,
+    Type,
     Unlink,
     X,
     type LucideIcon,
@@ -34,11 +36,18 @@ import {
     useRef,
     useState,
     useSyncExternalStore,
+    type ButtonHTMLAttributes,
     type KeyboardEvent,
+    type ReactNode,
+    type Ref,
     type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
 import { TOOLTIP_CLASS } from "~/config/ui";
+import {
+    LongPressTooltips,
+    useLongPress,
+} from "./long-press-tooltip";
 
 /** Touch devices up to tablet size get a toolbar docked above the keyboard. */
 const MOBILE_TOOLBAR = "(max-width: 1024px) and (pointer: coarse)";
@@ -48,6 +57,10 @@ const subscribeMobile = (notify: () => void) => {
     return () => media.removeEventListener("change", notify);
 };
 const mobileSnapshot = () => window.matchMedia(MOBILE_TOOLBAR).matches;
+/** True on touch devices up to tablet size, where one toolbar sits above the keyboard. */
+export function useMobileToolbar() {
+    return useSyncExternalStore(subscribeMobile, mobileSnapshot, () => false);
+}
 
 /**
  * What: The look of the formatting buttons (bold, italic, lists and so on)
@@ -122,8 +135,9 @@ function FormatButton({
     onClick: () => void;
     disabled?: boolean;
 }) {
+    const press = useLongPress(label);
     return (
-        <Tooltip.Root>
+        <Tooltip.Root open={press.enabled ? false : undefined}>
             <Tooltip.Trigger asChild>
                 <button
                     type="button"
@@ -132,7 +146,8 @@ function FormatButton({
                     aria-pressed={active}
                     disabled={disabled}
                     onMouseDown={(event) => event.preventDefault()}
-                    onClick={onClick}
+                    {...press.props}
+                    onClick={press.click(onClick)}
                 >
                     <Icon size={16} strokeWidth={1.6} aria-hidden="true" />
                 </button>
@@ -153,6 +168,28 @@ function FormatButton({
                 </Tooltip.Content>
             </Tooltip.Portal>
         </Tooltip.Root>
+    );
+}
+
+/** A plain toolbar button that also shows its name when held on a touch screen. */
+function PressButton({
+    label,
+    buttonRef,
+    onClick,
+    ...props
+}: {
+    label: string;
+    buttonRef?: Ref<HTMLButtonElement>;
+} & ButtonHTMLAttributes<HTMLButtonElement>) {
+    const press = useLongPress(label);
+    return (
+        <button
+            ref={buttonRef}
+            type="button"
+            {...props}
+            {...press.props}
+            onClick={onClick && press.click(onClick)}
+        />
     );
 }
 
@@ -178,6 +215,8 @@ export default function EditorToolbar({
     label = "Text formatting",
     containerRef,
     onBlurOutside,
+    tools,
+    focusMode = false,
 }: {
     editor: Editor;
     onConnect?: () => void;
@@ -185,6 +224,10 @@ export default function EditorToolbar({
     label?: string;
     containerRef?: RefObject<HTMLDivElement | null>;
     onBlurOutside?: () => void;
+    /** Mobile: the document tools shown in the toolbar's second mode. */
+    tools?: ReactNode;
+    /** Mobile: focus mode keeps the toolbar hidden until text is selected. */
+    focusMode?: boolean;
 }) {
     const state = useEditorState({
         editor,
@@ -212,6 +255,7 @@ export default function EditorToolbar({
                         " ",
                     )
                     .trim(),
+            selecting: !editor.state.selection.empty,
             canMark: editor.can().toggleBold(),
             canLink: editor.can().setLink({ href: "https://example.com" }),
         }),
@@ -226,34 +270,48 @@ export default function EditorToolbar({
     const menuRef = useRef<HTMLDivElement>(null);
     const linkInput = useRef<HTMLInputElement>(null);
     const dock = useRef<HTMLDivElement>(null);
-    const mobile = useSyncExternalStore(
-        subscribeMobile,
-        mobileSnapshot,
-        () => false,
-    );
+    const mobile = useMobileToolbar();
     const [docked, setDocked] = useState(false);
+    // Document tools are the resting mode; typing (focusing the editor) brings formatting back.
+    const withTools = mobile && !!tools && !focusMode;
+    const [mode, setMode] = useState<"format" | "tools">("tools");
+    const showTools = withTools && mode === "tools";
     const bookmark = useRef<SelectionBookmark | null>(null);
+    // With tools the bar is always there; without, it follows focus. Focus mode only shows
+    // formatting while words are selected or a formatting request (link, style menu) is open.
+    const visible =
+        mobile &&
+        !connecting &&
+        editor.isEditable &&
+        (focusMode
+            ? docked && (state.selecting || linkOpen || !!menu)
+            : withTools || docked);
     // Mobile: show while the editor or the toolbar holds focus.
     useEffect(() => {
         if (!mobile || editor.isDestroyed) return;
         let frame = 0;
         const update = () => {
             cancelAnimationFrame(frame);
-            frame = requestAnimationFrame(() =>
-                setDocked(
+            frame = requestAnimationFrame(() => {
+                const inside =
                     editor.view.hasFocus() ||
-                        !!root.current?.contains(document.activeElement),
-                ),
-            );
+                    !!root.current?.contains(document.activeElement);
+                setDocked(inside);
+                if (!inside) setMode("tools");
+            });
+        };
+        const resume = () => {
+            setMode("format");
+            update();
         };
         update();
-        editor.on("focus", update);
+        editor.on("focus", resume);
         editor.on("blur", update);
         document.addEventListener("focusin", update);
         document.addEventListener("focusout", update);
         return () => {
             cancelAnimationFrame(frame);
-            editor.off("focus", update);
+            editor.off("focus", resume);
             editor.off("blur", update);
             document.removeEventListener("focusin", update);
             document.removeEventListener("focusout", update);
@@ -262,7 +320,7 @@ export default function EditorToolbar({
     }, [editor, mobile]);
     // Mobile: sit just above the keyboard (visual viewport) and keep the caret visible.
     useLayoutEffect(() => {
-        if (!mobile || !docked) return;
+        if (!visible) return;
         const viewport = window.visualViewport;
         let frame = 0;
         const reveal = () => {
@@ -329,7 +387,7 @@ export default function EditorToolbar({
             document.documentElement.style.removeProperty("--tb-bottom");
             document.documentElement.style.removeProperty("--tb-room");
         };
-    }, [editor, mobile, docked]);
+    }, [editor, visible]);
     const popover = mobile
         ? MENU.replace(
               "absolute [top:calc(100%_+_6px)]",
@@ -408,6 +466,36 @@ export default function EditorToolbar({
         document.addEventListener("pointerdown", dismiss);
         return () => document.removeEventListener("pointerdown", dismiss);
     }, [menu, linkOpen]);
+
+    // Fading edges hint that the row scrolls when more controls sit off-screen.
+    const [fade, setFade] = useState({ start: false, end: false });
+    useLayoutEffect(() => {
+        const el = root.current;
+        if (!mobile || !visible || !el) return;
+        const measure = () => {
+            const start = el.scrollLeft > 2;
+            const end = el.scrollLeft + el.clientWidth < el.scrollWidth - 2;
+            setFade((prev) =>
+                prev.start === start && prev.end === end
+                    ? prev
+                    : { start, end },
+            );
+        };
+        measure();
+        el.addEventListener("scroll", measure, { passive: true });
+        const observer = new ResizeObserver(measure);
+        observer.observe(el);
+        if (el.firstElementChild) observer.observe(el.firstElementChild);
+        return () => {
+            el.removeEventListener("scroll", measure);
+            observer.disconnect();
+        };
+    }, [mobile, visible, showTools]);
+    const switchMode = () => {
+        if (linkOpen) closeLink();
+        setMenu(null);
+        setMode(showTools ? "format" : "tools");
+    };
 
     const menuItems = () =>
         Array.from(
@@ -508,7 +596,7 @@ export default function EditorToolbar({
         <div
             className={
                 mobile
-                    ? "editor-toolbar-shell relative [z-index:13] flex [max-width:100vw] [flex:0_0_auto] [scrollbar-width:none] flex-nowrap items-center justify-start [gap:4px_8px] [overflow-x:auto] [overscroll-behavior-x:contain] [padding:4px_6px] [color:var(--muted)]"
+                    ? "editor-toolbar-shell relative [z-index:13] flex w-full [touch-action:pan-x] [scrollbar-width:none] flex-nowrap items-center justify-start [gap:4px_8px] [overflow-x:auto] [overscroll-behavior-x:contain] [padding:4px_0_4px_6px] [color:var(--muted)] select-none [-webkit-touch-callout:none] [&::-webkit-scrollbar]:hidden"
                     : "editor-toolbar-shell relative [z-index:13] flex [max-width:calc(100vw_-_18px)] [flex:0_0_auto] flex-wrap items-center justify-center [gap:4px_8px] [padding:4px_6px] [color:var(--muted)] [@media(width_<=_760px)]:[z-index:12]"
             }
             ref={(node) => {
@@ -525,309 +613,432 @@ export default function EditorToolbar({
                     onBlurOutside?.();
             }}
         >
-            <div
-                className={`editor-formatting-toolbar flex items-center [gap:4px] [@media(width_<=_760px)]:[gap:4px_2px] ${mobile ? "[width:max-content] flex-nowrap [&>*]:shrink-0" : "[max-width:100%] flex-wrap justify-center"}`}
-                role="toolbar"
-                aria-label={label}
-            >
-                <div className="format-menu relative">
-                    <button
-                        type="button"
-                        ref={paragraphTrigger}
-                        className="paragraph-select toolbar-control text-muted! hover:text-ink! aria-expanded:bg-tint! aria-expanded:text-accent! inline-flex! h-8! min-h-8! w-[124px]! items-center! justify-between! gap-1.5! rounded-[5px]! border-0! bg-transparent! px-2! text-[12px]! shadow-none! hover:bg-[var(--control-hover)]! max-[760px]:w-[112px]!"
-                        aria-label="Text style"
-                        aria-haspopup="menu"
-                        aria-expanded={menu === "paragraph"}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => toggleMenu("paragraph")}
-                        onKeyDown={(event) => triggerKeys("paragraph", event)}
-                    >
-                        <span className="truncate">
-                            {PARAGRAPH_STYLES[state.heading]?.[1]}
-                        </span>
-                        <ChevronDown
-                            size={14}
-                            strokeWidth={1.8}
-                            aria-hidden="true"
-                            className="shrink-0 transition-transform duration-150 [[aria-expanded='true']>&]:rotate-180"
-                        />
-                    </button>
-                    {menu === "paragraph" && (
-                        <div
-                            ref={menuRef}
-                            className={`${popover} ${mobile ? "left-2" : "left-0"}`}
-                            role="menu"
+            {showTools ? (
+                <div
+                    className="flex w-max items-center gap-0.5 [padding-right:6px]"
+                    role="toolbar"
+                    aria-label="Writing tools"
+                >
+                    {tools}
+                </div>
+            ) : (
+                <div
+                    className={`editor-formatting-toolbar flex items-center [gap:4px] [@media(width_<=_760px)]:[gap:4px_2px] ${mobile ? "[width:max-content] flex-nowrap [padding-right:6px] [&>*]:shrink-0" : "[max-width:100%] flex-wrap justify-center"}`}
+                    role="toolbar"
+                    aria-label={label}
+                >
+                    <div className="format-menu relative">
+                        <PressButton
+                            label="Text style"
+                            buttonRef={paragraphTrigger}
+                            className="paragraph-select toolbar-control text-muted! hover:text-ink! aria-expanded:bg-tint! aria-expanded:text-accent! inline-flex! h-8! min-h-8! w-[124px]! items-center! justify-between! gap-1.5! rounded-[5px]! border-0! bg-transparent! px-2! text-[12px]! shadow-none! hover:bg-[var(--control-hover)]! max-[760px]:w-[112px]!"
                             aria-label="Text style"
-                            onKeyDown={menuKeys}
+                            aria-haspopup="menu"
+                            aria-expanded={menu === "paragraph"}
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => toggleMenu("paragraph")}
+                            onKeyDown={(event) =>
+                                triggerKeys("paragraph", event)
+                            }
                         >
-                            {PARAGRAPH_STYLES.map(([level, name, size]) => (
-                                <button
-                                    type="button"
-                                    key={level}
-                                    role="menuitemradio"
-                                    aria-checked={state.heading === level}
-                                    className={MENU_ITEM}
-                                    onMouseDown={(event) =>
-                                        event.preventDefault()
-                                    }
-                                    onClick={() => {
-                                        setMenu(null);
-                                        const chain = editor
+                            <span className="truncate">
+                                {PARAGRAPH_STYLES[state.heading]?.[1]}
+                            </span>
+                            <ChevronDown
+                                size={14}
+                                strokeWidth={1.8}
+                                aria-hidden="true"
+                                className="shrink-0 transition-transform duration-150 [[aria-expanded='true']>&]:rotate-180"
+                            />
+                        </PressButton>
+                        {menu === "paragraph" && (
+                            <div
+                                ref={menuRef}
+                                className={`${popover} ${mobile ? "left-2" : "left-0"}`}
+                                role="menu"
+                                aria-label="Text style"
+                                onKeyDown={menuKeys}
+                            >
+                                {PARAGRAPH_STYLES.map(([level, name, size]) => (
+                                    <button
+                                        type="button"
+                                        key={level}
+                                        role="menuitemradio"
+                                        aria-checked={state.heading === level}
+                                        className={MENU_ITEM}
+                                        onMouseDown={(event) =>
+                                            event.preventDefault()
+                                        }
+                                        onClick={() => {
+                                            setMenu(null);
+                                            const chain = editor
+                                                .chain()
+                                                .focus(undefined, {
+                                                    scrollIntoView: false,
+                                                });
+                                            if (level)
+                                                chain
+                                                    .setHeading({ level })
+                                                    .run();
+                                            else chain.setParagraph().run();
+                                        }}
+                                    >
+                                        <span className={`flex-1 ${size}`}>
+                                            {name}
+                                        </span>
+                                        {state.heading === level && (
+                                            <Check
+                                                size={14}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                            />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <span
+                        className={
+                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                        }
+                        role="separator"
+                        aria-orientation="vertical"
+                    />
+                    <div className={"format-group flex items-center [gap:2px]"}>
+                        <FormatButton
+                            icon={Bold}
+                            label="Bold"
+                            shortcut="Ctrl+B"
+                            active={state.bold}
+                            disabled={!state.canMark}
+                            onClick={() =>
+                                editor.chain().focus().toggleBold().run()
+                            }
+                        />
+                        <FormatButton
+                            icon={Italic}
+                            label="Italic"
+                            shortcut="Ctrl+I"
+                            active={state.italic}
+                            disabled={!state.canMark}
+                            onClick={() =>
+                                editor.chain().focus().toggleItalic().run()
+                            }
+                        />
+                        <FormatButton
+                            icon={Link2}
+                            label="Insert/Edit Link"
+                            shortcut="Ctrl+K"
+                            active={state.link}
+                            disabled={!state.canLink}
+                            onClick={openLink}
+                        />
+                    </div>
+                    <span
+                        className={
+                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                        }
+                        role="separator"
+                        aria-orientation="vertical"
+                    />
+                    <div className={"format-group flex items-center [gap:2px]"}>
+                        <FormatButton
+                            icon={List}
+                            label="Bullet List"
+                            active={state.bullet}
+                            onClick={() =>
+                                editor.chain().focus().toggleBulletList().run()
+                            }
+                        />
+                        <FormatButton
+                            icon={ListOrdered}
+                            label="Numbered List"
+                            active={state.ordered}
+                            onClick={() =>
+                                editor.chain().focus().toggleOrderedList().run()
+                            }
+                        />
+                        <FormatButton
+                            icon={Quote}
+                            label="Blockquote"
+                            active={state.quote}
+                            onClick={() =>
+                                editor.chain().focus().toggleBlockquote().run()
+                            }
+                        />
+                    </div>
+                    {mobile ? (
+                        <>
+                            <span
+                                className="format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                                role="separator"
+                                aria-orientation="vertical"
+                            />
+                            <div className="format-group flex items-center [gap:2px]">
+                                <FormatButton
+                                    icon={Strikethrough}
+                                    label="Strikethrough"
+                                    active={state.strike}
+                                    onClick={() =>
+                                        editor
                                             .chain()
-                                            .focus(undefined, {
-                                                scrollIntoView: false,
-                                            });
-                                        if (level)
-                                            chain.setHeading({ level }).run();
-                                        else chain.setParagraph().run();
-                                    }}
-                                >
-                                    <span className={`flex-1 ${size}`}>
-                                        {name}
-                                    </span>
-                                    {state.heading === level && (
-                                        <Check
-                                            size={14}
-                                            strokeWidth={2}
-                                            aria-hidden="true"
-                                        />
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                <span
-                    className={
-                        "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
-                    }
-                    role="separator"
-                    aria-orientation="vertical"
-                />
-                <div className={"format-group flex items-center [gap:2px]"}>
-                    <FormatButton
-                        icon={Bold}
-                        label="Bold"
-                        shortcut="Ctrl+B"
-                        active={state.bold}
-                        disabled={!state.canMark}
-                        onClick={() =>
-                            editor.chain().focus().toggleBold().run()
-                        }
-                    />
-                    <FormatButton
-                        icon={Italic}
-                        label="Italic"
-                        shortcut="Ctrl+I"
-                        active={state.italic}
-                        disabled={!state.canMark}
-                        onClick={() =>
-                            editor.chain().focus().toggleItalic().run()
-                        }
-                    />
-                    <FormatButton
-                        icon={Link2}
-                        label="Insert/Edit Link"
-                        shortcut="Ctrl+K"
-                        active={state.link}
-                        disabled={!state.canLink}
-                        onClick={openLink}
-                    />
-                </div>
-                <span
-                    className={
-                        "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
-                    }
-                    role="separator"
-                    aria-orientation="vertical"
-                />
-                <div className={"format-group flex items-center [gap:2px]"}>
-                    <FormatButton
-                        icon={List}
-                        label="Bullet List"
-                        active={state.bullet}
-                        onClick={() =>
-                            editor.chain().focus().toggleBulletList().run()
-                        }
-                    />
-                    <FormatButton
-                        icon={ListOrdered}
-                        label="Numbered List"
-                        active={state.ordered}
-                        onClick={() =>
-                            editor.chain().focus().toggleOrderedList().run()
-                        }
-                    />
-                    <FormatButton
-                        icon={Quote}
-                        label="Blockquote"
-                        active={state.quote}
-                        onClick={() =>
-                            editor.chain().focus().toggleBlockquote().run()
-                        }
-                    />
-                </div>
-                <span
-                    className={
-                        "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
-                    }
-                    role="separator"
-                    aria-orientation="vertical"
-                />
-                <div className={"format-menu relative"}>
-                    <Tooltip.Root>
-                        <Tooltip.Trigger asChild>
-                            <button
-                                type="button"
-                                ref={moreTrigger}
-                                className={FORMAT_BUTTON}
-                                aria-label="More formatting"
-                                aria-haspopup="menu"
-                                aria-expanded={menu === "more"}
-                                onMouseDown={(event) => event.preventDefault()}
-                                onClick={() => toggleMenu("more")}
-                                onKeyDown={(event) =>
-                                    triggerKeys("more", event)
+                                            .focus()
+                                            .toggleStrike()
+                                            .run()
+                                    }
+                                />
+                                <FormatButton
+                                    icon={Code}
+                                    label="Inline Code"
+                                    active={state.code}
+                                    onClick={() =>
+                                        editor
+                                            .chain()
+                                            .focus()
+                                            .toggleCode()
+                                            .run()
+                                    }
+                                />
+                                <FormatButton
+                                    icon={SquareCode}
+                                    label="Code Block"
+                                    active={state.codeBlock}
+                                    onClick={() =>
+                                        editor
+                                            .chain()
+                                            .focus()
+                                            .toggleCodeBlock()
+                                            .run()
+                                    }
+                                />
+                                <FormatButton
+                                    icon={ListTodo}
+                                    label="Checklist"
+                                    active={state.task}
+                                    onClick={() =>
+                                        editor
+                                            .chain()
+                                            .focus()
+                                            .toggleTaskList()
+                                            .run()
+                                    }
+                                />
+                                <FormatButton
+                                    icon={Minus}
+                                    label="Horizontal Divider"
+                                    onClick={() =>
+                                        editor
+                                            .chain()
+                                            .focus()
+                                            .setHorizontalRule()
+                                            .run()
+                                    }
+                                />
+                                {onConnect && (
+                                    <FormatButton
+                                        icon={Link2}
+                                        label="Connect to thought"
+                                        disabled={
+                                            !state.canConnect || connecting
+                                        }
+                                        onClick={onConnect}
+                                    />
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <span
+                                className={
+                                    "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
                                 }
-                            >
-                                <MoreHorizontal
-                                    size={16}
-                                    strokeWidth={1.6}
-                                    aria-hidden="true"
-                                />
-                            </button>
-                        </Tooltip.Trigger>
-                        <Tooltip.Portal>
-                            <Tooltip.Content
-                                className={TOOLTIP_CLASS}
-                                sideOffset={8}
-                            >
-                                More formatting
-                                <Tooltip.Arrow />
-                            </Tooltip.Content>
-                        </Tooltip.Portal>
-                    </Tooltip.Root>
-                    {menu === "more" && (
-                        <div
-                            ref={menuRef}
-                            className={`${popover} format-more-menu ${mobile ? "right-2" : "right-0"} w-[216px]`}
-                            role="menu"
-                            aria-label="More formatting"
-                            onKeyDown={menuKeys}
-                        >
-                            {/* Formats toggle in place and the menu stays open, so several can be stacked. */}
-                            {(
-                                [
-                                    [
-                                        Strikethrough,
-                                        "Strikethrough",
-                                        state.strike,
-                                        () =>
-                                            editor.chain().toggleStrike().run(),
-                                    ],
-                                    [
-                                        Code,
-                                        "Inline Code",
-                                        state.code,
-                                        () => editor.chain().toggleCode().run(),
-                                    ],
-                                    [
-                                        SquareCode,
-                                        "Code Block",
-                                        state.codeBlock,
-                                        () =>
-                                            editor
-                                                .chain()
-                                                .toggleCodeBlock()
-                                                .run(),
-                                    ],
-                                    [
-                                        ListTodo,
-                                        "Checklist",
-                                        state.task,
-                                        () =>
-                                            editor
-                                                .chain()
-                                                .toggleTaskList()
-                                                .run(),
-                                    ],
-                                ] as [LucideIcon, string, boolean, () => void][]
-                            ).map(([Icon, name, active, action]) => (
-                                <button
-                                    type="button"
-                                    key={name}
-                                    role="menuitemcheckbox"
-                                    aria-checked={active}
-                                    className={MENU_ITEM}
-                                    onMouseDown={(event) =>
-                                        event.preventDefault()
-                                    }
-                                    onClick={action}
-                                >
-                                    <Icon
-                                        size={16}
-                                        strokeWidth={1.6}
-                                        aria-hidden="true"
-                                    />
-                                    <span className="flex-1">{name}</span>
-                                    {active && (
-                                        <Check
-                                            size={14}
-                                            strokeWidth={2}
-                                            aria-hidden="true"
+                                role="separator"
+                                aria-orientation="vertical"
+                            />
+                            <div className={"format-menu relative"}>
+                                <Tooltip.Root>
+                                    <Tooltip.Trigger asChild>
+                                        <button
+                                            type="button"
+                                            ref={moreTrigger}
+                                            className={FORMAT_BUTTON}
+                                            aria-label="More formatting"
+                                            aria-haspopup="menu"
+                                            aria-expanded={menu === "more"}
+                                            onMouseDown={(event) =>
+                                                event.preventDefault()
+                                            }
+                                            onClick={() => toggleMenu("more")}
+                                            onKeyDown={(event) =>
+                                                triggerKeys("more", event)
+                                            }
+                                        >
+                                            <MoreHorizontal
+                                                size={16}
+                                                strokeWidth={1.6}
+                                                aria-hidden="true"
+                                            />
+                                        </button>
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Portal>
+                                        <Tooltip.Content
+                                            className={TOOLTIP_CLASS}
+                                            sideOffset={8}
+                                        >
+                                            More formatting
+                                            <Tooltip.Arrow />
+                                        </Tooltip.Content>
+                                    </Tooltip.Portal>
+                                </Tooltip.Root>
+                                {menu === "more" && (
+                                    <div
+                                        ref={menuRef}
+                                        className={`${popover} format-more-menu ${mobile ? "right-2" : "right-0"} w-[216px]`}
+                                        role="menu"
+                                        aria-label="More formatting"
+                                        onKeyDown={menuKeys}
+                                    >
+                                        {/* Formats toggle in place and the menu stays open, so several can be stacked. */}
+                                        {(
+                                            [
+                                                [
+                                                    Strikethrough,
+                                                    "Strikethrough",
+                                                    state.strike,
+                                                    () =>
+                                                        editor
+                                                            .chain()
+                                                            .toggleStrike()
+                                                            .run(),
+                                                ],
+                                                [
+                                                    Code,
+                                                    "Inline Code",
+                                                    state.code,
+                                                    () =>
+                                                        editor
+                                                            .chain()
+                                                            .toggleCode()
+                                                            .run(),
+                                                ],
+                                                [
+                                                    SquareCode,
+                                                    "Code Block",
+                                                    state.codeBlock,
+                                                    () =>
+                                                        editor
+                                                            .chain()
+                                                            .toggleCodeBlock()
+                                                            .run(),
+                                                ],
+                                                [
+                                                    ListTodo,
+                                                    "Checklist",
+                                                    state.task,
+                                                    () =>
+                                                        editor
+                                                            .chain()
+                                                            .toggleTaskList()
+                                                            .run(),
+                                                ],
+                                            ] as [
+                                                LucideIcon,
+                                                string,
+                                                boolean,
+                                                () => void,
+                                            ][]
+                                        ).map(
+                                            ([Icon, name, active, action]) => (
+                                                <button
+                                                    type="button"
+                                                    key={name}
+                                                    role="menuitemcheckbox"
+                                                    aria-checked={active}
+                                                    className={MENU_ITEM}
+                                                    onMouseDown={(event) =>
+                                                        event.preventDefault()
+                                                    }
+                                                    onClick={action}
+                                                >
+                                                    <Icon
+                                                        size={16}
+                                                        strokeWidth={1.6}
+                                                        aria-hidden="true"
+                                                    />
+                                                    <span className="flex-1">
+                                                        {name}
+                                                    </span>
+                                                    {active && (
+                                                        <Check
+                                                            size={14}
+                                                            strokeWidth={2}
+                                                            aria-hidden="true"
+                                                        />
+                                                    )}
+                                                </button>
+                                            ),
+                                        )}
+                                        <div
+                                            className={MENU_SEPARATOR}
+                                            role="separator"
                                         />
-                                    )}
-                                </button>
-                            ))}
-                            <div className={MENU_SEPARATOR} role="separator" />
-                            <button
-                                type="button"
-                                role="menuitem"
-                                className={MENU_ITEM}
-                                onMouseDown={(event) => event.preventDefault()}
-                                onClick={() => {
-                                    setMenu(null);
-                                    editor
-                                        .chain()
-                                        .focus()
-                                        .setHorizontalRule()
-                                        .run();
-                                }}
-                            >
-                                <Minus
-                                    size={16}
-                                    strokeWidth={1.6}
-                                    aria-hidden="true"
-                                />
-                                Horizontal Divider
-                            </button>
-                            {onConnect && (
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    className={`${MENU_ITEM} toolbar-connect`}
-                                    disabled={!state.canConnect || connecting}
-                                    onMouseDown={(event) =>
-                                        event.preventDefault()
-                                    }
-                                    onClick={() => {
-                                        setMenu(null);
-                                        onConnect();
-                                    }}
-                                >
-                                    <Link2
-                                        size={16}
-                                        strokeWidth={1.6}
-                                        aria-hidden="true"
-                                    />
-                                    Connect to thought
-                                </button>
-                            )}
-                        </div>
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            className={MENU_ITEM}
+                                            onMouseDown={(event) =>
+                                                event.preventDefault()
+                                            }
+                                            onClick={() => {
+                                                setMenu(null);
+                                                editor
+                                                    .chain()
+                                                    .focus()
+                                                    .setHorizontalRule()
+                                                    .run();
+                                            }}
+                                        >
+                                            <Minus
+                                                size={16}
+                                                strokeWidth={1.6}
+                                                aria-hidden="true"
+                                            />
+                                            Horizontal Divider
+                                        </button>
+                                        {onConnect && (
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                className={`${MENU_ITEM} toolbar-connect`}
+                                                disabled={
+                                                    !state.canConnect ||
+                                                    connecting
+                                                }
+                                                onMouseDown={(event) =>
+                                                    event.preventDefault()
+                                                }
+                                                onClick={() => {
+                                                    setMenu(null);
+                                                    onConnect();
+                                                }}
+                                            >
+                                                <Link2
+                                                    size={16}
+                                                    strokeWidth={1.6}
+                                                    aria-hidden="true"
+                                                />
+                                                Connect to thought
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </>
                     )}
                 </div>
-            </div>
-            {linkOpen && (
+            )}
+            {linkOpen && !showTools && (
                 <form
                     className={
                         (mobile
@@ -941,21 +1152,65 @@ export default function EditorToolbar({
         </div>
     );
     if (mobile) {
-        // Docked above the keyboard; shown only while the editor (or the toolbar) has focus.
-        if (!docked || connecting || !editor.isEditable) return null;
+        // One bar docked above the keyboard: a fixed mode switch, then a scrolling row of controls.
+        if (!visible) return null;
+        const fadeEdge =
+            "pointer-events-none absolute inset-y-0 w-6 from-[var(--surface)] to-transparent";
+        const switchLabel = showTools
+            ? "Show formatting"
+            : "Show document tools";
         return createPortal(
-            <div
-                ref={dock}
-                className="mobile-formatting-toolbar border-line bg-surface fixed inset-x-0 [bottom:var(--kb,0px)] [z-index:40] border-t"
-                style={{
-                    paddingBottom:
-                        "var(--kb-pad, env(safe-area-inset-bottom, 0px))",
-                    paddingLeft: "env(safe-area-inset-left, 0px)",
-                    paddingRight: "env(safe-area-inset-right, 0px)",
-                }}
-            >
-                {body}
-            </div>,
+            <LongPressTooltips>
+                <div
+                    ref={dock}
+                    className="mobile-formatting-toolbar border-line bg-surface fixed inset-x-0 [bottom:var(--kb,0px)] z-[19] flex items-stretch border-t"
+                    style={{
+                        paddingBottom:
+                            "var(--kb-pad, env(safe-area-inset-bottom, 0px))",
+                        paddingLeft: "env(safe-area-inset-left, 0px)",
+                        paddingRight: "env(safe-area-inset-right, 0px)",
+                    }}
+                >
+                    {withTools && (
+                        <PressButton
+                            label={switchLabel}
+                            aria-label={switchLabel}
+                            className="mode-switch border-line! text-muted! hover:text-ink! inline-flex! h-auto! min-h-11! w-11! shrink-0 items-center! justify-center! rounded-none! border-0! border-r! bg-transparent! p-0! shadow-none!"
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={switchMode}
+                        >
+                            {showTools ? (
+                                <Type
+                                    size={17}
+                                    strokeWidth={1.6}
+                                    aria-hidden="true"
+                                />
+                            ) : (
+                                <LayoutGrid
+                                    size={17}
+                                    strokeWidth={1.6}
+                                    aria-hidden="true"
+                                />
+                            )}
+                        </PressButton>
+                    )}
+                    <div className="relative min-w-0 flex-1">
+                        {body}
+                        {fade.start && (
+                            <span
+                                aria-hidden="true"
+                                className={`${fadeEdge} left-0 bg-linear-to-r`}
+                            />
+                        )}
+                        {fade.end && (
+                            <span
+                                aria-hidden="true"
+                                className={`${fadeEdge} right-0 bg-linear-to-l`}
+                            />
+                        )}
+                    </div>
+                </div>
+            </LongPressTooltips>,
             document.body,
         );
     }

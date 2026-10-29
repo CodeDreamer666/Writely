@@ -1,6 +1,5 @@
 "use client";
 import {
-    ArrowLeft,
     ChevronDown,
     ChevronUp,
 } from "lucide-react";
@@ -280,18 +279,9 @@ export default function Comparison({
         >
             <header className="comparison-top bg-paper shrink-0 px-8 pt-5 pb-4 max-[760px]:px-4 max-[760px]:pt-3">
                 <div className="mx-auto flex max-w-[1120px] items-center gap-2">
-                    <Button
-                        icon={ArrowLeft}
-                        label="Back to editing"
-                        onClick={() => setComparison(null)}
-                        className="size-10! min-h-10! min-w-10! shrink-0 rounded-lg! p-0!"
-                    />
-                    <h2 className="m-0 min-w-0 flex-1 truncate font-sans text-[18px] leading-tight font-semibold tracking-[-0.02em] max-[760px]:text-[15px]">
-                        Draft comparison
-                    </h2>
                     <nav
                         aria-label="Changes"
-                        className="border-line bg-surface flex shrink-0 items-center gap-0.5 rounded-lg border p-0.5"
+                        className="border-line bg-surface ml-auto flex shrink-0 items-center gap-0.5 rounded-lg border p-0.5"
                     >
                         <Button
                             icon={ChevronUp}
@@ -323,30 +313,6 @@ export default function Comparison({
                     <div className="grid min-w-0 grid-cols-2 gap-x-8 gap-y-2 max-[760px]:gap-x-3">
                         {select("left", "Version")}
                         {select("right", "Compare with")}
-                    </div>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-muted m-0 text-[11px]">
-                            Read-only comparison · your writing stays unchanged
-                        </p>
-                        <p
-                            aria-label="Legend"
-                            className="text-muted m-0 flex shrink-0 items-center gap-3 text-[11px]"
-                        >
-                            <span className="flex items-center gap-1.5">
-                                <span
-                                    aria-hidden="true"
-                                    className="inline-block h-2 w-2 rounded-full bg-[color-mix(in_srgb,var(--danger)_55%,var(--surface))]"
-                                />
-                                Removed
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                                <span
-                                    aria-hidden="true"
-                                    className="inline-block h-2 w-2 rounded-full bg-[color-mix(in_srgb,var(--success)_55%,var(--surface))]"
-                                />
-                                Added
-                            </span>
-                        </p>
                     </div>
                 </div>
             </header>
@@ -427,11 +393,6 @@ export default function Comparison({
             </div>
             <div className="comparison-bottom border-line bg-paper m-0 shrink-0 border-t px-8 py-3 pb-[max(12px,env(safe-area-inset-bottom))] max-[760px]:px-4">
                 <div className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-end gap-2">
-                    <p className="text-muted mr-auto min-w-0 flex-1 truncate text-[11px] max-[760px]:hidden">
-                        {restoreTarget
-                            ? `Restore “${restoreTarget.name}” to replace your current writing.`
-                            : "Choose a saved draft to restore it."}
-                    </p>
                     <Button
                         className="comparison-restore border-line! min-h-10! rounded-lg! border! px-3! text-[12px]! hover:bg-[var(--control-hover)]!"
                         disabled={

@@ -93,7 +93,7 @@ export default function EditorHeader({
     };
 
     return (
-        <header className="editor-header bg-paper [.is-scrolled_&]:border-line relative z-[13] grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 border-b border-transparent px-4 transition-[border-color] duration-200 max-sm:gap-1 max-sm:px-2 max-[760px]:[.comparison-mode_&]:hidden [.focus-mode_&]:hidden">
+        <header className="editor-header bg-paper [.is-scrolled_&]:border-line relative z-[13] grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 border-b border-transparent px-4 transition-[border-color] duration-200 max-sm:gap-1 max-sm:px-2 [.focus-mode_&]:hidden">
             <div className="flex min-w-0 items-center">
                 <button
                     className="text-muted hover:text-ink! h-9! min-h-9! gap-1.5! rounded-lg! px-2.5! text-[13px]!"

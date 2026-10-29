@@ -11,6 +11,7 @@ import {
     type ReactNode,
 } from "react";
 import { Button } from "../ui";
+import { useLongPress } from "./long-press-tooltip";
 import { TOOLTIP_CLASS } from "~/config/ui";
 
 /**
@@ -50,14 +51,16 @@ export function DockButton({
     onClick: () => void;
     className?: string;
 } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick">) {
+    const press = useLongPress(label);
     return (
-        <Tooltip.Root>
+        <Tooltip.Root open={press.enabled ? false : undefined}>
             <Tooltip.Trigger asChild>
                 <button
                     className={`${DOCK_BUTTON} ${className}`}
                     aria-label={label}
                     aria-pressed={pressed}
-                    onClick={onClick}
+                    {...press.props}
+                    onClick={press.click(onClick)}
                     {...props}
                 >
                     <Icon size={17} strokeWidth={1.6} aria-hidden="true" />
