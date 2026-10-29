@@ -596,7 +596,7 @@ export default function EditorToolbar({
         <div
             className={
                 mobile
-                    ? "editor-toolbar-shell relative [z-index:13] flex w-full [touch-action:pan-x] [scrollbar-width:none] flex-nowrap items-center justify-start [gap:4px_8px] [overflow-x:auto] [overscroll-behavior-x:contain] [padding:4px_0_4px_6px] [color:var(--muted)] select-none [-webkit-touch-callout:none] [&::-webkit-scrollbar]:hidden"
+                    ? "editor-toolbar-shell relative [z-index:13] flex w-full [touch-action:pan-x] [scrollbar-width:none] flex-nowrap items-center justify-start [gap:4px_8px] [overflow-x:auto] [overscroll-behavior-x:contain] h-12 [padding:0_0_0_6px] [color:var(--muted)] select-none [-webkit-touch-callout:none] [&::-webkit-scrollbar]:hidden"
                     : "editor-toolbar-shell relative [z-index:13] flex [max-width:calc(100vw_-_18px)] [flex:0_0_auto] flex-wrap items-center justify-center [gap:4px_8px] [padding:4px_6px] [color:var(--muted)] [@media(width_<=_760px)]:[z-index:12]"
             }
             ref={(node) => {
@@ -1175,7 +1175,7 @@ export default function EditorToolbar({
                         <PressButton
                             label={switchLabel}
                             aria-label={switchLabel}
-                            className="mode-switch border-line! text-muted! hover:text-ink! inline-flex! h-auto! min-h-11! w-11! shrink-0 items-center! justify-center! rounded-none! border-0! border-r! bg-transparent! p-0! shadow-none!"
+                            className="mode-switch border-line! text-muted! hover:text-ink! inline-flex! h-12! min-h-12! w-11! shrink-0 items-center! justify-center! rounded-none! border-0! border-r! bg-transparent! p-0! shadow-none!"
                             onMouseDown={(event) => event.preventDefault()}
                             onClick={switchMode}
                         >
