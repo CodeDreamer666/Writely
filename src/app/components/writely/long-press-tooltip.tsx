@@ -3,7 +3,6 @@ import {
     createContext,
     useContext,
     useEffect,
-    useLayoutEffect,
     useRef,
     useState,
     type HTMLAttributes,
@@ -14,7 +13,7 @@ import { TOOLTIP_CLASS } from "~/config/ui";
 
 /**
  * Touch screens have no hover, so toolbar buttons inside <LongPressTooltips> show their name when
- * held. A short tap runs the button as usual; after a hold, the release does nothing.
+ * held, in a strip fixed above the toolbar where a resting thumb cannot cover it. A short tap runs the button as usual; after a hold, the release does nothing.
  *
  * The whole gesture is handled here rather than left to the browser. A finger resting on a button
  * would otherwise make the browser move focus out of the editor (dropping and re-raising the
@@ -26,12 +25,10 @@ import { TOOLTIP_CLASS } from "~/config/ui";
 const LONG_PRESS_MS = 500;
 /** A finger that travels further than this is scrolling, not holding. */
 const MOVE_TOLERANCE = 10;
-/** Space kept between a tooltip and the screen edge, and between it and its button. */
-const EDGE = 8;
 /** Per-frame fraction of speed a flick keeps while the row coasts to a stop. */
 const FRICTION = 0.95;
 
-type Tip = { label: string; rect: DOMRect };
+type Tip = { label: string };
 
 const Active = createContext(false);
 
@@ -56,7 +53,6 @@ type Gesture = {
 export function LongPressTooltips({ children }: { children: ReactNode }) {
     const [tip, setTip] = useState<Tip | null>(null);
     const area = useRef<HTMLDivElement>(null);
-    const node = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const el = area.current;
@@ -106,7 +102,6 @@ export function LongPressTooltips({ children }: { children: ReactNode }) {
                         current.button.getAttribute("aria-label") ??
                         current.button.textContent?.trim() ??
                         "",
-                    rect: current.button.getBoundingClientRect(),
                 });
             }, LONG_PRESS_MS);
         };
@@ -173,18 +168,6 @@ export function LongPressTooltips({ children }: { children: ReactNode }) {
         };
     }, [tip]);
 
-    // Centre over the button, then slide back inside the visible viewport if it overhangs.
-    useLayoutEffect(() => {
-        const el = node.current;
-        if (!tip || !el) return;
-        const viewport = window.visualViewport;
-        const start = viewport?.offsetLeft ?? 0;
-        const width = viewport?.width ?? window.innerWidth;
-        const x = tip.rect.left + tip.rect.width / 2 - el.offsetWidth / 2;
-        el.style.left = `${Math.max(start + EDGE, Math.min(x, start + width - el.offsetWidth - EDGE))}px`;
-        el.style.top = `${tip.rect.top - EDGE}px`;
-    }, [tip]);
-
     return (
         <Active.Provider value={true}>
             {/* No box of its own: it only gives the touch listeners something to sit on. */}
@@ -194,9 +177,8 @@ export function LongPressTooltips({ children }: { children: ReactNode }) {
             {tip &&
                 createPortal(
                     <div
-                        ref={node}
                         role="tooltip"
-                        className={`${TOOLTIP_CLASS} pointer-events-none fixed -translate-y-full whitespace-nowrap [padding:6px_10px]`}
+                        className="bg-ink text-paper pointer-events-none fixed inset-x-0 [bottom:var(--tb-bottom,52px)] z-[19] flex h-10 items-center justify-center text-[14px] font-medium"
                     >
                         {tip.label}
                     </div>,

@@ -1,5 +1,6 @@
 "use client";
 import {
+    Link2,
     Palette,
     Pencil,
     Plus,
@@ -37,6 +38,8 @@ export function CompactCards({
     onReveal,
     connecting,
     onAttach,
+    canConnect,
+    onConnect,
     onCancelConnection,
     smartPunctuation,
 }: {
@@ -51,6 +54,9 @@ export function CompactCards({
     onReveal: (card: Card) => void;
     connecting: boolean;
     onAttach: (card: Card) => void;
+    /** Whether words are selected in the document, so a card can be attached to them. */
+    canConnect: boolean;
+    onConnect: (card: Card) => void;
     onCancelConnection: () => void;
     smartPunctuation: boolean;
 }) {
@@ -139,13 +145,14 @@ export function CompactCards({
                                                           : `“${target.quote}”`
                                                     : "Not attached to text"}
                                             </span>
-                                            <span className="text-accent text-xs">
-                                                {connecting
-                                                    ? "Attach selected text"
-                                                    : target && !target.orphaned
-                                                      ? "Show highlighted text"
-                                                      : "Edit card"}
-                                            </span>
+                                            {(connecting ||
+                                                (target && !target.orphaned)) && (
+                                                <span className="text-accent text-xs">
+                                                    {connecting
+                                                        ? "Attach selected text"
+                                                        : "Show highlighted text"}
+                                                </span>
+                                            )}
                                         </button>
                                         <div className="border-line flex justify-end border-t px-2 py-1">
                                             <Button
@@ -185,6 +192,12 @@ export function CompactCards({
                                                     primeKeyboard();
                                                     onEdit(card.id);
                                                 }}
+                                            />
+                                            <Button
+                                                icon={Link2}
+                                                label={`Connect card ${index + 1} to selected text`}
+                                                disabled={!canConnect}
+                                                onClick={() => onConnect(card)}
                                             />
                                             {target && (
                                                 <Button

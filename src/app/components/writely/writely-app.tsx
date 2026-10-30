@@ -588,6 +588,24 @@ export default function WritelyApp({
         revealCard(attached);
     };
 
+    // Same attachment as the toolbar's "Connect to thought", started from a card instead.
+    const selectedTarget = () => {
+        if (!editor) return null;
+        const { from, to } = editor.state.selection;
+        return selectionTarget(editor.state.doc, {
+            from,
+            to,
+            quote: editor.state.doc.textBetween(from, to, " "),
+        });
+    };
+    const connectCardToSelection = (card: Card) => {
+        const target = selectedTarget();
+        if (!target) return;
+        const connectors = [{ id: uid(), target }];
+        patchCard(card.id, { connectors });
+        revealCard({ ...card, connectors });
+    };
+
     const toolButtons = (
         <>
             <DockButton
@@ -784,6 +802,8 @@ export default function WritelyApp({
                             onReveal={revealCard}
                             connecting={!!connectionSelection}
                             onAttach={attachCompactCard}
+                            canConnect={!!selectedTarget()}
+                            onConnect={connectCardToSelection}
                             onCancelConnection={() =>
                                 setConnectionSelection(null)
                             }

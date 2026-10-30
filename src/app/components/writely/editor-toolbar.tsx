@@ -776,65 +776,6 @@ export default function EditorToolbar({
                                 aria-orientation="vertical"
                             />
                             <div className="format-group flex items-center [gap:2px]">
-                                <FormatButton
-                                    icon={Strikethrough}
-                                    label="Strikethrough"
-                                    active={state.strike}
-                                    onClick={() =>
-                                        editor
-                                            .chain()
-                                            .focus()
-                                            .toggleStrike()
-                                            .run()
-                                    }
-                                />
-                                <FormatButton
-                                    icon={Code}
-                                    label="Inline Code"
-                                    active={state.code}
-                                    onClick={() =>
-                                        editor
-                                            .chain()
-                                            .focus()
-                                            .toggleCode()
-                                            .run()
-                                    }
-                                />
-                                <FormatButton
-                                    icon={SquareCode}
-                                    label="Code Block"
-                                    active={state.codeBlock}
-                                    onClick={() =>
-                                        editor
-                                            .chain()
-                                            .focus()
-                                            .toggleCodeBlock()
-                                            .run()
-                                    }
-                                />
-                                <FormatButton
-                                    icon={ListTodo}
-                                    label="Checklist"
-                                    active={state.task}
-                                    onClick={() =>
-                                        editor
-                                            .chain()
-                                            .focus()
-                                            .toggleTaskList()
-                                            .run()
-                                    }
-                                />
-                                <FormatButton
-                                    icon={Minus}
-                                    label="Horizontal Divider"
-                                    onClick={() =>
-                                        editor
-                                            .chain()
-                                            .focus()
-                                            .setHorizontalRule()
-                                            .run()
-                                    }
-                                />
                                 {onConnect && (
                                     <FormatButton
                                         icon={Link2}
