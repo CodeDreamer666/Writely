@@ -277,7 +277,7 @@ export default function Comparison({
             aria-label="Draft comparison"
             className="comparison m-0 flex h-full min-h-0 flex-col p-0"
         >
-            <header className="comparison-top bg-paper shrink-0 px-8 pt-5 pb-4 max-[760px]:px-4 max-[760px]:pt-3">
+            <header className="comparison-top bg-paper shrink-0 px-8 pt-5 pb-4 max-md:px-4 max-md:pt-3">
                 <div className="mx-auto flex max-w-[1120px] items-center gap-2">
                     <nav
                         aria-label="Changes"
@@ -310,7 +310,7 @@ export default function Comparison({
                     </nav>
                 </div>
                 <div className="mx-auto mt-4 grid max-w-[1120px] gap-3">
-                    <div className="grid min-w-0 grid-cols-2 gap-x-8 gap-y-2 max-[760px]:gap-x-3">
+                    <div className="grid min-w-0 grid-cols-2 gap-x-8 gap-y-2 max-md:gap-x-3">
                         {select("left", "Version")}
                         {select("right", "Compare with")}
                     </div>
@@ -318,11 +318,11 @@ export default function Comparison({
             </header>
             <div
                 ref={scroller}
-                className="comparison-scroll min-h-0 flex-1 overflow-auto overscroll-contain px-8 pb-8 max-[760px]:px-4"
+                className="comparison-scroll min-h-0 flex-1 overflow-auto overscroll-contain px-8 pb-8 max-md:px-4"
             >
                 {/* Side by side, on wider screens. One scrolling area keeps the sides in step. */}
                 <div
-                    className={`compare-split border-line bg-surface mx-auto max-w-[1120px] overflow-hidden rounded-xl border px-7 pt-6 pb-2 max-[760px]:hidden ${PROSE}`}
+                    className={`compare-split border-line bg-surface mx-auto max-w-[1120px] overflow-hidden rounded-xl border px-7 pt-6 pb-2 max-md:hidden ${PROSE}`}
                 >
                     <div className="grid grid-cols-2 gap-x-12 bg-[linear-gradient(var(--border),var(--border))] bg-[length:1px_100%] [background-position:center] bg-no-repeat">
                         {!rows.length && (
@@ -356,7 +356,7 @@ export default function Comparison({
                 </div>
                 {/* One text, on phones: each removal sits right before what replaced it. */}
                 <div
-                    className={`compare-unified border-line bg-surface mx-auto grid max-w-[680px] gap-5 rounded-xl border p-5 min-[761px]:hidden ${PROSE}`}
+                    className={`compare-unified border-line bg-surface mx-auto grid max-w-[680px] gap-5 rounded-xl border p-5 md:hidden ${PROSE}`}
                 >
                     {(isEmpty(left.html) || isEmpty(right.html)) && (
                         <p className="text-muted font-sans text-[12px]">
@@ -386,7 +386,7 @@ export default function Comparison({
                     )}
                 </div>
             </div>
-            <div className="comparison-bottom border-line bg-paper m-0 shrink-0 border-t px-8 py-3 pb-[max(12px,env(safe-area-inset-bottom))] max-[760px]:px-4">
+            <div className="comparison-bottom border-line bg-paper m-0 shrink-0 border-t px-8 py-3 pb-[max(12px,env(safe-area-inset-bottom))] max-md:px-4">
                 <div className="mx-auto flex max-w-[1120px] flex-wrap items-center justify-end gap-2">
                     <Button
                         className="comparison-restore border-line! min-h-10! rounded-lg! border! px-3! text-[12px]! hover:bg-[var(--control-hover)]!"

@@ -25,12 +25,12 @@ export function SettingsSection({
     children: ReactNode;
 }) {
     return (
-        <section aria-labelledby={id} className="grid gap-y-6 max-sm:gap-y-5">
-            <div className="border-line flex items-end justify-between gap-x-6 gap-y-4 border-b pb-5 max-sm:flex-col max-sm:items-stretch max-sm:pb-4">
+        <section aria-labelledby={id} className="grid gap-y-6 max-md:gap-y-5">
+            <div className="border-line flex items-end justify-between gap-x-6 gap-y-4 border-b pb-5 max-md:flex-col max-md:items-stretch max-md:pb-4">
                 <div className="max-w-[560px]">
                     <h2
                         id={id}
-                        className="m-0 font-serif text-[30px] leading-tight font-normal tracking-[-0.02em] max-[860px]:text-[28px]"
+                        className="m-0 font-serif text-[30px] leading-tight font-normal tracking-[-0.02em] max-md:text-[28px]"
                     >
                         {title}
                     </h2>
@@ -112,7 +112,7 @@ export function SettingRow({
     }
     return (
         <div
-            className={`flex gap-x-6 gap-y-3 px-5 py-4 ${stacked ? "flex-col" : "items-center justify-between max-sm:flex-col max-sm:items-stretch"}`}
+            className={`flex gap-x-6 gap-y-3 px-5 py-4 ${stacked ? "flex-col" : "items-center justify-between max-md:flex-col max-md:items-stretch"}`}
         >
             <div className="min-w-0">
                 <div className="flex items-baseline justify-between gap-3">
@@ -158,7 +158,7 @@ export function Segmented<T extends string>({
         <div
             role="radiogroup"
             aria-labelledby={labelledBy}
-            className="border-line bg-paper grid min-w-[300px] auto-cols-fr grid-flow-col gap-0.5 rounded-xl border p-1 max-sm:min-w-0"
+            className="border-line bg-paper grid min-w-[300px] auto-cols-fr grid-flow-col gap-0.5 rounded-xl border p-1 max-md:min-w-0"
             onKeyDown={(e) => {
                 const step =
                     e.key === "ArrowRight" || e.key === "ArrowDown"

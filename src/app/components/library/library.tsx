@@ -391,7 +391,7 @@ export default function Library({
                                         setParams({ q: null });
                                     }
                                 }}
-                                className="placeholder:text-muted min-h-12! rounded-xl! border-transparent! bg-[color-mix(in_srgb,var(--text)_4%,var(--bg))]! pr-20! pl-12! text-[14.5px]! shadow-none! focus:border-[var(--control-focus)]! focus:bg-[var(--surface)]! max-xl:text-[16px]! max-sm:pr-12! [&::-webkit-search-cancel-button]:hidden"
+                                className="placeholder:text-muted min-h-12! rounded-xl! border-transparent! bg-[color-mix(in_srgb,var(--text)_4%,var(--bg))]! pr-20! pl-12! text-[14.5px]! shadow-none! focus:border-[var(--control-focus)]! focus:bg-[var(--surface)]! max-lg:text-[16px]! max-md:pr-12! [&::-webkit-search-cancel-button]:hidden"
                             />
                             {input ? (
                                 <button
@@ -409,7 +409,7 @@ export default function Library({
                             ) : (
                                 <kbd
                                     aria-hidden="true"
-                                    className="border-line text-muted pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 rounded-md border bg-[var(--surface)] px-2 py-0.5 font-sans text-[11.5px] max-sm:hidden"
+                                    className="border-line text-muted pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 rounded-md border bg-[var(--surface)] px-2 py-0.5 font-sans text-[11.5px] max-md:hidden"
                                 >
                                     Ctrl K
                                 </kbd>
@@ -417,21 +417,18 @@ export default function Library({
                         </div>
                     }
                 />
-                <div className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(260px,330px)_minmax(0,1fr)] max-[1279px]:grid-cols-1 max-[1279px]:content-start">
-                    <aside className="border-line flex min-w-0 flex-col gap-8 self-stretch border-r px-8 pt-9 pb-10 max-[1279px]:gap-4 max-[1279px]:border-r-0 max-[1279px]:border-b max-[1279px]:px-6 max-[1279px]:pt-5 max-[1279px]:pb-5 max-sm:px-4 max-sm:pt-4 max-sm:pb-4 min-[1024px]:max-xl:flex-row min-[1024px]:max-xl:items-center">
+                <div className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(260px,330px)_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:content-start">
+                    <aside className="border-line flex min-w-0 flex-col gap-8 self-stretch border-r px-8 pt-9 pb-10 max-lg:gap-4 max-lg:border-r-0 max-lg:border-b max-lg:px-6 max-lg:pt-5 max-lg:pb-5 max-md:px-4 max-md:pt-4 max-md:pb-4">
                         <Button
-                            className={`${PRIMARY_BUTTON} h-[52px]! w-full! gap-2.5! rounded-xl! text-[15px]! font-semibold [box-shadow:0_10px_22px_-14px_color-mix(in_srgb,var(--accent)_80%,transparent)] max-[1279px]:h-11! max-[1279px]:w-auto! max-[1279px]:self-start max-sm:w-full! min-[1024px]:max-xl:order-last min-[1024px]:max-xl:shrink-0`}
+                            className={`${PRIMARY_BUTTON} h-[52px]! w-full! gap-2.5! rounded-xl! text-[15px]! font-semibold [box-shadow:0_10px_22px_-14px_color-mix(in_srgb,var(--accent)_80%,transparent)] max-lg:h-11! max-lg:w-auto! max-lg:self-start max-md:w-full!`}
                             icon={creating ? LoaderCircle : Plus}
                             onClick={() => void newDocument()}
                             disabled={creating}
                         >
                             New document
                         </Button>
-                        <nav
-                            aria-label="Library"
-                            className="min-w-0 min-[1024px]:max-xl:flex-1"
-                        >
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1279px]:grid max-[1279px]:max-w-[440px] max-[1279px]:grid-cols-2 max-[1279px]:gap-2 max-sm:max-w-none max-sm:[scrollbar-width:none] max-sm:gap-1.5 max-sm:[&::-webkit-scrollbar]:hidden">
+                        <nav aria-label="Library" className="min-w-0">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-lg:grid max-lg:max-w-[440px] max-lg:grid-cols-2 max-lg:gap-2 max-md:max-w-none max-md:[scrollbar-width:none] max-md:gap-1.5 max-md:[&::-webkit-scrollbar]:hidden">
                                 {FILTERS.map(([value, label, Icon]) => {
                                     const current = filter === value;
                                     const count = counts.data?.[value];
@@ -449,7 +446,7 @@ export default function Library({
                                                                 : value,
                                                     })
                                                 }
-                                                className={`h-[50px]! min-h-[50px]! w-full! justify-start! gap-3.5! rounded-xl! border-0! px-4! text-[15px]! shadow-none! max-[1279px]:h-11! max-[1279px]:min-h-11! max-[1279px]:gap-2! max-[1279px]:px-3! max-[1279px]:text-[13.5px]! max-sm:px-2.5! max-sm:text-[13px]! ${
+                                                className={`h-[50px]! min-h-[50px]! w-full! justify-start! gap-3.5! rounded-xl! border-0! px-4! text-[15px]! shadow-none! max-lg:h-11! max-lg:min-h-11! max-lg:gap-2! max-lg:px-3! max-lg:text-[13.5px]! max-md:px-2.5! max-md:text-[13px]! ${
                                                     current
                                                         ? "bg-tint! text-ink! font-semibold"
                                                         : "text-muted! hover:text-ink! bg-transparent! hover:bg-[var(--control-hover)]!"
@@ -481,22 +478,22 @@ export default function Library({
                                     );
                                 })}
                                 {/* Phones and tablets: a button that opens the week in a bottom sheet. */}
-                                <li className="shrink-0 self-start min-[1280px]:hidden">
+                                <li className="shrink-0 self-start lg:hidden">
                                     <WritingWeekPill />
                                 </li>
                             </ul>
                         </nav>
-                        <div className="border-line border-t pt-7 max-[1279px]:hidden">
+                        <div className="border-line border-t pt-7 max-lg:hidden">
                             <WritingWeek />
                         </div>
                     </aside>
 
-                    <main className="min-w-0 px-10 pt-11 pb-24 max-[1279px]:px-6 max-[1279px]:pt-8 max-sm:px-4 max-sm:pt-6">
+                    <main className="min-w-0 px-10 pt-11 pb-24 max-lg:px-6 max-lg:pt-8 max-md:px-4 max-md:pt-6">
                         <LegacyImport onImported={refresh} />
                         <WelcomeBack />
-                        <div className="mb-9 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 max-sm:mb-6">
+                        <div className="mb-9 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 max-md:mb-6">
                             <div className="min-w-0">
-                                <h1 className="m-0 font-serif text-[52px] leading-[1.05] font-normal tracking-[-0.03em] max-xl:text-[44px] max-sm:text-[38px]">
+                                <h1 className="m-0 font-serif text-[52px] leading-[1.05] font-normal tracking-[-0.03em] max-lg:text-[44px] max-md:text-[38px]">
                                     {searching
                                         ? "Search results"
                                         : filter === "all"
@@ -509,7 +506,7 @@ export default function Library({
                                 </h1>
                                 {searching && (
                                     <p
-                                        className="text-muted m-0 mt-2 text-[16px] max-sm:text-[14px] max-sm:leading-relaxed"
+                                        className="text-muted m-0 mt-2 text-[16px] max-md:text-[14px] max-md:leading-relaxed"
                                         role="status"
                                         aria-live="polite"
                                     >
@@ -694,7 +691,7 @@ export default function Library({
                             (view === "cards" ? (
                                 <ul
                                     aria-label="Documents"
-                                    className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 p-0 max-sm:grid-cols-2 max-sm:gap-3"
+                                    className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 p-0 max-md:grid-cols-2 max-md:gap-3"
                                 >
                                     {items.map((doc) => (
                                         <li
@@ -711,7 +708,7 @@ export default function Library({
                                                         aria-hidden="true"
                                                         className="border-line relative block aspect-[5/4] shrink-0 overflow-hidden border-b"
                                                     >
-                                                        <span className="absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,#000_65%,transparent)] px-4 pt-3.5 font-serif text-[9px] leading-[1.55] break-words text-[color-mix(in_srgb,var(--text)_72%,transparent)] max-sm:px-3 max-sm:pt-3 sm:text-[10px]">
+                                                        <span className="absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,#000_65%,transparent)] px-4 pt-3.5 font-serif text-[9px] leading-[1.55] break-words text-[color-mix(in_srgb,var(--text)_72%,transparent)] max-md:px-3 max-md:pt-3 md:text-[10px]">
                                                             {doc.excerpt && (
                                                                 <Highlighted
                                                                     text={
@@ -724,7 +721,7 @@ export default function Library({
                                                             )}
                                                         </span>
                                                     </span>
-                                                    <span className="flex min-w-0 flex-col gap-0.5 py-3 pr-12 pl-4 max-sm:pr-10 max-sm:pl-3">
+                                                    <span className="flex min-w-0 flex-col gap-0.5 py-3 pr-12 pl-4 max-md:pr-10 max-md:pl-3">
                                                         <span className="flex min-w-0 items-center gap-2">
                                                             <DocIcon />
                                                             <span className="truncate font-serif text-[16px] leading-6">
@@ -780,7 +777,7 @@ export default function Library({
                                 <div>
                                     <div
                                         aria-hidden="true"
-                                        className="border-line text-muted grid grid-cols-[28px_minmax(0,1fr)_minmax(120px,200px)_40px] gap-6 border-b px-3 pb-2.5 text-[12.5px] font-medium max-sm:hidden"
+                                        className="border-line text-muted grid grid-cols-[28px_minmax(0,1fr)_minmax(120px,200px)_40px] gap-6 border-b px-3 pb-2.5 text-[12.5px] font-medium max-md:hidden"
                                     >
                                         <span />
                                         <span>Title</span>
@@ -788,7 +785,7 @@ export default function Library({
                                     </div>
                                     <ul
                                         aria-label="Documents"
-                                        className="border-line m-0 list-none p-0 max-sm:border-t"
+                                        className="border-line m-0 list-none p-0 max-md:border-t"
                                     >
                                         {items.map((doc) => (
                                             <li
@@ -798,9 +795,9 @@ export default function Library({
                                                 <TitleTooltip title={doc.title}>
                                                     <Link
                                                         href={`/d/${doc.id}`}
-                                                        className={`text-ink grid min-h-14 grid-cols-[28px_minmax(0,1fr)_minmax(120px,200px)] items-center gap-x-6 py-2 pr-[76px] pl-3 no-underline transition-colors hover:bg-[var(--control-hover)] max-sm:grid-cols-[28px_minmax(0,1fr)] max-sm:gap-x-3 max-sm:gap-y-0.5 max-sm:py-3 max-sm:pr-14 max-sm:pl-2 ${FOCUS_RING}`}
+                                                        className={`text-ink grid min-h-14 grid-cols-[28px_minmax(0,1fr)_minmax(120px,200px)] items-center gap-x-6 py-2 pr-[76px] pl-3 no-underline transition-colors hover:bg-[var(--control-hover)] max-md:grid-cols-[28px_minmax(0,1fr)] max-md:gap-x-3 max-md:gap-y-0.5 max-md:py-3 max-md:pr-14 max-md:pl-2 ${FOCUS_RING}`}
                                                     >
-                                                        <span className="flex justify-center max-sm:row-span-2">
+                                                        <span className="flex justify-center max-md:row-span-2">
                                                             <DocIcon
                                                                 size={20}
                                                             />
@@ -823,14 +820,14 @@ export default function Library({
                                                         </span>
                                                         <EditedTime
                                                             date={doc.updated}
-                                                            className="text-[13px] leading-5 max-sm:text-[12.5px]"
+                                                            className="text-[13px] leading-5 max-md:text-[12.5px]"
                                                         >
-                                                            <span className="sm:hidden">
+                                                            <span className="md:hidden">
                                                                 {formatEdited(
                                                                     doc.updated,
                                                                 )}
                                                             </span>
-                                                            <span className="max-sm:hidden">
+                                                            <span className="max-md:hidden">
                                                                 {editedDate(
                                                                     doc.updated,
                                                                 )}
@@ -838,7 +835,7 @@ export default function Library({
                                                         </EditedTime>
                                                     </Link>
                                                 </TitleTooltip>
-                                                <div className="absolute inset-y-0 right-3 flex items-center max-sm:right-1">
+                                                <div className="absolute inset-y-0 right-3 flex items-center max-md:right-1">
                                                     <ActionMenu
                                                         label={`Document actions: ${doc.title || "Untitled"}`}
                                                         menuLabel={`Actions for ${doc.title || "Untitled"}`}

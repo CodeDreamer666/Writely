@@ -112,7 +112,8 @@ export default function SettingsPage({
     const openSection = (value: Section) => {
         // From the narrow list, opening a section is a step the phone's back gesture should undo.
         const fromList =
-            section === null && window.matchMedia("(max-width: 860px)").matches;
+            section === null &&
+            window.matchMedia("(max-width: 767.98px)").matches;
         setSection(value);
         if (fromList) {
             pushedSection.current = true;
@@ -126,7 +127,7 @@ export default function SettingsPage({
     const pushedSection = useRef(false);
     const [narrow, setNarrow] = useState(false);
     useEffect(() => {
-        const query = window.matchMedia("(max-width: 860px)");
+        const query = window.matchMedia("(max-width: 767.98px)");
         const update = () => setNarrow(query.matches);
         update();
         query.addEventListener("change", update);
@@ -223,13 +224,13 @@ export default function SettingsPage({
                     }}
                 />
                 <main
-                    className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(240px,300px)_minmax(0,1fr)] max-[860px]:grid-cols-1 max-[860px]:content-start"
+                    className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(240px,300px)_minmax(0,1fr)] max-md:grid-cols-1 max-md:content-start"
                     aria-labelledby="settings-title"
                 >
                     {/* On narrow screens the sidebar becomes a list of sections, and a section opens in its own view. */}
                     <aside
-                        className={`border-line flex min-w-0 flex-col gap-6 self-stretch border-r px-6 pt-4 pb-10 max-[860px]:gap-3 max-[860px]:border-r-0 max-[860px]:pt-2 max-sm:px-4 ${
-                            section ? "max-[860px]:hidden" : ""
+                        className={`border-line flex min-w-0 flex-col gap-6 self-stretch border-r px-6 pt-4 pb-10 max-md:gap-3 max-md:border-r-0 max-md:px-4 max-md:pt-2 ${
+                            section ? "max-md:hidden" : ""
                         }`}
                     >
                         <h1
@@ -241,13 +242,13 @@ export default function SettingsPage({
                             Settings
                         </h1>
                         <nav aria-label="Settings sections" className="min-w-0">
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[860px]:gap-0">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-md:gap-0">
                                 {SECTIONS.map(([value, label, Icon]) => {
                                     const current = shown === value;
                                     return (
                                         <li
                                             key={value}
-                                            className="border-line max-[860px]:border-b max-[860px]:last:border-b-0"
+                                            className="border-line max-md:border-b max-md:last:border-b-0"
                                         >
                                             <button
                                                 aria-current={
@@ -256,13 +257,13 @@ export default function SettingsPage({
                                                 onClick={() =>
                                                     openSection(value)
                                                 }
-                                                className={`max-[860px]:text-ink! h-11! min-h-11! w-full! justify-start! gap-3! rounded-xl! border-0! px-3.5! text-[14px]! shadow-none! max-[860px]:h-14! max-[860px]:min-h-14! max-[860px]:rounded-none! max-[860px]:bg-transparent! max-[860px]:px-1! max-[860px]:text-[15px]! max-[860px]:font-normal! ${
+                                                className={`max-md:text-ink! h-11! min-h-11! w-full! justify-start! gap-3! rounded-xl! border-0! px-3.5! text-[14px]! shadow-none! max-md:h-14! max-md:min-h-14! max-md:rounded-none! max-md:bg-transparent! max-md:px-1! max-md:text-[15px]! max-md:font-normal! ${
                                                     current
                                                         ? "bg-tint! text-ink! font-semibold"
                                                         : "text-muted! hover:text-ink! bg-transparent! hover:bg-[var(--control-hover)]!"
                                                 }`}
                                             >
-                                                <span className="max-[860px]:bg-surface max-[860px]:border-line contents max-[860px]:flex max-[860px]:size-9 max-[860px]:shrink-0 max-[860px]:items-center max-[860px]:justify-center max-[860px]:rounded-xl max-[860px]:border">
+                                                <span className="max-md:bg-surface max-md:border-line contents max-md:flex max-md:size-9 max-md:shrink-0 max-md:items-center max-md:justify-center max-md:rounded-xl max-md:border">
                                                     <Icon
                                                         size={18}
                                                         strokeWidth={1.6}
@@ -270,7 +271,7 @@ export default function SettingsPage({
                                                         className={
                                                             current
                                                                 ? "text-ink shrink-0"
-                                                                : "text-muted max-[860px]:text-ink shrink-0"
+                                                                : "text-muted max-md:text-ink shrink-0"
                                                         }
                                                     />
                                                 </span>
@@ -281,7 +282,7 @@ export default function SettingsPage({
                                                     size={17}
                                                     strokeWidth={1.6}
                                                     aria-hidden="true"
-                                                    className="text-muted hidden shrink-0 max-[860px]:block"
+                                                    className="text-muted hidden shrink-0 max-md:block"
                                                 />
                                             </button>
                                         </li>
@@ -292,8 +293,8 @@ export default function SettingsPage({
                     </aside>
 
                     <div
-                        className={`flex w-full max-w-[820px] min-w-0 flex-col px-12 pt-4 pb-24 max-[1100px]:px-8 max-[860px]:px-6 max-[860px]:pt-2 max-sm:px-4 ${
-                            section ? "" : "max-[860px]:hidden"
+                        className={`flex w-full max-w-[820px] min-w-0 flex-col px-12 pt-4 pb-24 max-lg:px-8 max-md:px-4 max-md:pt-2 ${
+                            section ? "" : "max-md:hidden"
                         }`}
                     >
                         {shown === "appearance" && (
@@ -339,7 +340,7 @@ export default function SettingsPage({
                                 hint="Universal goals appear in every draft, in this order. Completion stays with each draft."
                                 action={
                                     <button
-                                        className="border-line! h-9! min-h-9! gap-1.5! rounded-lg! border! px-3! text-[12.5px]! max-sm:w-full!"
+                                        className="border-line! h-9! min-h-9! gap-1.5! rounded-lg! border! px-3! text-[12.5px]! max-md:w-full!"
                                         onClick={() => {
                                             setGoalText("");
                                             setGoalDialog({ goal: null });

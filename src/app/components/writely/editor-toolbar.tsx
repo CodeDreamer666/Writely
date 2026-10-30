@@ -50,7 +50,7 @@ import {
 } from "./long-press-tooltip";
 
 /** Touch devices up to tablet size get a toolbar docked above the keyboard. */
-const MOBILE_TOOLBAR = "(max-width: 1024px) and (pointer: coarse)";
+const MOBILE_TOOLBAR = "(max-width: 1023.98px) and (pointer: coarse)";
 const subscribeMobile = (notify: () => void) => {
     const media = window.matchMedia(MOBILE_TOOLBAR);
     media.addEventListener("change", notify);
@@ -72,7 +72,7 @@ export function useMobileToolbar() {
  * Effect: Changes the size and pressed colour of every formatting button.
  */
 const FORMAT_BUTTON =
-    "format-button toolbar-control [.editor-toolbar-shell_&]:inline-flex [.editor-toolbar-shell_&]:[height:32px] [.editor-toolbar-shell_&]:[min-height:32px] [.editor-toolbar-shell_&]:[width:32px] [.editor-toolbar-shell_&]:[min-width:32px] [.editor-toolbar-shell_&]:items-center [.editor-toolbar-shell_&]:justify-center [.editor-toolbar-shell_&]:[border-radius:5px] [.editor-toolbar-shell_&]:[padding:0] [.editor-toolbar-shell_&]:[color:var(--muted)] [.editor-toolbar-shell_&]:[box-shadow:none] [.editor-toolbar-shell_&]:[background:transparent] [.editor-toolbar-shell_&]:[border:0] [.editor-toolbar-shell_&[aria-expanded='true']]:[color:var(--accent)] [.editor-toolbar-shell_&[aria-expanded='true']]:[background:var(--tint)] [.editor-toolbar-shell_&[aria-pressed='true']]:[color:var(--accent)] [.editor-toolbar-shell_&[aria-pressed='true']]:[background:var(--tint)] [@media(width_<=_760px)]:[.editor-toolbar-shell_&]:[min-height:36px] [@media(width_<=_760px)]:[.editor-toolbar-shell_&]:[width:34px] [@media(width_<=_760px)]:[.editor-toolbar-shell_&]:[min-width:34px]";
+    "format-button toolbar-control [.editor-toolbar-shell_&]:inline-flex [.editor-toolbar-shell_&]:[height:32px] [.editor-toolbar-shell_&]:[min-height:32px] [.editor-toolbar-shell_&]:[width:32px] [.editor-toolbar-shell_&]:[min-width:32px] [.editor-toolbar-shell_&]:items-center [.editor-toolbar-shell_&]:justify-center [.editor-toolbar-shell_&]:[border-radius:5px] [.editor-toolbar-shell_&]:[padding:0] [.editor-toolbar-shell_&]:[color:var(--muted)] [.editor-toolbar-shell_&]:[box-shadow:none] [.editor-toolbar-shell_&]:[background:transparent] [.editor-toolbar-shell_&]:[border:0] [.editor-toolbar-shell_&[aria-expanded='true']]:[color:var(--accent)] [.editor-toolbar-shell_&[aria-expanded='true']]:[background:var(--tint)] [.editor-toolbar-shell_&[aria-pressed='true']]:[color:var(--accent)] [.editor-toolbar-shell_&[aria-pressed='true']]:[background:var(--tint)] max-md:[.editor-toolbar-shell_&]:[min-height:36px] max-md:[.editor-toolbar-shell_&]:[width:34px] max-md:[.editor-toolbar-shell_&]:[min-width:34px]";
 /**
  * What: The look of the toolbar's drop-down menus (paragraph style and
  * "More formatting").
@@ -596,8 +596,8 @@ export default function EditorToolbar({
         <div
             className={
                 mobile
-                    ? "editor-toolbar-shell relative [z-index:13] flex w-full [touch-action:pan-x] [scrollbar-width:none] flex-nowrap items-center justify-start [gap:4px_8px] [overflow-x:auto] [overscroll-behavior-x:contain] h-12 [padding:0_0_0_6px] [color:var(--muted)] select-none [-webkit-touch-callout:none] [&::-webkit-scrollbar]:hidden"
-                    : "editor-toolbar-shell relative [z-index:13] flex [max-width:calc(100vw_-_18px)] [flex:0_0_auto] flex-wrap items-center justify-center [gap:4px_8px] [padding:4px_6px] [color:var(--muted)] [@media(width_<=_760px)]:[z-index:12]"
+                    ? "editor-toolbar-shell relative [z-index:13] flex h-12 w-full [touch-action:pan-x] [scrollbar-width:none] flex-nowrap items-center justify-start [gap:4px_8px] [overflow-x:auto] [overscroll-behavior-x:contain] [padding:0_0_0_6px] [color:var(--muted)] select-none [-webkit-touch-callout:none] [&::-webkit-scrollbar]:hidden"
+                    : "editor-toolbar-shell relative [z-index:13] flex [max-width:calc(100vw_-_18px)] [flex:0_0_auto] flex-wrap items-center justify-center [gap:4px_8px] [padding:4px_6px] [color:var(--muted)] max-md:[z-index:12]"
             }
             ref={(node) => {
                 root.current = node;
@@ -623,7 +623,7 @@ export default function EditorToolbar({
                 </div>
             ) : (
                 <div
-                    className={`editor-formatting-toolbar flex items-center [gap:4px] [@media(width_<=_760px)]:[gap:4px_2px] ${mobile ? "[width:max-content] flex-nowrap [padding-right:6px] [&>*]:shrink-0" : "[max-width:100%] flex-wrap justify-center"}`}
+                    className={`editor-formatting-toolbar flex items-center [gap:4px] max-md:[gap:4px_2px] ${mobile ? "[width:max-content] flex-nowrap [padding-right:6px] [&>*]:shrink-0" : "[max-width:100%] flex-wrap justify-center"}`}
                     role="toolbar"
                     aria-label={label}
                 >
@@ -631,7 +631,7 @@ export default function EditorToolbar({
                         <PressButton
                             label="Text style"
                             buttonRef={paragraphTrigger}
-                            className="paragraph-select toolbar-control text-muted! hover:text-ink! aria-expanded:bg-tint! aria-expanded:text-accent! inline-flex! h-8! min-h-8! w-[124px]! items-center! justify-between! gap-1.5! rounded-[5px]! border-0! bg-transparent! px-2! text-[12px]! shadow-none! hover:bg-[var(--control-hover)]! max-[760px]:w-[112px]!"
+                            className="paragraph-select toolbar-control text-muted! hover:text-ink! aria-expanded:bg-tint! aria-expanded:text-accent! inline-flex! h-8! min-h-8! w-[124px]! items-center! justify-between! gap-1.5! rounded-[5px]! border-0! bg-transparent! px-2! text-[12px]! shadow-none! hover:bg-[var(--control-hover)]! max-md:w-[112px]!"
                             aria-label="Text style"
                             aria-haspopup="menu"
                             aria-expanded={menu === "paragraph"}
@@ -700,7 +700,7 @@ export default function EditorToolbar({
                     </div>
                     <span
                         className={
-                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] max-md:[margin:0]"
                         }
                         role="separator"
                         aria-orientation="vertical"
@@ -737,7 +737,7 @@ export default function EditorToolbar({
                     </div>
                     <span
                         className={
-                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                            "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] max-md:[margin:0]"
                         }
                         role="separator"
                         aria-orientation="vertical"
@@ -771,7 +771,7 @@ export default function EditorToolbar({
                     {mobile ? (
                         <>
                             <span
-                                className="format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                                className="format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] max-md:[margin:0]"
                                 role="separator"
                                 aria-orientation="vertical"
                             />
@@ -851,7 +851,7 @@ export default function EditorToolbar({
                         <>
                             <span
                                 className={
-                                    "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] [@media(width_<=_760px)]:[margin:0]"
+                                    "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] max-md:[margin:0]"
                                 }
                                 role="separator"
                                 aria-orientation="vertical"

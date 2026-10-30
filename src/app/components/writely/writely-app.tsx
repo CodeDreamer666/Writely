@@ -590,48 +590,48 @@ export default function WritelyApp({
 
     const toolButtons = (
         <>
-                                    <DockButton
-                                        icon={Plus}
-                                        label="Add thought card"
-                                        onClick={addCard}
-                                    />
-                                    <DockButton
-                                        icon={StickyNote}
-                                        label="Thoughts"
-                                        text="Thoughts"
-                                        count={cardCount || undefined}
-                                        pressed={panel === "thoughts"}
-                                        onClick={() => toggle("thoughts")}
-                                    />
-                                    <DockButton
-                                        icon={ListChecks}
-                                        label="Revision checklist"
-                                        text="Checklist"
-                                        count={
-                                            allChecks.length
-                                                ? `${doneCount}/${allChecks.length}`
-                                                : undefined
-                                        }
-                                        pressed={panel === "checklist"}
-                                        onClick={() => toggle("checklist")}
-                                    />
-                                    <DockButton
-                                        icon={History}
-                                        label="Saved drafts"
-                                        text="Drafts"
-                                        count={doc.drafts.length || undefined}
-                                        pressed={panel === "drafts"}
-                                        onClick={() => toggle("drafts")}
-                                    />
-                                    <DockDivider />
-                                    <DockButton
-                                        icon={ChartNoAxesColumnIncreasing}
-                                        label="Writing statistics"
-                                        text={`${statistics.words.toLocaleString()} ${statistics.words === 1 ? "word" : "words"}`}
-                                        pressed={panel === "stats"}
-                                        onClick={() => toggle("stats")}
-                                        className="font-normal! tabular-nums"
-                                    />
+            <DockButton
+                icon={Plus}
+                label="Add thought card"
+                onClick={addCard}
+            />
+            <DockButton
+                icon={StickyNote}
+                label="Thoughts"
+                text="Thoughts"
+                count={cardCount || undefined}
+                pressed={panel === "thoughts"}
+                onClick={() => toggle("thoughts")}
+            />
+            <DockButton
+                icon={ListChecks}
+                label="Revision checklist"
+                text="Checklist"
+                count={
+                    allChecks.length
+                        ? `${doneCount}/${allChecks.length}`
+                        : undefined
+                }
+                pressed={panel === "checklist"}
+                onClick={() => toggle("checklist")}
+            />
+            <DockButton
+                icon={History}
+                label="Saved drafts"
+                text="Drafts"
+                count={doc.drafts.length || undefined}
+                pressed={panel === "drafts"}
+                onClick={() => toggle("drafts")}
+            />
+            <DockDivider />
+            <DockButton
+                icon={ChartNoAxesColumnIncreasing}
+                label="Writing statistics"
+                text={`${statistics.words.toLocaleString()} ${statistics.words === 1 ? "word" : "words"}`}
+                pressed={panel === "stats"}
+                onClick={() => toggle("stats")}
+                className="font-normal! tabular-nums"
+            />
         </>
     );
     return (
@@ -659,7 +659,7 @@ export default function WritelyApp({
                     />
                     <div className="workspace-shell relative flex min-h-0 flex-1">
                         <main
-                            className={`workspace relative min-w-0 flex-1 overflow-auto [@media(pointer:coarse)]:[.focus-mode_&]:mt-[10dvh] [scroll-behavior:auto] [overflow-anchor:none] [&:has(.annotation-layer)]:overflow-x-hidden [.focus-mode_&_.annotation-layer]:invisible ${comparison ? "comparison-workspace overflow-hidden" : ""}`}
+                            className={`workspace relative min-w-0 flex-1 overflow-auto [scroll-behavior:auto] [overflow-anchor:none] [&:has(.annotation-layer)]:overflow-x-hidden [.focus-mode_&_.annotation-layer]:invisible [@media(pointer:coarse)]:[.focus-mode_&]:mt-[10dvh] ${comparison ? "comparison-workspace overflow-hidden" : ""}`}
                             ref={workspace}
                         >
                             {comparison ? (
@@ -674,7 +674,7 @@ export default function WritelyApp({
                                     }}
                                 />
                             ) : (
-                                <article className="paper relative mx-auto w-[calc(100%-384px)] max-w-[var(--editor-width)] pt-14 pb-[calc(48px+var(--flow-bottom-space,50vh))] max-[1119px]:w-[calc(100%-128px)] max-[1000px]:w-[calc(100%-96px)] max-[760px]:w-[calc(100%-40px)] max-[760px]:pt-8 [&:has(.blank-start)_.tiptap]:[min-height:0] min-[761px]:[.focus-mode_&]:w-[calc(100%-96px)] min-[761px]:[.focus-mode_&]:pt-[12vh] [.focus-mode_&_.card-text-highlight]:bg-transparent! [.focus-mode_&_:is(.blank-start,.endmark)]:hidden">
+                                <article className="paper relative mx-auto w-[calc(100%-384px)] max-w-[var(--editor-width)] pt-14 pb-[calc(48px+var(--flow-bottom-space,50vh))] max-[1119px]:w-[calc(100%-128px)] max-lg:w-[calc(100%-96px)] max-md:w-[calc(100%-40px)] max-md:pt-8 [&:has(.blank-start)_.tiptap]:[min-height:0] md:[.focus-mode_&]:w-[calc(100%-96px)] md:[.focus-mode_&]:pt-[12vh] [.focus-mode_&_.card-text-highlight]:bg-transparent! [.focus-mode_&_:is(.blank-start,.endmark)]:hidden">
                                     {editor && (
                                         <EditorToolbar
                                             key={doc.id}
@@ -978,7 +978,9 @@ export default function WritelyApp({
                                                 <button
                                                     className={`check-start text-ink! min-w-0! flex-1 justify-start! gap-3! rounded-none! border-0! bg-transparent! px-3.5! py-3! text-left disabled:opacity-100! ${c.done ? "complete" : ""}`}
                                                     onClick={() => begin(c)}
-                                                    disabled={!!doc.session || c.done}
+                                                    disabled={
+                                                        !!doc.session || c.done
+                                                    }
                                                 >
                                                     <span
                                                         className={`check-box flex size-[18px] shrink-0 items-center justify-center rounded-[5px] border ${c.done ? "border-success bg-success text-[var(--on-accent)]" : active ? "border-accent" : "border-[color-mix(in_srgb,var(--muted)_55%,transparent)]"}`}
@@ -1268,12 +1270,12 @@ export default function WritelyApp({
                         (toolsOpen ? (
                             <nav
                                 ref={dock}
-                                className="workspace-tools dock border-line bg-surface text-ink fixed bottom-5 left-1/2 z-[19] flex w-max max-w-[calc(100vw-16px)] -translate-x-1/2 flex-col overflow-hidden rounded-[16px] border [box-shadow:0_12px_32px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent),0_1px_2px_color-mix(in_srgb,var(--shadow)_6%,transparent)] max-[720px]:bottom-3 [.focus-mode_&]:hidden"
+                                className="workspace-tools dock border-line bg-surface text-ink fixed bottom-5 left-1/2 z-[19] flex w-max max-w-[calc(100vw-16px)] -translate-x-1/2 flex-col overflow-hidden rounded-[16px] border [box-shadow:0_12px_32px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent),0_1px_2px_color-mix(in_srgb,var(--shadow)_6%,transparent)] max-md:bottom-3 [.focus-mode_&]:hidden"
                                 aria-label="Writing tools"
                             >
                                 {doc.session && (
                                     <div
-                                        className="revision-actions border-line bg-tint flex items-center gap-1.5 border-b py-1.5 pr-1.5 pl-4 max-[720px]:pl-3"
+                                        className="revision-actions border-line bg-tint flex items-center gap-1.5 border-b py-1.5 pr-1.5 pl-4 max-md:pl-3"
                                         role="group"
                                         aria-label="Revision actions"
                                     >
@@ -1331,7 +1333,7 @@ export default function WritelyApp({
                             </nav>
                         ) : (
                             <button
-                                className="canvas-tools-launcher border-line! bg-surface! text-muted! hover:text-ink! fixed! bottom-5 left-1/2 z-[19] h-10! min-h-10! -translate-x-1/2 gap-2! rounded-full! border! px-4! text-[12px]! [box-shadow:0_8px_24px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent)] max-[720px]:bottom-3 [.focus-mode_&]:hidden!"
+                                className="canvas-tools-launcher border-line! bg-surface! text-muted! hover:text-ink! fixed! bottom-5 left-1/2 z-[19] h-10! min-h-10! -translate-x-1/2 gap-2! rounded-full! border! px-4! text-[12px]! [box-shadow:0_8px_24px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent)] max-md:bottom-3 [.focus-mode_&]:hidden!"
                                 aria-label="Show writing tools"
                                 aria-expanded={false}
                                 aria-controls="writing-tool-items"

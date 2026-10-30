@@ -119,7 +119,7 @@ export function FeedbackSettings() {
                         : "Couldn’t send your feedback. Please try again."}
                 </p>
             )}
-            <div className="flex justify-end max-sm:[&>button]:w-full">
+            <div className="flex justify-end max-md:[&>button]:w-full">
                 <button
                     type="submit"
                     disabled={!ready}

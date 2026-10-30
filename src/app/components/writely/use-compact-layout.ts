@@ -4,9 +4,8 @@ import {
     useSyncExternalStore,
 } from "react";
 
-// Includes iPad Pro in landscape without changing laptop layouts at the same width.
-export const COMPACT_LAYOUT =
-    "(max-width: 1024px), (max-width: 1400px) and (pointer: coarse)";
+// Phones and tablets: below 1024px. From 1024px on, every device gets the desktop layout.
+export const COMPACT_LAYOUT = "(max-width: 1023.98px)";
 
 const subscribe = (notify: () => void) => {
     const media = window.matchMedia(COMPACT_LAYOUT);

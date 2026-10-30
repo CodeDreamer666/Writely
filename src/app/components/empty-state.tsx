@@ -111,12 +111,12 @@ export function EmptyState({
 }) {
     return (
         <div
-            className={`empty-state border-line flex [animation:appear_200ms_ease-out] flex-col items-center rounded-2xl border bg-[color-mix(in_srgb,var(--surface)_60%,transparent)] text-center motion-reduce:animate-none ${compact ? "px-4 py-6" : "px-6 py-12 max-sm:px-4 max-sm:py-8"} ${className}`}
+            className={`empty-state border-line flex [animation:appear_200ms_ease-out] flex-col items-center rounded-2xl border bg-[color-mix(in_srgb,var(--surface)_60%,transparent)] text-center motion-reduce:animate-none ${compact ? "px-4 py-6" : "px-6 py-12 max-md:px-4 max-md:py-8"} ${className}`}
         >
             <div
                 className={
                     inlineHeader
-                        ? `flex w-full items-center text-left ${compact ? "gap-3" : "gap-5 px-2 max-sm:gap-4 max-sm:px-0"}`
+                        ? `flex w-full items-center text-left ${compact ? "gap-3" : "gap-5 px-2 max-md:gap-4 max-md:px-0"}`
                         : "flex flex-col items-center"
                 }
             >

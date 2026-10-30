@@ -28,7 +28,7 @@ export function ShortcutList({ columns = 1 }: { columns?: 1 | 2 }) {
     const mac = useSyncExternalStore(noSubscription, isMac, () => false);
     return (
         <div
-            className={`grid gap-x-10 gap-y-6 ${columns === 2 ? "grid-cols-2 max-sm:grid-cols-1" : ""}`}
+            className={`grid gap-x-10 gap-y-6 ${columns === 2 ? "grid-cols-2 max-md:grid-cols-1" : ""}`}
         >
             {SHORTCUT_GROUPS.map((group) => (
                 <section key={group.title} aria-label={group.title}>

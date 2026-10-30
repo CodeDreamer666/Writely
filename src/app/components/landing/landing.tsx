@@ -231,9 +231,9 @@ function Hero() {
     return (
         <section
             aria-labelledby="hero-title"
-            className={`${WIDTH} grid items-center gap-14 pt-12 pb-6 max-sm:px-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:pt-20`}
+            className={`${WIDTH} grid items-center gap-14 pt-12 pb-6 max-md:px-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:pt-20`}
         >
-            <div className="max-w-[520px] max-sm:px-2">
+            <div className="max-w-[520px] max-md:px-2">
                 <h1
                     id="hero-title"
                     className="font-serif text-[clamp(44px,5.4vw,68px)] leading-[1.04] font-normal tracking-[-0.035em] text-balance"
@@ -245,7 +245,7 @@ function Hero() {
                     A quiet place to leave notes for later, rewrite when the
                     words come, and keep every version.
                 </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center">
                     <a href={SIGN_IN} className={PRIMARY}>
                         Start writing
                         <ArrowRight size={17} aria-hidden="true" />
@@ -853,7 +853,7 @@ const PROMISES = [
         ListChecks,
         "Polish one goal at a time",
         "field-sage",
-        "bottom-0 left-6 rotate-2 sm:right-12 sm:left-auto",
+        "bottom-0 left-6 rotate-2 md:right-12 md:left-auto",
     ],
 ] as const;
 
@@ -866,7 +866,7 @@ function FinalCta() {
             <div className="relative pt-[72px] pb-16">
                 <h2
                     id="cta-title"
-                    className="font-serif text-[32px] leading-[1.12] font-normal tracking-[-0.03em] text-balance sm:text-[36px]"
+                    className="font-serif text-[32px] leading-[1.12] font-normal tracking-[-0.03em] text-balance md:text-[36px]"
                 >
                     Begin anywhere.
                     <br />
@@ -879,7 +879,7 @@ function FinalCta() {
                     />
                 </h2>
                 <div className="mt-6 flex justify-start lg:justify-end">
-                    <a href={SIGN_IN} className={`${PRIMARY} w-full sm:w-auto`}>
+                    <a href={SIGN_IN} className={`${PRIMARY} w-full md:w-auto`}>
                         Start your first piece
                         <ArrowRight size={17} aria-hidden="true" />
                     </a>

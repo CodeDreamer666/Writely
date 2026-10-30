@@ -85,7 +85,7 @@ export function IconButton({
             <Tooltip.Trigger asChild>
                 <button
                     className={
-                        "icon-button [height:44px] [width:44px] shrink-0 [padding:12px] [&[aria-pressed='true']]:[color:var(--accent)] [&[aria-pressed='true']]:[background:var(--tint)] [.workspace-tools_&]:[min-width:44px] [.workspace-tools_&]:[font-size:inherit] [.workspace-tools_&]:[color:var(--text)] [.workspace-tools_&:active]:[border-top-color:var(--control-border)] [.workspace-tools_&:active]:[border-right-color:var(--control-border)] [.workspace-tools_&:active]:[border-bottom-color:var(--control-border)] [.workspace-tools_&:active]:[border-left-color:var(--control-border)] [.workspace-tools_&:active]:[color:var(--accent)] [.workspace-tools_&:active]:[background:var(--tint)] [.workspace-tools_&:hover]:[border-top-color:var(--control-border)] [.workspace-tools_&:hover]:[border-right-color:var(--control-border)] [.workspace-tools_&:hover]:[border-bottom-color:var(--control-border)] [.workspace-tools_&:hover]:[border-left-color:var(--control-border)] [.workspace-tools_&:hover]:[background:var(--control-hover)] [.workspace-tools_&[aria-pressed='true']]:[color:var(--accent)] [.workspace-tools_&[aria-pressed='true']]:[background:var(--tint)] [@media(width_<=_640px)]:[.workspace-tools_&]:[width:44px]"
+                        "icon-button [height:44px] [width:44px] shrink-0 [padding:12px] [&[aria-pressed='true']]:[color:var(--accent)] [&[aria-pressed='true']]:[background:var(--tint)] [.workspace-tools_&]:[min-width:44px] [.workspace-tools_&]:[font-size:inherit] [.workspace-tools_&]:[color:var(--text)] max-md:[.workspace-tools_&]:[width:44px] [.workspace-tools_&:active]:[border-top-color:var(--control-border)] [.workspace-tools_&:active]:[border-right-color:var(--control-border)] [.workspace-tools_&:active]:[border-bottom-color:var(--control-border)] [.workspace-tools_&:active]:[border-left-color:var(--control-border)] [.workspace-tools_&:active]:[color:var(--accent)] [.workspace-tools_&:active]:[background:var(--tint)] [.workspace-tools_&:hover]:[border-top-color:var(--control-border)] [.workspace-tools_&:hover]:[border-right-color:var(--control-border)] [.workspace-tools_&:hover]:[border-bottom-color:var(--control-border)] [.workspace-tools_&:hover]:[border-left-color:var(--control-border)] [.workspace-tools_&:hover]:[background:var(--control-hover)] [.workspace-tools_&[aria-pressed='true']]:[color:var(--accent)] [.workspace-tools_&[aria-pressed='true']]:[background:var(--tint)]"
                     }
                     aria-label={label}
                     {...props}
@@ -406,7 +406,7 @@ export function ActionMenu({
     const reveal = (last = false) => {
         setSubmenu(null);
         setEntered(false);
-        setSheet(window.matchMedia("(max-width: 640px)").matches);
+        setSheet(window.matchMedia("(max-width: 767.98px)").matches);
         const rect = trigger.current!.getBoundingClientRect();
         setMenuPosition({
             top: Math.max(

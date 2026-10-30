@@ -79,7 +79,7 @@ export const DIALOG_ACTIONS =
  * Effect: Changes how dark the backdrop is and the space kept around dialogs.
  */
 export const OVERLAY_CLASS =
-    "modal-overlay fixed [inset:0] [z-index:100] box-border grid [grid-template-columns:minmax(0,_1fr)] [place-items:center] justify-center overflow-hidden [padding:24px] [background:color-mix(in_srgb,_var(--shadow)_25%,_transparent)] [@media(width_<=_760px)]:[padding:16px]";
+    "modal-overlay fixed [inset:0] [z-index:100] box-border grid [grid-template-columns:minmax(0,_1fr)] [place-items:center] justify-center overflow-hidden [padding:24px] [background:color-mix(in_srgb,_var(--shadow)_25%,_transparent)] max-md:[padding:16px]";
 
 /**
  * What: The dialog box itself: its width, border, shadow, padding and

@@ -31,7 +31,7 @@ import { TOOLTIP_CLASS } from "~/config/ui";
  * On narrow screens the buttons show only their icon.
  */
 export const DOCK_BUTTON =
-    "dock-button relative h-11! min-h-11! min-w-11! gap-2! rounded-[10px]! border-0! px-3! text-[12.5px]! font-medium text-muted! whitespace-nowrap hover:bg-[color-mix(in_srgb,var(--text)_6%,transparent)]! hover:text-ink! aria-pressed:bg-tint! aria-pressed:text-accent! max-[720px]:px-0! max-[720px]:w-11!";
+    "dock-button relative h-11! min-h-11! min-w-11! gap-2! rounded-[10px]! border-0! px-3! text-[12.5px]! font-medium text-muted! whitespace-nowrap hover:bg-[color-mix(in_srgb,var(--text)_6%,transparent)]! hover:text-ink! aria-pressed:bg-tint! aria-pressed:text-accent! max-md:px-0! max-md:w-11!";
 
 export function DockButton({
     icon: Icon,
@@ -66,13 +66,11 @@ export function DockButton({
                     {...props}
                 >
                     <Icon size={17} strokeWidth={1.6} aria-hidden="true" />
-                    {text && (
-                        <span className="max-[720px]:sr-only">{text}</span>
-                    )}
+                    {text && <span className="max-md:sr-only">{text}</span>}
                     {count !== undefined && count !== "" && (
                         <span
                             aria-hidden="true"
-                            className="text-[11px] font-normal tabular-nums opacity-75 max-[720px]:absolute max-[720px]:top-1 max-[720px]:right-0.5 max-[720px]:min-w-4 max-[720px]:rounded-full max-[720px]:bg-[var(--bg)] max-[720px]:px-1 max-[720px]:text-[9.5px] max-[720px]:leading-4 max-[720px]:opacity-100"
+                            className="text-[11px] font-normal tabular-nums opacity-75 max-md:absolute max-md:top-1 max-md:right-0.5 max-md:min-w-4 max-md:rounded-full max-md:bg-[var(--bg)] max-md:px-1 max-md:text-[9.5px] max-md:leading-4 max-md:opacity-100"
                         >
                             {count}
                         </span>
@@ -97,7 +95,7 @@ export const DockDivider = () => (
     <span aria-hidden="true" className="bg-line mx-1 h-5 w-px shrink-0" />
 );
 
-const PHONE = "(max-width: 720px)";
+const PHONE = "(max-width: 767.98px)";
 const subscribePhone = (notify: () => void) => {
     const media = window.matchMedia(PHONE);
     media.addEventListener("change", notify);
@@ -230,7 +228,7 @@ export function Drawer({
                 aria-label="Close writing panel"
                 tabIndex={-1}
                 onClick={onClose}
-                className={`drawer-scrim fixed! inset-0 z-[17] m-0! h-full! w-full! cursor-default! rounded-none! border-0! bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! p-0! transition-opacity duration-300 hover:bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! max-[720px]:bg-[color-mix(in_srgb,var(--shadow)_18%,transparent)]! ${open && (!sheet || entered) ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                className={`drawer-scrim fixed! inset-0 z-[17] m-0! h-full! w-full! cursor-default! rounded-none! border-0! bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! p-0! transition-opacity duration-300 hover:bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! max-md:bg-[color-mix(in_srgb,var(--shadow)_18%,transparent)]! ${open && (!sheet || entered) ? "opacity-100" : "pointer-events-none opacity-0"}`}
             />
             <aside
                 ref={ref}
@@ -262,13 +260,13 @@ export function Drawer({
                           }
                         : undefined
                 }
-                className={`drawer border-line bg-surface text-ink fixed bottom-[calc(var(--dock-height,64px)+28px)] left-1/2 z-[18] flex max-h-[min(68dvh,620px)] w-[min(560px,calc(100vw-24px))] -translate-x-1/2 flex-col overflow-hidden rounded-[18px] border [box-shadow:0_24px_64px_-12px_color-mix(in_srgb,var(--shadow)_22%,transparent),0_2px_6px_color-mix(in_srgb,var(--shadow)_5%,transparent)] max-[720px]:bottom-0 max-[720px]:z-[21] max-[720px]:max-h-[82dvh] max-[720px]:w-full max-[720px]:rounded-t-[9px] max-[720px]:rounded-b-none max-[720px]:border-b-0 max-[720px]:pb-[env(safe-area-inset-bottom)] max-[720px]:[box-shadow:0_-8px_32px_rgba(0,0,0,0.18)] ${sheet ? "" : "transition-[opacity,translate,clip-path] duration-200 ease-out motion-reduce:transition-none"} ${open ? "translate-y-0 opacity-100 [clip-path:inset(0_0_0_0_round_18px)] max-[720px]:[clip-path:none]" : "pointer-events-none translate-y-3 opacity-0 [clip-path:inset(40%_0_0_0_round_18px)] max-[720px]:translate-y-0 max-[720px]:opacity-100 max-[720px]:[clip-path:none]"}`}
+                className={`drawer border-line bg-surface text-ink fixed bottom-[calc(var(--dock-height,64px)+28px)] left-1/2 z-[18] flex max-h-[min(68dvh,620px)] w-[min(560px,calc(100vw-24px))] -translate-x-1/2 flex-col overflow-hidden rounded-[18px] border [box-shadow:0_24px_64px_-12px_color-mix(in_srgb,var(--shadow)_22%,transparent),0_2px_6px_color-mix(in_srgb,var(--shadow)_5%,transparent)] max-md:bottom-0 max-md:z-[21] max-md:max-h-[82dvh] max-md:w-full max-md:rounded-t-[9px] max-md:rounded-b-none max-md:border-b-0 max-md:pb-[env(safe-area-inset-bottom)] max-md:[box-shadow:0_-8px_32px_rgba(0,0,0,0.18)] ${sheet ? "" : "transition-[opacity,translate,clip-path] duration-200 ease-out motion-reduce:transition-none"} ${open ? "translate-y-0 opacity-100 [clip-path:inset(0_0_0_0_round_18px)] max-md:[clip-path:none]" : "pointer-events-none translate-y-3 opacity-0 [clip-path:inset(40%_0_0_0_round_18px)] max-md:translate-y-0 max-md:opacity-100 max-md:[clip-path:none]"}`}
             >
                 <span
                     aria-hidden="true"
-                    className="bg-line mx-auto mt-2 hidden h-1 w-9 shrink-0 rounded-full max-[720px]:block"
+                    className="bg-line mx-auto mt-2 hidden h-1 w-9 shrink-0 rounded-full max-md:block"
                 />
-                <header className="flex shrink-0 items-center gap-2 py-3 pr-2 pl-5 max-[720px]:pt-2">
+                <header className="flex shrink-0 items-center gap-2 py-3 pr-2 pl-5 max-md:pt-2">
                     <h2 className="mr-auto text-[15px] font-semibold tracking-[-0.01em]">
                         {title}
                     </h2>
