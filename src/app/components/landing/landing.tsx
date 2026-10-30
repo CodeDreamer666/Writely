@@ -263,7 +263,7 @@ function Hero() {
                     A quiet place to leave notes for later, rewrite when the
                     words come, and keep every version.
                 </p>
-                <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:max-lg:justify-center">
+                <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-center lg:justify-start">
                     <a href={SIGN_IN} className={PRIMARY}>
                         Start writing
                         <ArrowRight size={17} aria-hidden="true" />
