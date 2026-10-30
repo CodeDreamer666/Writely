@@ -66,6 +66,7 @@ export function CompactCards({
                 title={connecting ? "Attach to a card" : "Cards"}
                 onClose={onClose}
                 id="compact-cards"
+                className="max-lg:w-full max-lg:max-w-[640px]"
             >
                 {connecting && (
                     <div className="text-muted mb-4 flex items-center gap-2 text-sm">

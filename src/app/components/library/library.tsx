@@ -366,7 +366,7 @@ export default function Library({
 
     return (
         <Tooltip.Provider delayDuration={450}>
-            <div className="library bg-paper text-ink min-h-dvh">
+            <div className="library bg-paper text-ink min-h-dvh max-lg:[&_input]:text-[16px]!">
                 <AppHeader
                     search={
                         <div role="search" className="relative">
@@ -418,9 +418,9 @@ export default function Library({
                     }
                 />
                 <div className="grid min-h-[calc(100dvh-76px)] grid-cols-[minmax(260px,330px)_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:content-start">
-                    <aside className="border-line flex min-w-0 flex-col gap-8 self-stretch border-r px-8 pt-9 pb-10 max-lg:gap-4 max-lg:border-r-0 max-lg:border-b max-lg:px-6 max-lg:pt-5 max-lg:pb-5 max-md:px-4 max-md:pt-4 max-md:pb-4">
+                    <aside className="border-line flex min-w-0 flex-col gap-8 self-stretch border-r px-8 pt-9 pb-10 max-lg:gap-0 max-lg:border-r-0 max-lg:px-6 max-lg:pt-4 max-lg:pb-0 max-md:px-4">
                         <Button
-                            className={`${PRIMARY_BUTTON} h-[52px]! w-full! gap-2.5! rounded-xl! text-[15px]! font-semibold [box-shadow:0_10px_22px_-14px_color-mix(in_srgb,var(--accent)_80%,transparent)] max-lg:h-11! max-lg:w-auto! max-lg:self-start max-md:w-full!`}
+                            className={`${PRIMARY_BUTTON} h-[52px]! w-full! gap-2.5! rounded-xl! text-[15px]! font-semibold [box-shadow:0_10px_22px_-14px_color-mix(in_srgb,var(--accent)_80%,transparent)] max-lg:fixed max-lg:right-[max(20px,env(safe-area-inset-right))] max-lg:bottom-[calc(24px+env(safe-area-inset-bottom))] max-lg:z-[14] max-lg:h-14! max-lg:w-auto! max-lg:rounded-[18px]! max-lg:px-5!`}
                             icon={creating ? LoaderCircle : Plus}
                             onClick={() => void newDocument()}
                             disabled={creating}
@@ -428,12 +428,15 @@ export default function Library({
                             New document
                         </Button>
                         <nav aria-label="Library" className="min-w-0">
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-lg:grid max-lg:max-w-[440px] max-lg:grid-cols-2 max-lg:gap-2 max-md:max-w-none max-md:[scrollbar-width:none] max-md:gap-1.5 max-md:[&::-webkit-scrollbar]:hidden">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-lg:relative max-lg:max-w-[440px] max-lg:flex-row max-lg:gap-2 max-lg:overflow-x-auto max-md:max-w-none max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden">
                                 {FILTERS.map(([value, label, Icon]) => {
                                     const current = filter === value;
                                     const count = counts.data?.[value];
                                     return (
-                                        <li key={value} className="shrink-0">
+                                        <li
+                                            key={value}
+                                            className="shrink-0 max-lg:flex-none"
+                                        >
                                             <button
                                                 aria-current={
                                                     current ? "page" : undefined
@@ -488,12 +491,12 @@ export default function Library({
                         </div>
                     </aside>
 
-                    <main className="min-w-0 px-10 pt-11 pb-24 max-lg:px-6 max-lg:pt-8 max-md:px-4 max-md:pt-6">
+                    <main className="min-w-0 px-10 pt-11 pb-24 max-lg:px-6 max-lg:pt-6 max-md:px-4">
                         <LegacyImport onImported={refresh} />
                         <WelcomeBack />
                         <div className="mb-9 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 max-md:mb-6">
                             <div className="min-w-0">
-                                <h1 className="m-0 font-serif text-[52px] leading-[1.05] font-normal tracking-[-0.03em] max-lg:text-[44px] max-md:text-[38px]">
+                                <h1 className="m-0 font-serif text-[52px] leading-[1.05] font-normal tracking-[-0.03em] max-lg:text-[32px] max-md:text-[28px]">
                                     {searching
                                         ? "Search results"
                                         : filter === "all"
@@ -756,7 +759,7 @@ export default function Library({
                                                     menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                     // Wide enough for "Export as Word (.docx)" on one line.
                                                     menuWidth={208}
-                                                    triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
+                                                    triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! max-lg:size-11! max-lg:min-h-11! max-lg:min-w-11! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                     items={menuFor(doc)}
                                                     sheetTitle={
                                                         doc.title ||
@@ -841,7 +844,7 @@ export default function Library({
                                                         menuLabel={`Actions for ${doc.title || "Untitled"}`}
                                                         // Wide enough for "Export as Word (.docx)" on one line.
                                                         menuWidth={208}
-                                                        triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
+                                                        triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! max-lg:size-11! max-lg:min-h-11! max-lg:min-w-11! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                         items={menuFor(doc)}
                                                         sheetTitle={
                                                             doc.title ||

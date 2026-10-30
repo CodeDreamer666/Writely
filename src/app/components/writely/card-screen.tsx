@@ -114,7 +114,7 @@ export function CardScreen({
                     role: "textbox",
                     "aria-label": "Card text",
                     "aria-multiline": "true",
-                    class: "card-screen-text min-h-full px-5 pt-3 pb-[max(24px,env(safe-area-inset-bottom))] font-serif text-[18px] leading-[1.6] outline-none [overflow-wrap:anywhere]",
+                    class: "card-screen-text min-h-full [&_p.is-editor-empty:first-child]:before:pointer-events-none [&_p.is-editor-empty:first-child]:before:float-left [&_p.is-editor-empty:first-child]:before:h-0 [&_p.is-editor-empty:first-child]:before:text-muted [&_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] px-5 pt-3 pb-[max(24px,env(safe-area-inset-bottom))] font-serif text-[18px] leading-[1.6] outline-none [overflow-wrap:anywhere]",
                 },
                 // Keep the caret clear of the edges while typing near them.
                 scrollMargin: 32,

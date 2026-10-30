@@ -31,7 +31,7 @@ export function AppHeader({
         <header
             className={
                 search
-                    ? "border-line grid h-[76px] grid-cols-[minmax(140px,1fr)_minmax(0,780px)_minmax(44px,1fr)] items-center gap-6 border-b px-8 max-lg:gap-4 max-lg:px-6 max-md:h-auto max-md:grid-cols-[1fr_auto] max-md:gap-x-3 max-md:gap-y-2 max-md:px-4 max-md:py-3 [&>.header-search]:max-md:col-span-2 [&>.header-search]:max-md:row-start-2"
+                    ? "border-line grid h-[76px] grid-cols-[minmax(140px,1fr)_minmax(0,780px)_minmax(44px,1fr)] items-center gap-6 border-b px-8 max-lg:gap-4 max-lg:px-6 max-md:h-auto max-md:grid-cols-[1fr_auto] max-md:gap-x-3 max-md:gap-y-2 max-md:px-4 max-md:py-3 md:max-lg:grid-cols-[auto_minmax(0,1fr)_auto] [&>.header-search]:max-md:col-span-2 [&>.header-search]:max-md:row-start-2"
                     : "flex h-16 items-center gap-3 px-6 max-md:px-4"
             }
         >

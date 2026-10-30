@@ -4,6 +4,21 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/*
+ * `dark:` follows Writely's theme setting: the dark theme, or the system's dark mode while the
+ * setting is "system". Without this it would only follow the system.
+ */
+@custom-variant dark {
+    &:where([data-theme="dark"] *) {
+        @slot;
+    }
+    @media (prefers-color-scheme: dark) {
+        &:where(:root:not([data-theme="light"]) *) {
+            @slot;
+        }
+    }
+}
+
 @theme inline {
     --color-paper: var(--bg);
     --color-surface: var(--surface);
@@ -175,270 +190,9 @@ body {
     pointer-events: none !important;
 }
 
-/*
- * The landing page. The thought-card pastels colour its drawn thought cards and fields; dark mode
- * blends each pastel into the dark surface the same way thought cards do.
- */
-.landing {
-    --landing-mark: color-mix(in srgb, #fbefb5 85%, transparent);
-}
-.landing-field {
-    --field-text: #1f1d1a;
-    --field-soft: color-mix(in srgb, #1f1d1a 80%, var(--field));
-}
-.field-sky {
-    --field: #d9e6f2;
-}
-.field-butter {
-    --field: #fbefb5;
-}
-.field-sage {
-    --field: #ddebdd;
-}
-:root[data-theme="dark"] .landing {
-    --landing-mark: color-mix(in srgb, #fbefb5 28%, transparent);
-}
-:root[data-theme="dark"] .landing-field {
-    --field: color-mix(in srgb, var(--field-tone) 16%, var(--bg));
-    --field-text: var(--text);
-    --field-soft: var(--muted);
-}
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .landing {
-        --landing-mark: color-mix(in srgb, #fbefb5 28%, transparent);
-    }
-    :root:not([data-theme="light"]) .landing-field {
-        --field: color-mix(in srgb, var(--field-tone) 16%, var(--bg));
-        --field-text: var(--text);
-        --field-soft: var(--muted);
-    }
-}
-.field-sky {
-    --field-tone: #d9e6f2;
-}
-.field-butter {
-    --field-tone: #fbefb5;
-}
-.field-sage {
-    --field-tone: #ddebdd;
-}
-/* Sign-in: the sage highlights on the drawn revision above the form, blended into the page in dark mode. */
-.auth-hero {
-    --hero-mark: #ddebdd;
-}
-:root[data-theme="dark"] .auth-hero {
-    --hero-mark: color-mix(in srgb, #ddebdd 22%, var(--surface));
-}
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .auth-hero {
-        --hero-mark: color-mix(in srgb, #ddebdd 22%, var(--surface));
-    }
-}
 /* The blinking caret on the landing page's closing blank page. */
 @keyframes caret-blink {
     50% {
         opacity: 0;
     }
-}
-
-/* Phones and tablets (below 1024px) use a full-width writing surface and touch-sized controls. */
-@media (max-width: 1023.98px) {
-    .app {
-        height: var(--visual-height, 100dvh);
-    }
-    .app .paper {
-        width: calc(100% - 64px);
-        max-width: 760px;
-        padding-top: 32px;
-        overflow-wrap: anywhere;
-    }
-    .app .editor-header {
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        padding-top: env(safe-area-inset-top);
-        height: calc(60px + env(safe-area-inset-top));
-    }
-    .app .editor-header > :nth-child(2) {
-        justify-content: flex-start;
-    }
-    .app .document-title {
-        font-size: 16px !important;
-    }
-    .app .workspace-tools {
-        bottom: 0;
-        width: 100%;
-        max-width: 100%;
-        border-radius: 0;
-        border-width: 1px 0 0;
-        padding-bottom: env(safe-area-inset-bottom);
-        box-shadow: none;
-    }
-    .app .workspace-tools #writing-tool-items {
-        justify-content: space-evenly;
-        width: 100%;
-        overflow-x: auto;
-    }
-    .app .dock-button {
-        min-width: 44px !important;
-        min-height: 44px !important;
-    }
-    .app .canvas-tools-launcher {
-        bottom: calc(12px + env(safe-area-inset-bottom));
-    }
-    .app .drawer {
-        z-index: 21;
-        bottom: 0;
-        max-height: min(72dvh, calc(var(--visual-height, 100dvh) - 70px));
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-    .app .drawer-scrim {
-        z-index: 20;
-    }
-    .app #compact-cards {
-        width: min(640px, 100%);
-    }
-    .app .paper .tiptap {
-        font-size: min(var(--editor-font-size), 20px);
-    }
-    .app input,
-    .app textarea,
-    .library input {
-        font-size: 16px !important;
-    }
-    .library main {
-        padding-top: 24px;
-    }
-    .library main h1 {
-        font-size: 32px;
-    }
-    .library aside {
-        gap: 0;
-        border-bottom: 0;
-        padding-bottom: 0;
-    }
-    .library aside > button {
-        position: fixed;
-        right: max(20px, env(safe-area-inset-right));
-        bottom: calc(24px + env(safe-area-inset-bottom));
-        z-index: 14;
-        width: auto !important;
-        height: 56px !important;
-        border-radius: 18px !important;
-        padding-inline: 20px !important;
-    }
-    .library aside nav ul {
-        position: relative;
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        gap: 8px;
-    }
-    .library aside nav li {
-        flex: 0 0 auto;
-    }
-    .library aside nav a {
-        min-height: 44px !important;
-    }
-    .library > div {
-        grid-template-columns: minmax(0, 1fr);
-        align-content: start;
-    }
-    .library aside {
-        border-right: 0;
-        padding-top: 16px;
-    }
-}
-/* Phones (below 768px). */
-@media (max-width: 767.98px) {
-    .app .paper {
-        width: calc(100% - 36px);
-        padding-top: 8px;
-    }
-    .app .editor-header {
-        gap: 2px;
-        padding-inline: 4px;
-        height: calc(48px + env(safe-area-inset-top));
-    }
-    .app .editor-header > :first-child span {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-    }
-    .app .editor-header .save-status {
-        margin-right: 0;
-    }
-    .app .editor-header .save-status + span {
-        display: none;
-    }
-    .app .editor-header .document-title {
-        padding-inline: 4px !important;
-    }
-    .app .dock-button {
-        width: 44px !important;
-        padding-inline: 0 !important;
-    }
-    .app .dock-button > span:not([aria-hidden]) {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-    }
-    .app .drawer {
-        width: 100%;
-        border-radius: 9px 9px 0 0;
-    }
-    .library main h1 {
-        font-size: 28px;
-    }
-}
-/* Tablets (768px to 1023px). */
-@media (min-width: 768px) and (max-width: 1023.98px) {
-    .library > header {
-        grid-template-columns: auto minmax(0, 1fr) auto;
-    }
-}
-
-/* Important Tailwind control sizes live in a layer; these touch overrides must as well. */
-@layer base {
-    @media (max-width: 1023.98px) {
-        .library aside > button {
-            width: auto !important;
-            height: 56px !important;
-            border-radius: 18px !important;
-            padding-inline: 20px !important;
-        }
-        .app input,
-        .app textarea,
-        .library input {
-            font-size: 16px !important;
-        }
-        .app .editor-header .document-title {
-            font-size: 16px !important;
-        }
-        .app .editor-header button {
-            min-height: 44px !important;
-            min-width: 44px !important;
-            height: 44px !important;
-        }
-        .app .editor-header .document-title {
-            min-width: 0 !important;
-        }
-        .library [aria-label^="Document actions:"] {
-            width: 44px !important;
-            height: 44px !important;
-            min-height: 44px !important;
-            min-width: 44px !important;
-        }
-    }
-}
-
-/* The phone card editor's prompt while a card is empty. */
-.card-screen-text p.is-editor-empty:first-child::before {
-    content: attr(data-placeholder);
-    float: left;
-    height: 0;
-    color: var(--muted);
-    pointer-events: none;
 }

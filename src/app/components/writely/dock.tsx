@@ -114,6 +114,7 @@ export function Drawer({
     children,
     actions,
     id,
+    className = "",
 }: {
     open: boolean;
     title: string;
@@ -122,6 +123,8 @@ export function Drawer({
     /** Extra controls beside the title. */
     actions?: ReactNode;
     id?: string;
+    /** Extra classes for the panel itself, such as a different width. */
+    className?: string;
 }) {
     const [shown, setShown] = useState(open);
     // On phones it is a sheet: it slides up and down, and a swipe down closes it.
@@ -228,7 +231,7 @@ export function Drawer({
                 aria-label="Close writing panel"
                 tabIndex={-1}
                 onClick={onClose}
-                className={`drawer-scrim fixed! inset-0 z-[17] m-0! h-full! w-full! cursor-default! rounded-none! border-0! bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! p-0! transition-opacity duration-300 hover:bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! max-md:bg-[color-mix(in_srgb,var(--shadow)_18%,transparent)]! ${open && (!sheet || entered) ? "opacity-100" : "pointer-events-none opacity-0"}`}
+                className={`drawer-scrim fixed! inset-0 z-[17] m-0! h-full! w-full! cursor-default! rounded-none! border-0! bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! p-0! transition-opacity duration-300 hover:bg-[color-mix(in_srgb,var(--shadow)_6%,transparent)]! max-lg:z-20 max-md:bg-[color-mix(in_srgb,var(--shadow)_18%,transparent)]! ${open && (!sheet || entered) ? "opacity-100" : "pointer-events-none opacity-0"}`}
             />
             <aside
                 ref={ref}
@@ -260,7 +263,7 @@ export function Drawer({
                           }
                         : undefined
                 }
-                className={`drawer border-line bg-surface text-ink fixed bottom-[calc(var(--dock-height,64px)+28px)] left-1/2 z-[18] flex max-h-[min(68dvh,620px)] w-[min(560px,calc(100vw-24px))] -translate-x-1/2 flex-col overflow-hidden rounded-[18px] border [box-shadow:0_24px_64px_-12px_color-mix(in_srgb,var(--shadow)_22%,transparent),0_2px_6px_color-mix(in_srgb,var(--shadow)_5%,transparent)] max-md:bottom-0 max-md:z-[21] max-md:max-h-[82dvh] max-md:w-full max-md:rounded-t-[9px] max-md:rounded-b-none max-md:border-b-0 max-md:pb-[env(safe-area-inset-bottom)] max-md:[box-shadow:0_-8px_32px_rgba(0,0,0,0.18)] ${sheet ? "" : "transition-[opacity,translate,clip-path] duration-200 ease-out motion-reduce:transition-none"} ${open ? "translate-y-0 opacity-100 [clip-path:inset(0_0_0_0_round_18px)] max-md:[clip-path:none]" : "pointer-events-none translate-y-3 opacity-0 [clip-path:inset(40%_0_0_0_round_18px)] max-md:translate-y-0 max-md:opacity-100 max-md:[clip-path:none]"}`}
+                className={`drawer border-line bg-surface text-ink fixed bottom-[calc(var(--dock-height,64px)+28px)] left-1/2 z-[18] flex max-h-[min(68dvh,620px)] w-[min(560px,calc(100vw-24px))] -translate-x-1/2 flex-col overflow-hidden rounded-[18px] border [box-shadow:0_24px_64px_-12px_color-mix(in_srgb,var(--shadow)_22%,transparent),0_2px_6px_color-mix(in_srgb,var(--shadow)_5%,transparent)] max-lg:bottom-0 max-lg:z-[21] max-lg:max-h-[min(72dvh,calc(var(--visual-height,100dvh)-70px))] max-lg:pb-[env(safe-area-inset-bottom)] max-md:w-full max-md:rounded-t-[9px] max-md:rounded-b-none max-md:border-b-0 max-md:[box-shadow:0_-8px_32px_rgba(0,0,0,0.18)] ${className} ${sheet ? "" : "transition-[opacity,translate,clip-path] duration-200 ease-out motion-reduce:transition-none"} ${open ? "translate-y-0 opacity-100 [clip-path:inset(0_0_0_0_round_18px)] max-md:[clip-path:none]" : "pointer-events-none translate-y-3 opacity-0 [clip-path:inset(40%_0_0_0_round_18px)] max-md:translate-y-0 max-md:opacity-100 max-md:[clip-path:none]"}`}
             >
                 <span
                     aria-hidden="true"

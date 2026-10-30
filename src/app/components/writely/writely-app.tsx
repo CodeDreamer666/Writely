@@ -639,7 +639,7 @@ export default function WritelyApp({
             <div
                 style={editorStyle(preferences)}
                 spellCheck={preferences.spellcheck ? undefined : false}
-                className={`app bg-paper relative flex h-dvh flex-col overflow-hidden ${panel ? "tool-panel-visible" : ""} ${comparison ? "comparison-mode" : ""} ${focusMode ? "focus-mode" : ""} ${focusMode && preferences.paragraphHighlight ? "paragraph-highlight" : ""}`}
+                className={`app bg-paper relative flex h-dvh flex-col overflow-hidden max-lg:h-[var(--visual-height,100dvh)] max-lg:[&_input]:text-[16px]! max-lg:[&_textarea]:text-[16px]! ${panel ? "tool-panel-visible" : ""} ${comparison ? "comparison-mode" : ""} ${focusMode ? "focus-mode" : ""} ${focusMode && preferences.paragraphHighlight ? "paragraph-highlight" : ""}`}
             >
                 {focusMode && <FocusExit onExit={toggleFocusMode} />}
                 <div
@@ -674,7 +674,7 @@ export default function WritelyApp({
                                     }}
                                 />
                             ) : (
-                                <article className="paper relative mx-auto w-[calc(100%-384px)] max-w-[var(--editor-width)] pt-14 pb-[calc(48px+var(--flow-bottom-space,50vh))] max-[1119px]:w-[calc(100%-128px)] max-lg:w-[calc(100%-96px)] max-md:w-[calc(100%-40px)] max-md:pt-8 [&:has(.blank-start)_.tiptap]:[min-height:0] md:[.focus-mode_&]:w-[calc(100%-96px)] md:[.focus-mode_&]:pt-[12vh] [.focus-mode_&_.card-text-highlight]:bg-transparent! [.focus-mode_&_:is(.blank-start,.endmark)]:hidden">
+                                <article className="paper relative mx-auto w-[calc(100%-384px)] max-w-[var(--editor-width)] pt-14 pb-[calc(48px+var(--flow-bottom-space,50vh))] max-[1119px]:w-[calc(100%-128px)] max-lg:w-[calc(100%-64px)] max-lg:max-w-[760px] max-lg:pt-8 max-lg:[overflow-wrap:anywhere] max-md:w-[calc(100%-36px)] max-md:pt-2 max-lg:[&_.tiptap]:[font-size:min(var(--editor-font-size),20px)] [&:has(.blank-start)_.tiptap]:[min-height:0] lg:[.focus-mode_&]:w-[calc(100%-96px)] lg:[.focus-mode_&]:pt-[12vh] [.focus-mode_&_.card-text-highlight]:bg-transparent! [.focus-mode_&_:is(.blank-start,.endmark)]:hidden">
                                     {editor && (
                                         <EditorToolbar
                                             key={doc.id}
@@ -1270,7 +1270,7 @@ export default function WritelyApp({
                         (toolsOpen ? (
                             <nav
                                 ref={dock}
-                                className="workspace-tools dock border-line bg-surface text-ink fixed bottom-5 left-1/2 z-[19] flex w-max max-w-[calc(100vw-16px)] -translate-x-1/2 flex-col overflow-hidden rounded-[16px] border [box-shadow:0_12px_32px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent),0_1px_2px_color-mix(in_srgb,var(--shadow)_6%,transparent)] max-md:bottom-3 [.focus-mode_&]:hidden"
+                                className="workspace-tools dock border-line bg-surface text-ink fixed bottom-5 left-1/2 z-[19] flex w-max max-w-[calc(100vw-16px)] -translate-x-1/2 flex-col overflow-hidden rounded-[16px] border [box-shadow:0_12px_32px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent),0_1px_2px_color-mix(in_srgb,var(--shadow)_6%,transparent)] max-lg:bottom-0 max-lg:w-full max-lg:max-w-full max-lg:rounded-none max-lg:border-x-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:[box-shadow:none] [.focus-mode_&]:hidden"
                                 aria-label="Writing tools"
                             >
                                 {doc.session && (
@@ -1309,7 +1309,7 @@ export default function WritelyApp({
                                 )}
                                 <div
                                     id="writing-tool-items"
-                                    className="writing-tool-items flex items-center gap-0.5 overflow-x-auto p-1.5"
+                                    className="writing-tool-items flex items-center gap-0.5 overflow-x-auto p-1.5 max-lg:w-full max-lg:justify-evenly"
                                 >
                                     {toolButtons}
                                     <DockButton
@@ -1333,7 +1333,7 @@ export default function WritelyApp({
                             </nav>
                         ) : (
                             <button
-                                className="canvas-tools-launcher border-line! bg-surface! text-muted! hover:text-ink! fixed! bottom-5 left-1/2 z-[19] h-10! min-h-10! -translate-x-1/2 gap-2! rounded-full! border! px-4! text-[12px]! [box-shadow:0_8px_24px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent)] max-md:bottom-3 [.focus-mode_&]:hidden!"
+                                className="canvas-tools-launcher border-line! bg-surface! text-muted! hover:text-ink! fixed! bottom-5 left-1/2 z-[19] h-10! min-h-10! -translate-x-1/2 gap-2! rounded-full! border! px-4! text-[12px]! [box-shadow:0_8px_24px_-8px_color-mix(in_srgb,var(--shadow)_16%,transparent)] max-lg:bottom-[calc(12px+env(safe-area-inset-bottom))] [.focus-mode_&]:hidden!"
                                 aria-label="Show writing tools"
                                 aria-expanded={false}
                                 aria-controls="writing-tool-items"

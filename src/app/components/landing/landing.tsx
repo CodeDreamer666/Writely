@@ -78,9 +78,25 @@ const PANEL = "rounded-xl border border-line bg-surface";
 const WIDTH = "mx-auto w-full max-w-[1120px] px-6";
 const SERIF_TITLE =
     "font-serif text-[32px] leading-[1.1] font-normal tracking-[-0.03em] text-balance";
+/**
+ * What: The thought-card pastels the landing page draws with. Each sets the field colour, ink and
+ * dark-mode blend for the element it is on.
+ *
+ * Used in:
+ * - src/app/components/landing/landing.tsx (THOUGHT users, Hero, FinalCta)
+ *
+ * Effect: Changes the colours of the drawn cards, highlights and chips.
+ */
+const FIELD_BASE =
+    "[--field:var(--field-tone)] [--field-text:#1f1d1a] dark:[--field:color-mix(in_srgb,var(--field-tone)_16%,var(--bg))] dark:[--field-text:var(--text)]";
+const FIELD = {
+    sky: `${FIELD_BASE} [--field-tone:#d9e6f2]`,
+    butter: `${FIELD_BASE} [--field-tone:#fbefb5]`,
+    sage: `${FIELD_BASE} [--field-tone:#ddebdd]`,
+};
 /** A thought card, in one of the landing pastels; dark mode blends it into the page. */
 const THOUGHT =
-    "landing-field bg-[var(--field)] font-serif text-[14px] leading-[1.4] text-[var(--field-text)] [box-shadow:0_12px_24px_-14px_color-mix(in_srgb,var(--shadow)_45%,transparent)]";
+    "bg-[var(--field)] font-serif text-[14px] leading-[1.4] text-[var(--field-text)] [box-shadow:0_12px_24px_-14px_color-mix(in_srgb,var(--shadow)_45%,transparent)]";
 const CARET =
     "bg-accent ml-0.5 inline-block h-[1.05em] w-[1.5px] translate-y-[0.15em]";
 const FOCUS =
@@ -106,7 +122,7 @@ export default function Landing() {
         return () => window.removeEventListener("scroll", sync);
     }, []);
     return (
-        <div className="landing bg-paper text-ink min-h-dvh overflow-x-clip">
+        <div className="bg-paper text-ink min-h-dvh overflow-x-clip [--landing-mark:color-mix(in_srgb,#fbefb5_85%,transparent)] dark:[--landing-mark:color-mix(in_srgb,#fbefb5_28%,transparent)]">
             <a
                 href="#main"
                 className="bg-surface text-ink sr-only z-50 rounded-lg px-4 py-2 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
@@ -195,19 +211,21 @@ function EditorDrawing() {
                     , and that is where the work starts.
                 </p>
                 <p
-                    className={`${THOUGHT} field-butter relative -mt-2 w-[min(176px,62%)] rotate-2 self-end px-3.5 py-3`}
+                    className={`${THOUGHT} ${FIELD.butter} relative -mt-2 w-[min(176px,62%)] rotate-2 self-end px-3.5 py-3`}
                 >
                     Close. Not quite it yet.
                 </p>
                 <p className="mt-3 text-[16px] leading-[1.7] text-[color-mix(in_srgb,var(--text)_70%,var(--surface))]">
                     So I write it down anyway,{" "}
-                    <mark className="landing-field field-sky rounded-[2px] bg-[var(--field)] text-inherit">
+                    <mark
+                        className={`${FIELD.sky} rounded-[2px] bg-[var(--field)] text-inherit`}
+                    >
                         and trust the right words to find me later
                     </mark>
                     .
                 </p>
                 <p
-                    className={`${THOUGHT} field-sky relative -mt-2 mr-6 w-[min(176px,62%)] -rotate-2 self-end px-3.5 py-3`}
+                    className={`${THOUGHT} ${FIELD.sky} relative -mt-2 mr-6 w-[min(176px,62%)] -rotate-2 self-end px-3.5 py-3`}
                 >
                     Too soft an ending? Come back to this.
                 </p>
@@ -394,7 +412,7 @@ function Steps() {
                         </mark>
                         <span
                             aria-hidden="true"
-                            className={`${THOUGHT} field-butter absolute right-3.5 -bottom-[18px] -rotate-2 px-3.5 py-2.5`}
+                            className={`${THOUGHT} ${FIELD.butter} absolute right-3.5 -bottom-[18px] -rotate-2 px-3.5 py-2.5`}
                         >
                             Says it. Doesn’t show it.
                         </span>
@@ -847,12 +865,12 @@ function Customize() {
  * Effect: Changes the tilted chips scattered around the closing headline.
  */
 const PROMISES = [
-    [StickyNote, "Leave a thought", "field-butter", "top-0 left-0 -rotate-6"],
-    [History, "Keep every draft", "field-sky", "top-7 right-0 rotate-3"],
+    [StickyNote, "Leave a thought", FIELD.butter, "top-0 left-0 -rotate-6"],
+    [History, "Keep every draft", FIELD.sky, "top-7 right-0 rotate-3"],
     [
         ListChecks,
         "Polish one goal at a time",
-        "field-sage",
+        FIELD.sage,
         "bottom-0 left-6 rotate-2 md:right-12 md:left-auto",
     ],
 ] as const;
@@ -888,7 +906,7 @@ function FinalCta() {
                     {PROMISES.map(([Icon, label, field, spot]) => (
                         <li
                             key={label}
-                            className={`landing-field ${field} absolute flex min-h-9 items-center gap-2 rounded-lg bg-[var(--field)] px-3 text-[13px] font-medium text-[var(--field-text)] [box-shadow:0_8px_16px_-12px_color-mix(in_srgb,var(--shadow)_45%,transparent)] ${spot}`}
+                            className={`${field} absolute flex min-h-9 items-center gap-2 rounded-lg bg-[var(--field)] px-3 text-[13px] font-medium text-[var(--field-text)] [box-shadow:0_8px_16px_-12px_color-mix(in_srgb,var(--shadow)_45%,transparent)] ${spot}`}
                         >
                             <Icon
                                 size={15}

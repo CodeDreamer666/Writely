@@ -93,7 +93,7 @@ export default function EditorHeader({
     };
 
     return (
-        <header className="editor-header bg-paper [.is-scrolled_&]:border-line relative z-[13] grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 border-b border-transparent px-4 transition-[border-color] duration-200 max-md:gap-1 max-md:px-2 [.focus-mode_&]:hidden">
+        <header className="editor-header bg-paper [.is-scrolled_&]:border-line relative z-[13] grid h-14 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 border-b border-transparent px-4 transition-[border-color] duration-200 max-lg:h-[calc(60px+env(safe-area-inset-top))] max-lg:grid-cols-[auto_minmax(0,1fr)_auto] max-lg:pt-[env(safe-area-inset-top)] max-md:h-[calc(48px+env(safe-area-inset-top))] max-md:gap-0.5 max-md:px-1 max-lg:[&_button]:h-11! max-lg:[&_button]:min-h-11! max-lg:[&_button:not(.document-title)]:min-w-11! [.focus-mode_&]:hidden">
             <div className="flex min-w-0 items-center">
                 <button
                     className="text-muted hover:text-ink! h-9! min-h-9! gap-1.5! rounded-lg! px-2.5! text-[13px]!"
@@ -103,7 +103,7 @@ export default function EditorHeader({
                     <span className="max-md:sr-only">{backLabel}</span>
                 </button>
             </div>
-            <div className="flex min-w-0 justify-center">
+            <div className="flex min-w-0 justify-center max-lg:justify-start">
                 {editing ? (
                     <input
                         ref={input}
@@ -124,7 +124,7 @@ export default function EditorHeader({
                     />
                 ) : (
                     <button
-                        className="document-title text-ink! h-9! min-h-9! max-w-full min-w-0! rounded-lg! px-2.5! text-[14px]! font-medium"
+                        className="document-title text-ink! h-9! min-h-9! max-w-full min-w-0! rounded-lg! px-2.5! text-[14px]! font-medium max-lg:text-[16px]!"
                         title={onRename ? "Rename document" : undefined}
                         disabled={!onRename}
                         onClick={() => setEditing(true)}
@@ -138,7 +138,7 @@ export default function EditorHeader({
                     <span
                         role="status"
                         title={STATUS[status]}
-                        className={`save-status mr-1 flex shrink-0 items-center gap-1 text-[12px] whitespace-nowrap transition-opacity duration-300 ${status === "error" ? "text-danger" : status === "saving" ? "text-muted" : "text-muted opacity-60"}`}
+                        className={`save-status mr-1 flex shrink-0 items-center gap-1 text-[12px] whitespace-nowrap transition-opacity duration-300 max-md:mr-0 ${status === "error" ? "text-danger" : status === "saving" ? "text-muted" : "text-muted opacity-60"}`}
                     >
                         {status === "saving" ? (
                             <LoaderCircle
@@ -162,7 +162,10 @@ export default function EditorHeader({
                         Retry
                     </button>
                 )}
-                <span aria-hidden="true" className="bg-line mx-1 h-4 w-px" />
+                <span
+                    aria-hidden="true"
+                    className="bg-line mx-1 h-4 w-px max-md:[.save-status+&]:hidden"
+                />
                 <Button
                     icon={Undo2}
                     label="Undo (Ctrl+Z)"
