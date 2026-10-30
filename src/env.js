@@ -11,10 +11,12 @@ export const env = createEnv({
                 ? z.string()
                 : z.string().optional(),
         BETTER_AUTH_URL: z.string().url().optional(),
-        // Both set: the sign-in page offers "Continue with Google".
-        GOOGLE_CLIENT_ID: z.string().optional(),
-        GOOGLE_CLIENT_SECRET: z.string().optional(),
-        // Sends the 6-digit password reset codes through Resend. Without it, codes are only logged in development.
+        // Google sign-in, the only way into Writely.
+        GOOGLE_CLIENT_ID: z.string(),
+        GOOGLE_CLIENT_SECRET: z.string(),
+        // "1" turns on email and password sign-up and sign-in, for the end-to-end tests only.
+        E2E_PASSWORD_SIGN_IN: z.literal("1").optional(),
+        // Sends feedback copies through Resend.
         RESEND_API_KEY: z.string().optional(),
         EMAIL_FROM: z.string().optional(),
         // Where feedback from Settings is also emailed (needs the two above). It is always saved to the database.
@@ -43,6 +45,7 @@ export const env = createEnv({
         BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
         GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
         GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+        E2E_PASSWORD_SIGN_IN: process.env.E2E_PASSWORD_SIGN_IN,
         RESEND_API_KEY: process.env.RESEND_API_KEY,
         EMAIL_FROM: process.env.EMAIL_FROM,
         FEEDBACK_EMAIL: process.env.FEEDBACK_EMAIL,

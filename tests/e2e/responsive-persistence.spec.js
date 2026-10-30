@@ -2,6 +2,8 @@ import {
     test,
     expect,
     openSample,
+    redirectOf,
+    signIn,
     stored,
 } from "./fixtures.js";
 
@@ -194,22 +196,17 @@ test("autosave retries offline edits and login restores the database copy in a f
     const otherContext = await browser.newContext({ baseURL });
     try {
         const other = await otherContext.newPage();
+        expect(await redirectOf(other, `/d/${id}`)).toBe(
+            `/auth/google?next=${encodeURIComponent(`/d/${id}`)}`,
+        );
+        expect(
+            await signIn(other, baseURL, {
+                ...account,
+                password: "wrong-password",
+            }),
+        ).toBe(false);
+        expect(await signIn(other, baseURL, account)).toBe(true);
         await other.goto(`/d/${id}`);
-        await expect(other).toHaveURL(/sign-in/);
-        await other.getByLabel("Email", { exact: true }).fill(account.email);
-        await other
-            .getByLabel("Password", { exact: true })
-            .fill("wrong-password");
-        await other
-            .getByRole("button", { name: "Sign in", exact: true })
-            .click();
-        await expect(other.getByRole("alert")).toBeVisible();
-        await other
-            .getByLabel("Password", { exact: true })
-            .fill(account.password);
-        await other
-            .getByRole("button", { name: "Sign in", exact: true })
-            .click();
         await expect(text(other)).toContainText(
             "Recovered after losing the connection.",
         );
@@ -217,9 +214,8 @@ test("autosave retries offline edits and login restores the database copy in a f
         await other
             .getByRole("button", { name: "Log out", exact: true })
             .click();
-        await expect(other).toHaveURL(/sign-in/);
-        await other.goto(`/d/${id}`);
-        await expect(other).toHaveURL(/sign-in/);
+        await expect(other).toHaveURL(/\/$/);
+        expect(await redirectOf(other, `/d/${id}`)).toMatch(/^\/auth\/google/);
     } finally {
         await otherContext.close();
     }

@@ -176,9 +176,8 @@ body {
 }
 
 /*
- * Landing, sign-in and welcome pages. The thought-card pastels colour the drawn thought cards and
- * the sign-in and welcome fields; dark mode blends each pastel into the dark surface the same way
- * thought cards do.
+ * The landing page. The thought-card pastels colour its drawn thought cards and fields; dark mode
+ * blends each pastel into the dark surface the same way thought cards do.
  */
 .landing {
     --landing-mark: color-mix(in srgb, #fbefb5 85%, transparent);

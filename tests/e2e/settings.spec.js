@@ -47,11 +47,9 @@ test("settings header returns to the correct parent", async ({ page }) => {
             const back = page.getByRole("link", { name: "Back to Documents" });
             await expect(back).toBeVisible();
             await expect(
-                page
-                    .locator("main")
-                    .getByRole("link", {
-                        name: /Back to (Settings|Documents)/,
-                    }),
+                page.locator("main").getByRole("link", {
+                    name: /Back to (Settings|Documents)/,
+                }),
             ).toHaveCount(0);
             await back.click();
             await expect(page).toHaveURL(/\/$/);

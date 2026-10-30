@@ -480,12 +480,13 @@ export default function Library({
                                         </li>
                                     );
                                 })}
-                                <li className="shrink-0 self-start sm:hidden">
+                                {/* Phones and tablets: a button that opens the week in a bottom sheet. */}
+                                <li className="shrink-0 self-start min-[1280px]:hidden">
                                     <WritingWeekPill />
                                 </li>
                             </ul>
                         </nav>
-                        <div className="border-line border-t pt-7 max-[1279px]:pt-4 max-sm:hidden min-[1024px]:max-[1279px]:hidden">
+                        <div className="border-line border-t pt-7 max-[1279px]:hidden">
                             <WritingWeek />
                         </div>
                     </aside>
@@ -756,6 +757,8 @@ export default function Library({
                                                 <ActionMenu
                                                     label={`Document actions: ${doc.title || "Untitled"}`}
                                                     menuLabel={`Actions for ${doc.title || "Untitled"}`}
+                                                    // Wide enough for "Export as Word (.docx)" on one line.
+                                                    menuWidth={208}
                                                     triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                     items={menuFor(doc)}
                                                     sheetTitle={
@@ -839,6 +842,8 @@ export default function Library({
                                                     <ActionMenu
                                                         label={`Document actions: ${doc.title || "Untitled"}`}
                                                         menuLabel={`Actions for ${doc.title || "Untitled"}`}
+                                                        // Wide enough for "Export as Word (.docx)" on one line.
+                                                        menuWidth={208}
                                                         triggerClassName="pointer-events-auto! size-10! min-h-10! min-w-10! rounded-full! text-[var(--muted)]! opacity-100! hover:text-[var(--text)]!"
                                                         items={menuFor(doc)}
                                                         sheetTitle={

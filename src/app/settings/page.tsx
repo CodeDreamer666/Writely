@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Settings · Writely" };
 
 export default async function Settings() {
     const session = await getSession();
-    if (!session) redirect("/sign-in?next=/settings");
+    if (!session) redirect("/auth/google?next=/settings");
     const userId = session.user.id;
     await settled(userId);
     const workspace = await ensureWorkspace(userId);

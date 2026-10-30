@@ -18,7 +18,7 @@ export default async function DocumentPage(props: {
 }) {
     const { id } = await props.params;
     const session = await getSession();
-    if (!session) redirect(`/sign-in?next=${encodeURIComponent(`/d/${id}`)}`);
+    if (!session) redirect(`/auth/google?next=${encodeURIComponent(`/d/${id}`)}`);
     const [workspace, data] = await Promise.all([
         ensureWorkspace(session.user.id),
         loadDocumentWorkspace(session.user.id, id),

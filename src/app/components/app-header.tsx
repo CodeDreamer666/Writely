@@ -13,7 +13,7 @@ export type AccountUser = { id: string; name: string; email: string };
 export async function logOut() {
     await authClient.signOut();
     // A full load, so nothing from the signed-in session stays in memory.
-    window.location.href = "/sign-in";
+    window.location.href = "/";
 }
 
 /**

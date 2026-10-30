@@ -31,6 +31,24 @@ export const test = base.extend({
 
 export { expect };
 
+/**
+ * Signs `account` in with its password, as the tests' stand-in for Google. Returns whether the
+ * server accepted it.
+ */
+export async function signIn(page, baseURL, account) {
+    const response = await page.request.post("/api/auth/sign-in/email", {
+        data: { email: account.email, password: account.password },
+        headers: { origin: baseURL },
+    });
+    return response.ok();
+}
+
+/** Where a request to `path` is sent, without following the redirect. */
+export async function redirectOf(page, path) {
+    const response = await page.request.get(path, { maxRedirects: 0 });
+    return response.headers().location ?? null;
+}
+
 /** The workspace as it is saved on the server. */
 export const stored = (page) =>
     page.evaluate(async () => {

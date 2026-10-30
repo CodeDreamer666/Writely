@@ -207,7 +207,7 @@ export default function SettingsPage({
         } catch {
             /* Storage may be unavailable. */
         }
-        window.location.href = "/sign-in";
+        window.location.href = "/";
     };
 
     return (

@@ -35,15 +35,15 @@ import type { DiffChunk } from "~/lib/writely/model";
  */
 
 /**
- * What: The link that opens the sign-in page already switched to
- * "create an account".
+ * What: Where every sign-in and sign-up button on the home page goes: straight to Google, or to
+ * the library when already signed in. A plain link, not <Link>, since it leaves the app.
  *
  * Used in:
  * - src/app/components/landing/landing.tsx (Landing, Hero, FinalCta)
  *
- * Effect: Changes where every sign-up button on the home page goes.
+ * Effect: Changes where every sign-in and sign-up button on the home page goes.
  */
-const SIGN_UP = "/sign-in?mode=sign-up";
+const SIGN_IN = "/auth/google";
 /**
  * What: The look of the home page's main call-to-action links.
  *
@@ -130,12 +130,12 @@ export default function Landing() {
                         aria-label="Account"
                         className="flex items-center gap-2"
                     >
-                        <Link
-                            href="/sign-in"
+                        <a
+                            href={SIGN_IN}
                             className={`text-ink flex min-h-11 items-center rounded-lg px-3 text-[15px] font-medium no-underline ${FOCUS}`}
                         >
                             Sign in
-                        </Link>
+                        </a>
                     </nav>
                 </div>
             </header>
@@ -246,10 +246,10 @@ function Hero() {
                     words come, and keep every version.
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <Link href={SIGN_UP} className={PRIMARY}>
+                    <a href={SIGN_IN} className={PRIMARY}>
                         Start writing
                         <ArrowRight size={17} aria-hidden="true" />
-                    </Link>
+                    </a>
                     <a
                         href="#how"
                         onClick={(e) => {
@@ -879,13 +879,10 @@ function FinalCta() {
                     />
                 </h2>
                 <div className="mt-6 flex justify-start lg:justify-end">
-                    <Link
-                        href={SIGN_UP}
-                        className={`${PRIMARY} w-full sm:w-auto`}
-                    >
+                    <a href={SIGN_IN} className={`${PRIMARY} w-full sm:w-auto`}>
                         Start your first piece
                         <ArrowRight size={17} aria-hidden="true" />
-                    </Link>
+                    </a>
                 </div>
                 <ul className="m-0 list-none p-0">
                     {PROMISES.map(([Icon, label, field, spot]) => (
