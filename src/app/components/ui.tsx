@@ -229,7 +229,7 @@ export function BottomSheet({
                 aria-modal="true"
                 aria-label={title}
                 tabIndex={-1}
-                className="fixed inset-x-0 bottom-0 z-[35] max-h-[85dvh] w-full overflow-y-auto rounded-t-[14px] bg-[var(--surface)] px-4 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] outline-none motion-reduce:transition-none"
+                className="fixed inset-x-0 bottom-0 z-[35] mx-auto max-h-[85dvh] w-full max-w-[520px] overflow-y-auto rounded-t-[14px] bg-[var(--surface)] px-4 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] outline-none motion-reduce:transition-none"
                 onTouchStart={touchStart}
                 onTouchMove={touchMove}
                 onTouchEnd={touchEnd}

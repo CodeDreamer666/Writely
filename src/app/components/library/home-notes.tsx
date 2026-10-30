@@ -223,7 +223,7 @@ export function WritingWeekPill() {
             <BottomSheet open={open} onClose={close} title="Writing this week">
                 <div className="border-line bg-surface rounded-2xl border px-5 pt-5 pb-4">
                     <ol
-                        className="m-0 grid h-[104px] list-none grid-cols-7 items-end gap-2 p-0"
+                        className="m-0 mx-auto grid h-[104px] w-full max-w-[420px] list-none grid-cols-7 items-end gap-2 p-0"
                         aria-label="Words written each day"
                     >
                         {week.map((day) => {
