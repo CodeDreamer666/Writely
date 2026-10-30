@@ -251,7 +251,7 @@ function Hero() {
             aria-labelledby="hero-title"
             className={`${WIDTH} grid items-center gap-14 pt-12 pb-6 max-md:px-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:pt-20`}
         >
-            <div className="max-w-[520px] max-md:px-2">
+            <div className="max-w-[520px] max-md:px-2 md:max-lg:mx-auto md:max-lg:text-center">
                 <h1
                     id="hero-title"
                     className="font-serif text-[clamp(44px,5.4vw,68px)] leading-[1.04] font-normal tracking-[-0.035em] text-balance"
@@ -263,7 +263,7 @@ function Hero() {
                     A quiet place to leave notes for later, rewrite when the
                     words come, and keep every version.
                 </p>
-                <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center">
+                <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:max-lg:justify-center">
                     <a href={SIGN_IN} className={PRIMARY}>
                         Start writing
                         <ArrowRight size={17} aria-hidden="true" />
