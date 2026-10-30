@@ -357,9 +357,6 @@ body {
         border-right: 0;
         padding-top: 16px;
     }
-    .library aside > div {
-        display: none;
-    }
 }
 @media (max-width: 600px) {
     .app .paper {
