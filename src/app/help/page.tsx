@@ -6,7 +6,7 @@ import { TopicList } from "./topic-list";
 
 export const metadata: Metadata = { title: "Help · Writely" };
 
-/** The Help home: every topic, each opening a step-by-step guide with pictures. */
+/** The Help home: every topic, each opening a short guide. */
 export default function HelpHome() {
     return (
         <div className="bg-paper text-ink min-h-dvh">
@@ -16,9 +16,8 @@ export default function HelpHome() {
                     Help
                 </h1>
                 <p className="text-muted mt-3 mb-8 max-w-[560px] text-[15.5px] leading-relaxed">
-                    Pick a topic to open a step-by-step guide. Every step is one
-                    action, with a picture showing exactly where to click and
-                    what you’ll see next.
+                    Short guides to the parts of Writely that aren’t obvious at
+                    first glance, on a computer and on a phone.
                 </p>
                 <h2 className="text-muted mb-3 text-[13px] font-medium">
                     Topics

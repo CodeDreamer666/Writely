@@ -431,7 +431,7 @@ export default function SettingsPage({
                             <SettingsSection
                                 id="help-title"
                                 title="Help"
-                                hint="Step-by-step guides with pictures. Every step is one action and shows exactly where to click."
+                                hint="Short guides to the parts of Writely that aren’t obvious at first glance."
                             >
                                 <TopicList />
                             </SettingsSection>
