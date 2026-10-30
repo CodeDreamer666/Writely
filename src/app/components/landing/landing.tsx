@@ -170,11 +170,14 @@ export default function Landing() {
                     <nav aria-label="Legal" className="flex gap-5">
                         <a
                             href="/privacy"
-                            className="text-muted hover:text-ink"
+                            className="text-muted hover:text-ink no-underline"
                         >
                             Privacy Policy
                         </a>
-                        <a href="/terms" className="text-muted hover:text-ink">
+                        <a
+                            href="/terms"
+                            className="text-muted hover:text-ink no-underline"
+                        >
                             Terms of Service
                         </a>
                     </nav>
