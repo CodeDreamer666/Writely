@@ -80,8 +80,7 @@ test("formatting floats only over selected text, keeps selections, and persists 
         "Bullet List",
         "Numbered List",
         "Blockquote",
-        "Horizontal Divider",
-        "More formatting",
+        "Connect to thought",
     ]);
     await toolbar(page)
         .getByRole("button", { name: "Bold", exact: true })
@@ -171,20 +170,12 @@ test("list editing and secondary formats use editable persistent blocks", async 
     await manuscript(page).press("Enter");
     await expect(manuscript(page).locator(":scope > p")).toHaveCount(2);
     await select(page, "second");
-    for (const name of ["Strikethrough", "Inline Code"]) {
-        await toolbar(page)
-            .getByRole("button", { name: "More formatting" })
-            .click();
-        await page.getByRole("menuitemcheckbox", { name, exact: true }).click();
-    }
+    // Strikethrough, code, checklist and divider have no toolbar button; they stay on shortcuts.
+    await manuscript(page).press("ControlOrMeta+Shift+s");
+    await manuscript(page).press("ControlOrMeta+e");
     await expect(manuscript(page).locator("code")).toHaveText("second");
     await select(page, "Alpha");
-    await toolbar(page)
-        .getByRole("button", { name: "More formatting" })
-        .click();
-    await page
-        .getByRole("menuitemcheckbox", { name: "Checklist", exact: true })
-        .click();
+    await manuscript(page).press("ControlOrMeta+Shift+9");
     await expect(
         manuscript(page).locator('[data-type="taskList"]'),
     ).toBeVisible();
@@ -193,12 +184,7 @@ test("list editing and secondary formats use editable persistent blocks", async 
         .poll(async () => current(await stored(page)).html)
         .toContain('data-checked="true"');
     await select(page, "second");
-    await toolbar(page)
-        .getByRole("button", { name: "More formatting" })
-        .click();
-    await page
-        .getByRole("menuitemcheckbox", { name: "Code Block", exact: true })
-        .click();
+    await manuscript(page).press("ControlOrMeta+Alt+c");
     await expect(manuscript(page).locator("pre code")).toContainText(
         "A second paragraph.",
     );
@@ -276,9 +262,8 @@ test("the selection toolbar fits a small screen and dividers persist through und
             String(level),
         );
     }
-    await toolbar(page)
-        .getByRole("button", { name: "Horizontal Divider" })
-        .click();
+    await manuscript(page).press("Enter");
+    await page.keyboard.type("---");
     await expect(manuscript(page).locator("hr")).toHaveCount(1);
     await manuscript(page).press("ControlOrMeta+z");
     await expect(manuscript(page).locator("hr")).toHaveCount(0);

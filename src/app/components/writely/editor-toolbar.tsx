@@ -16,13 +16,7 @@ import {
     List,
     ListOrdered,
     Quote,
-    Minus,
-    MoreHorizontal,
-    Strikethrough,
-    Code,
-    SquareCode,
     LayoutGrid,
-    ListTodo,
     ExternalLink,
     Type,
     Unlink,
@@ -67,20 +61,19 @@ export function useMobileToolbar() {
  * in the toolbar that appears over selected text.
  *
  * Used in:
- * - src/app/components/writely/editor-toolbar.tsx (FormatButton, the "More formatting" button)
+ * - src/app/components/writely/editor-toolbar.tsx (FormatButton)
  *
  * Effect: Changes the size and pressed colour of every formatting button.
  */
 const FORMAT_BUTTON =
     "format-button toolbar-control [.editor-toolbar-shell_&]:inline-flex [.editor-toolbar-shell_&]:[height:32px] [.editor-toolbar-shell_&]:[min-height:32px] [.editor-toolbar-shell_&]:[width:32px] [.editor-toolbar-shell_&]:[min-width:32px] [.editor-toolbar-shell_&]:items-center [.editor-toolbar-shell_&]:justify-center [.editor-toolbar-shell_&]:[border-radius:5px] [.editor-toolbar-shell_&]:[padding:0] [.editor-toolbar-shell_&]:[color:var(--muted)] [.editor-toolbar-shell_&]:[box-shadow:none] [.editor-toolbar-shell_&]:[background:transparent] [.editor-toolbar-shell_&]:[border:0] [.editor-toolbar-shell_&[aria-expanded='true']]:[color:var(--accent)] [.editor-toolbar-shell_&[aria-expanded='true']]:[background:var(--tint)] [.editor-toolbar-shell_&[aria-pressed='true']]:[color:var(--accent)] [.editor-toolbar-shell_&[aria-pressed='true']]:[background:var(--tint)] max-md:[.editor-toolbar-shell_&]:[min-height:36px] max-md:[.editor-toolbar-shell_&]:[width:34px] max-md:[.editor-toolbar-shell_&]:[min-width:34px]";
 /**
- * What: The look of the toolbar's drop-down menus (paragraph style and
- * "More formatting").
+ * What: The look of the toolbar's drop-down menus (paragraph style).
  *
  * Used in:
  * - src/app/components/writely/editor-toolbar.tsx (EditorToolbar)
  *
- * Effect: Changes the size, shadow and opening animation of both menus.
+ * Effect: Changes the size, shadow and opening animation of the menu.
  */
 const MENU =
     "format-popover absolute [top:calc(100%_+_6px)] [z-index:30] grid [min-width:200px] [gap:1px] [border-radius:10px] border border-line bg-surface [padding:4px] text-ink [box-shadow:0_14px_36px_-14px_color-mix(in_srgb,var(--shadow)_30%,transparent)] [font:12.5px/1.5_Inter,_sans-serif] [animation:appear_120ms_ease-out] motion-reduce:animate-none";
@@ -94,15 +87,6 @@ const MENU =
  */
 const MENU_ITEM =
     "flex! w-full! min-h-8! items-center! justify-start! gap-2.5! rounded-md! border-0! bg-transparent! px-2.5! py-1.5! text-left! text-ink! shadow-none! hover:bg-[var(--control-hover)]! focus-visible:bg-[var(--control-hover)]! focus-visible:outline-none! aria-checked:text-accent! disabled:opacity-40! [&_svg]:shrink-0";
-/**
- * What: The thin line between groups in the "More formatting" menu.
- *
- * Used in:
- * - src/app/components/writely/editor-toolbar.tsx (EditorToolbar)
- *
- * Effect: Changes the thickness, colour and spacing of that line.
- */
-const MENU_SEPARATOR = "mx-1.5 my-1 h-px bg-line";
 /**
  * What: The paragraph styles in the toolbar's style menu: the heading level
  * (0 means normal text), the label and the size the label is shown at.
@@ -242,10 +226,6 @@ export default function EditorToolbar({
             bullet: editor.isActive("bulletList"),
             ordered: editor.isActive("orderedList"),
             quote: editor.isActive("blockquote"),
-            strike: editor.isActive("strike"),
-            code: editor.isActive("code"),
-            codeBlock: editor.isActive("codeBlock"),
-            task: editor.isActive("taskList"),
             canConnect:
                 !editor.state.selection.empty &&
                 !!editor.state.doc
@@ -260,13 +240,12 @@ export default function EditorToolbar({
             canLink: editor.can().setLink({ href: "https://example.com" }),
         }),
     });
-    const [menu, setMenu] = useState<"paragraph" | "more" | null>(null);
+    const [menu, setMenu] = useState<"paragraph" | null>(null);
     const [linkOpen, setLinkOpen] = useState(false);
     const [url, setURL] = useState("");
     const [error, setError] = useState("");
     const root = useRef<HTMLDivElement>(null);
     const paragraphTrigger = useRef<HTMLButtonElement>(null);
-    const moreTrigger = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
     const linkInput = useRef<HTMLInputElement>(null);
     const dock = useRef<HTMLDivElement>(null);
@@ -503,7 +482,7 @@ export default function EditorToolbar({
                 "[role^='menuitem']:not(:disabled)",
             ) ?? [],
         );
-    const focusMenu = (name: "paragraph" | "more", last = false) =>
+    const focusMenu = (name: "paragraph", last = false) =>
         requestAnimationFrame(() => {
             const items = menuItems();
             const current = items.find((item) => item.ariaChecked === "true");
@@ -513,21 +492,17 @@ export default function EditorToolbar({
             )?.focus();
         });
     const closeMenu = () => {
-        const trigger =
-            menu === "paragraph"
-                ? paragraphTrigger.current
-                : moreTrigger.current;
         setMenu(null);
-        trigger?.focus();
+        paragraphTrigger.current?.focus();
     };
-    const toggleMenu = (name: "paragraph" | "more") => {
+    const toggleMenu = (name: "paragraph") => {
         setLinkOpen(false);
         bookmark.current = null;
         setMenu(menu === name ? null : name);
         if (menu !== name) focusMenu(name);
     };
     const triggerKeys = (
-        name: "paragraph" | "more",
+        name: "paragraph",
         event: KeyboardEvent<HTMLButtonElement>,
     ) => {
         if (!["ArrowDown", "ArrowUp"].includes(event.key)) return;
@@ -768,7 +743,7 @@ export default function EditorToolbar({
                             }
                         />
                     </div>
-                    {mobile ? (
+                    {onConnect && (
                         <>
                             <span
                                 className="format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] max-md:[margin:0]"
@@ -776,204 +751,12 @@ export default function EditorToolbar({
                                 aria-orientation="vertical"
                             />
                             <div className="format-group flex items-center [gap:2px]">
-                                {onConnect && (
-                                    <FormatButton
-                                        icon={Link2}
-                                        label="Connect to thought"
-                                        disabled={
-                                            !state.canConnect || connecting
-                                        }
-                                        onClick={onConnect}
-                                    />
-                                )}
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <span
-                                className={
-                                    "format-separator [margin:0_2px] [height:16px] [width:1px] [background:var(--border)] max-md:[margin:0]"
-                                }
-                                role="separator"
-                                aria-orientation="vertical"
-                            />
-                            <div className={"format-menu relative"}>
-                                <Tooltip.Root>
-                                    <Tooltip.Trigger asChild>
-                                        <button
-                                            type="button"
-                                            ref={moreTrigger}
-                                            className={FORMAT_BUTTON}
-                                            aria-label="More formatting"
-                                            aria-haspopup="menu"
-                                            aria-expanded={menu === "more"}
-                                            onMouseDown={(event) =>
-                                                event.preventDefault()
-                                            }
-                                            onClick={() => toggleMenu("more")}
-                                            onKeyDown={(event) =>
-                                                triggerKeys("more", event)
-                                            }
-                                        >
-                                            <MoreHorizontal
-                                                size={16}
-                                                strokeWidth={1.6}
-                                                aria-hidden="true"
-                                            />
-                                        </button>
-                                    </Tooltip.Trigger>
-                                    <Tooltip.Portal>
-                                        <Tooltip.Content
-                                            className={TOOLTIP_CLASS}
-                                            sideOffset={8}
-                                        >
-                                            More formatting
-                                            <Tooltip.Arrow />
-                                        </Tooltip.Content>
-                                    </Tooltip.Portal>
-                                </Tooltip.Root>
-                                {menu === "more" && (
-                                    <div
-                                        ref={menuRef}
-                                        className={`${popover} format-more-menu ${mobile ? "right-2" : "right-0"} w-[216px]`}
-                                        role="menu"
-                                        aria-label="More formatting"
-                                        onKeyDown={menuKeys}
-                                    >
-                                        {/* Formats toggle in place and the menu stays open, so several can be stacked. */}
-                                        {(
-                                            [
-                                                [
-                                                    Strikethrough,
-                                                    "Strikethrough",
-                                                    state.strike,
-                                                    () =>
-                                                        editor
-                                                            .chain()
-                                                            .toggleStrike()
-                                                            .run(),
-                                                ],
-                                                [
-                                                    Code,
-                                                    "Inline Code",
-                                                    state.code,
-                                                    () =>
-                                                        editor
-                                                            .chain()
-                                                            .toggleCode()
-                                                            .run(),
-                                                ],
-                                                [
-                                                    SquareCode,
-                                                    "Code Block",
-                                                    state.codeBlock,
-                                                    () =>
-                                                        editor
-                                                            .chain()
-                                                            .toggleCodeBlock()
-                                                            .run(),
-                                                ],
-                                                [
-                                                    ListTodo,
-                                                    "Checklist",
-                                                    state.task,
-                                                    () =>
-                                                        editor
-                                                            .chain()
-                                                            .toggleTaskList()
-                                                            .run(),
-                                                ],
-                                            ] as [
-                                                LucideIcon,
-                                                string,
-                                                boolean,
-                                                () => void,
-                                            ][]
-                                        ).map(
-                                            ([Icon, name, active, action]) => (
-                                                <button
-                                                    type="button"
-                                                    key={name}
-                                                    role="menuitemcheckbox"
-                                                    aria-checked={active}
-                                                    className={MENU_ITEM}
-                                                    onMouseDown={(event) =>
-                                                        event.preventDefault()
-                                                    }
-                                                    onClick={action}
-                                                >
-                                                    <Icon
-                                                        size={16}
-                                                        strokeWidth={1.6}
-                                                        aria-hidden="true"
-                                                    />
-                                                    <span className="flex-1">
-                                                        {name}
-                                                    </span>
-                                                    {active && (
-                                                        <Check
-                                                            size={14}
-                                                            strokeWidth={2}
-                                                            aria-hidden="true"
-                                                        />
-                                                    )}
-                                                </button>
-                                            ),
-                                        )}
-                                        <div
-                                            className={MENU_SEPARATOR}
-                                            role="separator"
-                                        />
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            className={MENU_ITEM}
-                                            onMouseDown={(event) =>
-                                                event.preventDefault()
-                                            }
-                                            onClick={() => {
-                                                setMenu(null);
-                                                editor
-                                                    .chain()
-                                                    .focus()
-                                                    .setHorizontalRule()
-                                                    .run();
-                                            }}
-                                        >
-                                            <Minus
-                                                size={16}
-                                                strokeWidth={1.6}
-                                                aria-hidden="true"
-                                            />
-                                            Horizontal Divider
-                                        </button>
-                                        {onConnect && (
-                                            <button
-                                                type="button"
-                                                role="menuitem"
-                                                className={`${MENU_ITEM} toolbar-connect`}
-                                                disabled={
-                                                    !state.canConnect ||
-                                                    connecting
-                                                }
-                                                onMouseDown={(event) =>
-                                                    event.preventDefault()
-                                                }
-                                                onClick={() => {
-                                                    setMenu(null);
-                                                    onConnect();
-                                                }}
-                                            >
-                                                <Link2
-                                                    size={16}
-                                                    strokeWidth={1.6}
-                                                    aria-hidden="true"
-                                                />
-                                                Connect to thought
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
+                                <FormatButton
+                                    icon={Link2}
+                                    label="Connect to thought"
+                                    disabled={!state.canConnect || connecting}
+                                    onClick={onConnect}
+                                />
                             </div>
                         </>
                     )}

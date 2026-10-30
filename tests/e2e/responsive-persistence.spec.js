@@ -66,10 +66,7 @@ test.describe("phone and iPad cards", () => {
             await expect(page.locator(".card-screen")).toHaveCount(0);
             await selectWords(page, "Words to remember");
             await page
-                .getByRole("button", { name: "More formatting", exact: true })
-                .click();
-            await page
-                .getByRole("menuitem", {
+                .getByRole("button", {
                     name: "Connect to thought",
                     exact: true,
                 })
