@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * What: The kinds of feedback a writer can send, with the label and hint shown for each.
+ * What: The kinds of feedback a writer can send, with the label shown for each.
  *
  * Used in:
  * - src/app/components/writely/feedback-settings.tsx (FeedbackSettings)
@@ -10,10 +10,10 @@ import { z } from "zod";
  * Effect: Changes the choices on the feedback form. The first one is selected when the form opens.
  */
 export const FEEDBACK_CATEGORIES = [
-    ["idea", "Idea", "Something that would make Writely better"],
-    ["bug", "Problem", "Something that isn’t working"],
-    ["praise", "Praise", "Something you like"],
-    ["other", "Other", "Anything else"],
+    ["idea", "Idea"],
+    ["bug", "Problem"],
+    ["praise", "Praise"],
+    ["other", "Other"],
 ] as const;
 
 export type FeedbackCategory = (typeof FEEDBACK_CATEGORIES)[number][0];

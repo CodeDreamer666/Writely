@@ -442,7 +442,7 @@ export default function SettingsPage({
                                 title="Feedback"
                                 hint="Tell us what’s working, what isn’t, or what you wish Writely did. Every message is read."
                             >
-                                <FeedbackSettings email={user.email} />
+                                <FeedbackSettings />
                             </SettingsSection>
                         )}
                         {shown === "account" && (

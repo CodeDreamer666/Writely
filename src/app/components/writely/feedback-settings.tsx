@@ -21,22 +21,19 @@ import {
 } from "./settings-controls";
 import { PRIMARY_BUTTON } from "~/config/ui";
 
-/** The Feedback section of Settings: pick a kind, write a message, choose whether to be contacted. */
-export function FeedbackSettings({ email }: { email: string }) {
+/** The Feedback section of Settings: pick a kind and write a message. */
+export function FeedbackSettings() {
     const [category, setCategory] = useState<FeedbackCategory>(
         FEEDBACK_CATEGORIES[0][0],
     );
     const [message, setMessage] = useState("");
-    const [allowContact, setAllowContact] = useState(false);
     const [sent, setSent] = useState(false);
     const submit = api.feedback.submit.useMutation();
     const kindId = useId();
     const messageId = useId();
-    const contactId = useId();
 
     const length = message.trim().length;
     const ready = length >= FEEDBACK_MIN && !submit.isPending;
-    const hint = FEEDBACK_CATEGORIES.find(([value]) => value === category)?.[2];
 
     const send = (e: FormEvent) => {
         e.preventDefault();
@@ -45,7 +42,7 @@ export function FeedbackSettings({ email }: { email: string }) {
             {
                 category,
                 message,
-                allowContact,
+                allowContact: false,
                 page: "settings",
             },
             {
@@ -74,9 +71,8 @@ export function FeedbackSettings({ email }: { email: string }) {
                         Thank you for telling us.
                     </p>
                     <p className="text-muted m-0 max-w-[420px] text-[13.5px] leading-relaxed">
-                        {allowContact
-                            ? `If we have questions, we’ll write to ${email}.`
-                            : "Your message was sent without your email, so we won’t be able to reply."}
+                        Your message was sent without your email, so we won’t be
+                        able to reply.
                     </p>
                     <button
                         type="button"
@@ -108,7 +104,6 @@ export function FeedbackSettings({ email }: { email: string }) {
                             label,
                         }))}
                     />
-                    <p className="text-muted m-0 text-[12px]">{hint}</p>
                 </div>
                 <div className="grid gap-2">
                     <label
@@ -128,7 +123,7 @@ export function FeedbackSettings({ email }: { email: string }) {
                         rows={7}
                         placeholder="What happened, or what would you like to see?"
                         aria-describedby={`${messageId}-count`}
-                        className="min-h-[160px] w-full resize-y"
+                        className="min-h-[160px] w-full resize-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     />
                     <p
                         id={`${messageId}-count`}
@@ -145,25 +140,6 @@ export function FeedbackSettings({ email }: { email: string }) {
                         </span>
                     </p>
                 </div>
-                <label
-                    htmlFor={contactId}
-                    className="m-0 flex cursor-pointer items-start gap-3 text-[13.5px] leading-snug"
-                >
-                    <input
-                        id={contactId}
-                        type="checkbox"
-                        checked={allowContact}
-                        onChange={(e) => setAllowContact(e.target.checked)}
-                        className="mt-0.5 size-4 shrink-0"
-                    />
-                    <span>
-                        You can email me about this
-                        <span className="text-muted block text-[12px]">
-                            Sends {email} with your message. Leave it off to
-                            stay anonymous.
-                        </span>
-                    </span>
-                </label>
             </SettingsCard>
             {submit.isError && (
                 <p role="alert" className="text-danger m-0 text-[13px]">
