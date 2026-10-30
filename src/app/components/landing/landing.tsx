@@ -165,8 +165,19 @@ export default function Landing() {
 
             <footer className="border-line border-t">
                 <div
-                    className={`${WIDTH} text-muted flex items-center justify-end pt-7 pb-10 text-[13px]`}
+                    className={`${WIDTH} text-muted flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-7 pb-10 text-[13px]`}
                 >
+                    <nav aria-label="Legal" className="flex gap-5">
+                        <a
+                            href="/privacy"
+                            className="text-muted hover:text-ink"
+                        >
+                            Privacy Policy
+                        </a>
+                        <a href="/terms" className="text-muted hover:text-ink">
+                            Terms of Service
+                        </a>
+                    </nav>
                     <span>© {new Date().getFullYear()} Writely</span>
                 </div>
             </footer>
