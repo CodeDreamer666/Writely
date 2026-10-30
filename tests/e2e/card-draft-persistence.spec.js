@@ -14,7 +14,7 @@ const current = (data) => data.docs.find((doc) => doc.id === data.active);
 test("thought cards and drafts keep every field, including position, after a reload", async ({
     page,
 }) => {
-    await page.goto("/welcome");
+    await page.goto("/");
     const doc = {
         ...makeDoc(),
         title: "Persistence check",

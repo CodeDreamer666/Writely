@@ -1,5 +1,4 @@
 import { type Metadata } from "next";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { readPreferences } from "~/lib/writely/preferences";
 import { getSession } from "~/server/better-auth/server";
@@ -22,7 +21,6 @@ export default async function Home() {
     // Signed-out visitors get the front door; the library is for writers with an account.
     if (!session) return <Landing />;
     const workspace = await ensureWorkspace(session.user.id);
-    if (!workspace.welcomedAt) redirect("/welcome");
     return (
         <Suspense>
             <Library
@@ -32,6 +30,7 @@ export default async function Home() {
                     email: session.user.email,
                 }}
                 initialPreferences={readPreferences(workspace.preferences)}
+                firstVisit={!workspace.welcomedAt}
             />
         </Suspense>
     );

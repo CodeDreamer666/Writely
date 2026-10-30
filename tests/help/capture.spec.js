@@ -53,7 +53,7 @@ async function around(page, target, { left = 24, top = 24, width, height }) {
 
 /**
  * Screenshots `area` (one or more targets, padded; the whole window when left out) and records
- * each mark's box, label and which side of the box its label sits on.
+ * each mark's box and label.
  */
 async function capture(page, theme, id, { area, pad = 24, marks = [] } = {}) {
     const view = page.viewportSize();
@@ -96,7 +96,6 @@ async function capture(page, theme, id, { area, pad = 24, marks = [] } = {}) {
             w: round((right - x) / clip.width),
             h: round((bottom - y) / clip.height),
             label: mark.label,
-            side: mark.side ?? "below",
         });
     }
     await page.screenshot({
@@ -178,32 +177,26 @@ for (const theme of ["light", "dark"]) {
                 {
                     target: dockButton(page, "Add thought card"),
                     label: "New card",
-                    side: "above",
                 },
                 {
                     target: dockButton(page, "Thoughts"),
                     label: "Thoughts",
-                    side: "below",
                 },
                 {
                     target: dockButton(page, "Revision checklist"),
                     label: "Checklist",
-                    side: "above",
                 },
                 {
                     target: dockButton(page, "Saved drafts"),
                     label: "Drafts",
-                    side: "below",
                 },
                 {
                     target: dockButton(page, "Writing statistics"),
                     label: "Word count",
-                    side: "above",
                 },
                 {
                     target: dockButton(page, "Hide writing tools"),
                     label: "Hide",
-                    side: "below",
                 },
             ],
         });
@@ -216,7 +209,6 @@ for (const theme of ["light", "dark"]) {
                         name: "Enter focus mode",
                     }),
                     label: "Enter focus mode",
-                    side: "below",
                 },
             ],
         });
@@ -230,31 +222,29 @@ for (const theme of ["light", "dark"]) {
         const card = page
             .locator(".annotation-cloud")
             .filter({ hasText: "Too vague?" });
+        // Cropped close, so the card's small buttons stay big enough to point at on a phone.
         await shot("cards-saved", {
             area: await around(page, card, {
-                left: 40,
-                top: 70,
-                width: 720,
-                height: 300,
+                left: 24,
+                top: 40,
+                width: 330,
+                height: 210,
             }),
             pad: 0,
             marks: [
                 {
                     target: card.locator('[aria-label^="Edit thought"]'),
                     label: "Edit",
-                    side: "above",
                     pad: 3,
                 },
                 {
                     target: card.locator('[aria-label^="Collapse thought"]'),
                     label: "Fold away",
-                    side: "left",
                     pad: 3,
                 },
                 {
                     target: card.locator(".cloud-body"),
                     label: "Drag here to move the card",
-                    side: "below",
                     pad: 2,
                 },
             ],
@@ -273,24 +263,20 @@ for (const theme of ["light", "dark"]) {
                         name: "New thought",
                     }),
                     label: "New card",
-                    side: "below",
                 },
                 {
                     target: thoughts.getByRole("button", {
                         name: /all cards$/,
                     }),
                     label: "Show or hide all cards",
-                    side: "left",
                 },
                 {
                     target: row.locator('[aria-label^="Change colour"]'),
                     label: "Colour",
-                    side: "below",
                 },
                 {
                     target: row.locator('[aria-label^="Delete thought"]'),
                     label: "Delete",
-                    side: "right",
                 },
             ],
         });
@@ -317,8 +303,8 @@ for (const theme of ["light", "dark"]) {
             ],
             pad: 20,
             marks: [
-                { target: more, label: "More (⋯)", side: "above" },
-                { target: connect, label: "Connect to thought", side: "right" },
+                { target: more, label: "More (⋯)" },
+                { target: connect, label: "Connect to thought" },
             ],
         });
         await connect.click();
@@ -335,10 +321,9 @@ for (const theme of ["light", "dark"]) {
                 {
                     target: tinted,
                     label: "Connected words are tinted",
-                    side: "below",
                     pad: 3,
                 },
-                { target: card, label: "The card", side: "below", pad: 8 },
+                { target: card, label: "The card", pad: 8 },
             ],
         });
         await card.locator(".cloud-body").click();
@@ -353,7 +338,6 @@ for (const theme of ["light", "dark"]) {
                 {
                     target: remove,
                     label: "Remove the connection",
-                    side: "below",
                     pad: 3,
                 },
             ],
@@ -390,7 +374,6 @@ for (const theme of ["light", "dark"]) {
                             w: round((exitBox.width + 10) / clip.width),
                             h: round((exitBox.height + 10) / clip.height),
                             label: "Exit focus mode",
-                            side: "below",
                         },
                     ],
                 };
@@ -413,7 +396,6 @@ for (const theme of ["light", "dark"]) {
                 {
                     target: goal.locator("xpath=ancestor::button[1]"),
                     label: "Click a goal to start revising",
-                    side: "below",
                 },
             ],
         });
@@ -429,7 +411,6 @@ for (const theme of ["light", "dark"]) {
                         name: "Finish revision",
                     }),
                     label: "Finish revision",
-                    side: "above",
                 },
             ],
         });
@@ -455,23 +436,20 @@ for (const theme of ["light", "dark"]) {
         const selects = comparison.locator("select");
         await shot("revise-compare", {
             marks: [
-                { target: selects.nth(0), label: "Version", side: "below" },
+                { target: selects.nth(0), label: "Version" },
                 {
                     target: selects.nth(1),
                     label: "Compare with",
-                    side: "below",
                 },
                 {
                     target: page.getByRole("navigation", { name: "Changes" }),
                     label: "Previous / next change",
-                    side: "left",
                 },
                 {
                     target: page.getByRole("button", {
                         name: "Restore this version",
                     }),
                     label: "Restore (asks first)",
-                    side: "left",
                 },
             ],
         });
@@ -499,13 +477,12 @@ for (const theme of ["light", "dark"]) {
             ],
             pad: 24,
             marks: [
-                { target: word, label: "Word", side: "left" },
+                { target: word, label: "Word" },
                 {
                     target: page.getByRole("menuitem", {
                         name: "Export as PDF (.pdf)",
                     }),
                     label: "PDF",
-                    side: "left",
                 },
             ],
         });
@@ -546,7 +523,6 @@ for (const theme of ["light", "dark"]) {
                         name: "Show document tools",
                     }),
                     label: "Switch tools",
-                    side: "above",
                     pad: 2,
                 },
                 {
@@ -557,7 +533,6 @@ for (const theme of ["light", "dark"]) {
                         height: shell.height,
                     },
                     label: "Swipe for more",
-                    side: "above",
                     pad: 0,
                 },
             ],
@@ -583,22 +558,18 @@ for (const theme of ["light", "dark"]) {
                         name: "New card",
                     }),
                     label: "New card",
-                    side: "below",
                 },
                 {
                     target: phoneCard.locator('[aria-label^="Edit card"]'),
                     label: "Edit",
-                    side: "above",
                 },
                 {
                     target: phoneCard.locator('[aria-label^="Detach card"]'),
                     label: "Detach",
-                    side: "below",
                 },
                 {
                     target: phoneCard.locator('[aria-label^="Delete card"]'),
                     label: "Delete",
-                    side: "left",
                 },
             ],
         });
@@ -622,12 +593,10 @@ for (const theme of ["light", "dark"]) {
                         .getByRole("button", { name: "Attach selected text" })
                         .first(),
                     label: "Attach to this card",
-                    side: "below",
                 },
                 {
                     target: attach.getByRole("button", { name: "New card" }),
                     label: "Or make a new connected card",
-                    side: "below",
                 },
             ],
         });

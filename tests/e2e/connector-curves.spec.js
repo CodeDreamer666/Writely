@@ -9,7 +9,7 @@ test("curved connectors follow the card and leaf without markers", async ({
     page,
 }) => {
     test.setTimeout(90_000);
-    await page.goto("/welcome");
+    await page.goto("/");
     const seed = initial();
     const doc = seed.docs[0];
     doc.html = "<p>Alpha beta gamma delta.</p><p>Another line of writing.</p>";

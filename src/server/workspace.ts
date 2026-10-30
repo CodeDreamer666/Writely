@@ -122,13 +122,13 @@ const TRANSACTION_OPTIONS = { maxWait: 10_000, timeout: 30_000 };
 
 /**
  * The user's workspace row, created on first visit with the default universal goals and no
- * documents: a new account starts at the welcome screen rather than with sample writing.
+ * documents: a new account starts with an empty library rather than with sample writing.
  */
 export async function ensureWorkspace(userId: string) {
     const existing = await db.workspace.findUnique({ where: { userId } });
     if (existing) return existing;
     await db.$transaction(async (tx) => {
-        // The welcome page and its API calls can arrive together. Let PostgreSQL arbitrate
+        // The library and its API calls can arrive together. Let PostgreSQL arbitrate
         // creation atomically; a read followed by create races across requests and instances.
         const inserted = await tx.workspace.createMany({
             data: [{ userId }],

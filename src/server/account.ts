@@ -23,7 +23,7 @@ export async function updatePreferences(
     return next;
 }
 
-/** Records that the first-time welcome has been shown, so later visits go straight to the library. */
+/** Records that a new account has seen where Help is, so the library stops pointing it out. */
 export async function markWelcomed(userId: string) {
     await ensureWorkspace(userId);
     await db.workspace.updateMany({

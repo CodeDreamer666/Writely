@@ -83,7 +83,7 @@ model Workspace {
   nextThoughtColour Int       @default(0)
   // Appearance, writing, export and library preferences (see src/lib/writely/preferences.ts); unknown keys are ignored.
   preferences       Json      @default("{}")
-  // When the first-time welcome was shown; null means the user hasn't seen it yet.
+  // When a new account dismissed or followed the library's pointer to Help; null shows it.
   welcomedAt        DateTime?
   // The last time a welcome-back message was shown, so each absence gets at most one.
   welcomeBackAt     DateTime?

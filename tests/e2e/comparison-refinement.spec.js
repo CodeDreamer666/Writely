@@ -21,7 +21,7 @@ const html = (paragraphs) => paragraphs.map((p) => `<p>${p}</p>`).join("");
 
 /** A document whose "Revised" draft rewrites a sentence, adds a word and replaces a paragraph. */
 async function openComparison(page) {
-    await page.goto("/welcome");
+    await page.goto("/");
     const doc = {
         ...makeDoc("Comparison check", html(NEW)),
         drafts: [

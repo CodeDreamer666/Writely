@@ -55,11 +55,11 @@ const trpc = (page, path, input) =>
     );
 
 /**
- * Seeds the sample manuscripts, skips the first-time welcome and opens "The things we carry" in
+ * Seeds the sample manuscripts, dismisses the first-visit Help note and opens "The things we carry" in
  * the editor. Returns the document id.
  */
 export async function openSample(page) {
-    await page.goto("/welcome");
+    await page.goto("/");
     // The account's own universal goals, so sample checks become progress on them.
     const { defaultRevisionGoals } = await stored(page);
     const sample = migrateRevisions({ ...initial(), defaultRevisionGoals });

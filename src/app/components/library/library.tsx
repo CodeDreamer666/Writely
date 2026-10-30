@@ -66,6 +66,7 @@ import {
     TOOLTIP_CLASS,
 } from "~/config/ui";
 import {
+    FirstVisit,
     WelcomeBack,
     WritingWeek,
     WritingWeekPill,
@@ -120,9 +121,12 @@ const FOCUS_RING =
 
 export default function Library({
     initialPreferences,
+    firstVisit,
 }: {
     user: AccountUser;
     initialPreferences: Preferences;
+    /** A new account that hasn't yet been shown where Help is. */
+    firstVisit: boolean;
 }) {
     const router = useRouter(),
         pathname = usePathname(),
@@ -490,7 +494,11 @@ export default function Library({
                     </aside>
 
                     <main className="min-w-0 px-10 pt-11 pb-24 max-[1279px]:px-6 max-[1279px]:pt-8 max-sm:px-4 max-sm:pt-6">
-                        <WelcomeBack />
+                        {firstVisit ? (
+                            <FirstVisit onImported={refresh} />
+                        ) : (
+                            <WelcomeBack />
+                        )}
                         <div className="mb-9 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 max-sm:mb-6">
                             <div className="min-w-0">
                                 <h1 className="m-0 font-serif text-[52px] leading-[1.05] font-normal tracking-[-0.03em] max-xl:text-[44px] max-sm:text-[38px]">

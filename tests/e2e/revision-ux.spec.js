@@ -11,7 +11,7 @@ const editor = (page) =>
     page.getByRole("textbox", { name: "Document text", exact: true });
 
 async function seed(page, overrides = {}) {
-    await page.goto("/welcome");
+    await page.goto("/");
     const doc = {
         ...makeDoc(
             "A quieter beginning",

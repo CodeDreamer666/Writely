@@ -8,32 +8,28 @@
                 "y": 0.234,
                 "w": 0.8919,
                 "h": 0.157,
-                "label": "New card",
-                "side": "below"
+                "label": "New card"
             },
             {
                 "x": 0.7218,
                 "y": 0.0828,
                 "w": 0.1566,
                 "h": 0.1337,
-                "label": "Show or hide all cards",
-                "side": "left"
+                "label": "Show or hide all cards"
             },
             {
                 "x": 0.6875,
                 "y": 0.7435,
                 "w": 0.0912,
                 "h": 0.157,
-                "label": "Colour",
-                "side": "below"
+                "label": "Colour"
             },
             {
                 "x": 0.8429,
                 "y": 0.7435,
                 "w": 0.0912,
                 "h": 0.157,
-                "label": "Delete",
-                "side": "right"
+                "label": "Delete"
             }
         ]
     },
@@ -46,62 +42,55 @@
                 "y": 0.1698,
                 "w": 0.9179,
                 "h": 0.0692,
-                "label": "New card",
-                "side": "below"
+                "label": "New card"
             },
             {
                 "x": 0.5718,
                 "y": 0.9321,
                 "w": 0.1385,
                 "h": 0.0679,
-                "label": "Edit",
-                "side": "above"
+                "label": "Edit"
             },
             {
                 "x": 0.6846,
                 "y": 0.9321,
                 "w": 0.1385,
                 "h": 0.0679,
-                "label": "Detach",
-                "side": "below"
+                "label": "Detach"
             },
             {
                 "x": 0.7974,
                 "y": 0.9321,
                 "w": 0.1385,
                 "h": 0.0679,
-                "label": "Delete",
-                "side": "left"
+                "label": "Delete"
             }
         ]
     },
     "cards-saved": {
-        "width": 720,
-        "height": 300,
+        "width": 330,
+        "height": 210,
         "marks": [
             {
-                "x": 0.2097,
-                "y": 0.2367,
-                "w": 0.0472,
-                "h": 0.1133,
-                "label": "Edit",
-                "side": "above"
+                "x": 0.4091,
+                "y": 0.1952,
+                "w": 0.103,
+                "h": 0.1619,
+                "label": "Edit"
             },
             {
-                "x": 0.1708,
-                "y": 0.2367,
-                "w": 0.0417,
-                "h": 0.1133,
-                "label": "Fold away",
-                "side": "left"
+                "x": 0.3242,
+                "y": 0.1952,
+                "w": 0.0909,
+                "h": 0.1619,
+                "label": "Fold away"
             },
             {
-                "x": 0.0528,
-                "y": 0.2267,
-                "w": 0.2139,
-                "h": 0.27,
-                "label": "Drag here to move the card",
-                "side": "below"
+                "x": 0.0667,
+                "y": 0.181,
+                "w": 0.4667,
+                "h": 0.3857,
+                "label": "Drag here to move the card"
             }
         ]
     },
@@ -114,16 +103,14 @@
                 "y": 0.2072,
                 "w": 0.2474,
                 "h": 0.1758,
-                "label": "Word",
-                "side": "left"
+                "label": "Word"
             },
             {
                 "x": 0.3771,
                 "y": 0.3527,
                 "w": 0.2474,
                 "h": 0.1758,
-                "label": "PDF",
-                "side": "left"
+                "label": "PDF"
             }
         ]
     },
@@ -136,8 +123,7 @@
                 "y": 0.0281,
                 "w": 0.0719,
                 "h": 0.2875,
-                "label": "Enter focus mode",
-                "side": "below"
+                "label": "Enter focus mode"
             }
         ]
     },
@@ -150,30 +136,27 @@
                 "y": 0.0078,
                 "w": 0.114,
                 "h": 0.0467,
-                "label": "Exit focus mode",
-                "side": "below"
+                "label": "Exit focus mode"
             }
         ]
     },
     "link-done": {
-        "width": 459,
+        "width": 468,
         "height": 384,
         "marks": [
             {
-                "x": 0.4597,
+                "x": 0.4509,
                 "y": 0.8143,
-                "w": 0.4403,
+                "w": 0.4521,
                 "h": 0.0677,
-                "label": "Connected words are tinted",
-                "side": "below"
+                "label": "Connected words are tinted"
             },
             {
-                "x": 0.0871,
+                "x": 0.0855,
                 "y": 0.1042,
-                "w": 0.3617,
+                "w": 0.3547,
                 "h": 0.2422,
-                "label": "The card",
-                "side": "below"
+                "label": "The card"
             }
         ]
     },
@@ -182,20 +165,18 @@
         "height": 295,
         "marks": [
             {
-                "x": 0.5922,
+                "x": 0.5918,
                 "y": 0.0701,
                 "w": 0.0645,
                 "h": 0.1424,
-                "label": "More (⋯)",
-                "side": "above"
+                "label": "More (⋯)"
             },
             {
-                "x": 0.3173,
+                "x": 0.3169,
                 "y": 0.8091,
                 "w": 0.3318,
                 "h": 0.1424,
-                "label": "Connect to thought",
-                "side": "right"
+                "label": "Connect to thought"
             }
         ]
     },
@@ -208,16 +189,14 @@
                 "y": 0.5274,
                 "w": 0.9051,
                 "h": 0.1933,
-                "label": "Attach to this card",
-                "side": "below"
+                "label": "Attach to this card"
             },
             {
                 "x": 0.041,
                 "y": 0.4492,
                 "w": 0.9179,
                 "h": 0.0692,
-                "label": "Or make a new connected card",
-                "side": "below"
+                "label": "Or make a new connected card"
             }
         ]
     },
@@ -230,8 +209,7 @@
                 "y": 0.6243,
                 "w": 0.1478,
                 "h": 0.1799,
-                "label": "Remove the connection",
-                "side": "below"
+                "label": "Remove the connection"
             }
         ]
     },
@@ -244,8 +222,7 @@
                 "y": 0.3348,
                 "w": 0.8885,
                 "h": 0.1378,
-                "label": "Click a goal to start revising",
-                "side": "below"
+                "label": "Click a goal to start revising"
             }
         ]
     },
@@ -258,32 +235,28 @@
                 "y": 0.17,
                 "w": 0.4328,
                 "h": 0.0556,
-                "label": "Version",
-                "side": "below"
+                "label": "Version"
             },
             {
                 "x": 0.5086,
                 "y": 0.17,
                 "w": 0.4328,
                 "h": 0.0556,
-                "label": "Compare with",
-                "side": "below"
+                "label": "Compare with"
             },
             {
                 "x": 0.8133,
                 "y": 0.0789,
                 "w": 0.1281,
                 "h": 0.0622,
-                "label": "Previous / next change",
-                "side": "left"
+                "label": "Previous / next change"
             },
             {
                 "x": 0.7205,
                 "y": 0.9367,
                 "w": 0.1154,
                 "h": 0.0556,
-                "label": "Restore (asks first)",
-                "side": "left"
+                "label": "Restore (asks first)"
             }
         ]
     },
@@ -296,8 +269,7 @@
                 "y": 0.3169,
                 "w": 0.199,
                 "h": 0.2514,
-                "label": "Finish revision",
-                "side": "above"
+                "label": "Finish revision"
             }
         ]
     },
@@ -310,48 +282,42 @@
                 "y": 0.4648,
                 "w": 0.0754,
                 "h": 0.3803,
-                "label": "New card",
-                "side": "above"
+                "label": "New card"
             },
             {
                 "x": 0.1564,
                 "y": 0.4648,
                 "w": 0.183,
                 "h": 0.3803,
-                "label": "Thoughts",
-                "side": "below"
+                "label": "Thoughts"
             },
             {
                 "x": 0.3283,
                 "y": 0.4648,
                 "w": 0.1966,
                 "h": 0.3803,
-                "label": "Checklist",
-                "side": "above"
+                "label": "Checklist"
             },
             {
                 "x": 0.5137,
                 "y": 0.4648,
                 "w": 0.1539,
                 "h": 0.3803,
-                "label": "Drafts",
-                "side": "below"
+                "label": "Drafts"
             },
             {
                 "x": 0.6719,
                 "y": 0.4648,
                 "w": 0.1717,
                 "h": 0.3803,
-                "label": "Word count",
-                "side": "above"
+                "label": "Word count"
             },
             {
                 "x": 0.8324,
                 "y": 0.4648,
                 "w": 0.0754,
                 "h": 0.3803,
-                "label": "Hide",
-                "side": "below"
+                "label": "Hide"
             }
         ]
     },
@@ -364,16 +330,14 @@
                 "y": 0.8333,
                 "w": 0.1179,
                 "h": 0.1667,
-                "label": "Switch tools",
-                "side": "above"
+                "label": "Switch tools"
             },
             {
                 "x": 0.7538,
                 "y": 0.84,
                 "w": 0.2462,
                 "h": 0.16,
-                "label": "Swipe for more",
-                "side": "above"
+                "label": "Swipe for more"
             }
         ]
     }
