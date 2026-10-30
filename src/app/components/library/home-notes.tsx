@@ -1,11 +1,13 @@
 "use client";
 import {
     ArrowRight,
+    ChartNoAxesColumn,
     ChevronRight,
     X,
 } from "lucide-react";
 import Link from "next/link";
 import {
+    useCallback,
     useEffect,
     useMemo,
     useRef,
@@ -13,6 +15,7 @@ import {
 } from "react";
 import { localDay } from "~/lib/writely/sync";
 import { api } from "~/trpc/react";
+import { BottomSheet } from "../ui";
 
 /**
  * What: One day in milliseconds.
@@ -132,11 +135,13 @@ export function WelcomeBack() {
 }
 
 /**
- * The "Writing this week" bars as a fixed-width card for phones, made to sit in the library's
- * scrolling row beside the filters.
+ * A phone-sized "Writing this week": a button for the library's scrolling row that opens the week's
+ * bars in a bottom sheet.
  */
 export function WritingWeekPill() {
+    const [open, setOpen] = useState(false);
     const { today, week, home } = useWeek();
+    const close = useCallback(() => setOpen(false), []);
     const todayKey = localDay(today);
     const words = home.data?.wordsByDay ?? {};
     const active = new Set(home.data?.activeDays ?? []);
@@ -148,79 +153,90 @@ export function WritingWeekPill() {
     const most = Math.max(1, ...week.map((day) => words[localDay(day)] ?? 0));
 
     return (
-        <section
-            aria-label="Writing this week"
-            className="border-line bg-surface w-[250px] rounded-xl border px-4 py-3"
-        >
-            <div className="text-ink mb-2 text-[13px] font-medium">
-                Writing this week
-            </div>
-            <ol
-                className="m-0 grid h-14 list-none grid-cols-7 items-end gap-1.5 p-0"
-                aria-label="Words written each day"
+        <>
+            <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={open}
+                onClick={() => setOpen(true)}
+                className="text-muted! hover:text-ink! h-11! min-h-11! gap-2! rounded-xl! border-0! bg-transparent! px-2.5! text-[13px]! whitespace-nowrap shadow-none! hover:bg-[var(--control-hover)]!"
             >
-                {week.map((day) => {
-                    const key = localDay(day);
-                    const count = words[key] ?? 0;
-                    const isToday = key === todayKey;
-                    const height = count
-                        ? 10 + (count / most) * 30
-                        : active.has(key)
-                          ? 10
-                          : 7;
-                    return (
-                        <li
-                            key={key}
-                            className="flex flex-col items-center gap-1.5"
-                        >
-                            <span
-                                title={`${day.toLocaleDateString(undefined, { weekday: "long" })}: ${count.toLocaleString()} ${count === 1 ? "word" : "words"}`}
-                                style={{ height }}
-                                className={`block w-full max-w-[14px] rounded-full ${
-                                    isToday
-                                        ? "bg-accent"
-                                        : key > todayKey
-                                          ? "bg-[color-mix(in_srgb,var(--tint)_55%,var(--surface))]"
-                                          : "bg-tint"
-                                }`}
-                            />
-                            <span
-                                className={`text-[10.5px] leading-none ${isToday ? "text-ink font-semibold" : "text-muted"}`}
-                            >
-                                <span aria-hidden="true">
-                                    {day.toLocaleDateString(undefined, {
-                                        weekday: "narrow",
-                                    })}
-                                </span>
-                                <span className="sr-only">
-                                    {day.toLocaleDateString(undefined, {
-                                        weekday: "long",
-                                    })}
-                                    : {count} words
-                                </span>
-                            </span>
-                        </li>
-                    );
-                })}
-            </ol>
-            <p className="text-muted m-0 mt-3 text-[12.5px] leading-none">
-                {!home.data ? (
-                    " "
-                ) : total ? (
-                    <>
-                        You wrote{" "}
-                        <strong className="text-ink font-semibold">
-                            {total.toLocaleString()}
-                        </strong>{" "}
-                        {total === 1 ? "word" : "words"} this week
-                    </>
-                ) : daysWritten ? (
-                    `You wrote on ${daysWritten} ${daysWritten === 1 ? "day" : "days"} this week`
-                ) : (
-                    "Your writing will show here"
-                )}
-            </p>
-        </section>
+                <ChartNoAxesColumn
+                    size={19}
+                    strokeWidth={1.6}
+                    aria-hidden="true"
+                />
+                Writing this week
+            </button>
+            <BottomSheet open={open} onClose={close} title="Writing this week">
+                <div className="border-line bg-surface rounded-2xl border px-5 pt-5 pb-4">
+                    <ol
+                        className="m-0 grid h-[104px] list-none grid-cols-7 items-end gap-2 p-0"
+                        aria-label="Words written each day"
+                    >
+                        {week.map((day) => {
+                            const key = localDay(day);
+                            const count = words[key] ?? 0;
+                            const isToday = key === todayKey;
+                            const height = count
+                                ? 20 + (count / most) * 60
+                                : active.has(key)
+                                  ? 20
+                                  : 14;
+                            return (
+                                <li
+                                    key={key}
+                                    className="flex flex-col items-center gap-2"
+                                >
+                                    <span
+                                        style={{ height }}
+                                        className={`block w-full max-w-[18px] rounded-full ${
+                                            isToday
+                                                ? "bg-accent"
+                                                : key > todayKey
+                                                  ? "bg-[color-mix(in_srgb,var(--tint)_55%,var(--surface))]"
+                                                  : "bg-tint"
+                                        }`}
+                                    />
+                                    <span
+                                        className={`text-[11px] leading-none ${isToday ? "text-ink font-semibold" : "text-muted"}`}
+                                    >
+                                        <span aria-hidden="true">
+                                            {day.toLocaleDateString(undefined, {
+                                                weekday: "narrow",
+                                            })}
+                                        </span>
+                                        <span className="sr-only">
+                                            {day.toLocaleDateString(undefined, {
+                                                weekday: "long",
+                                            })}
+                                            : {count} words
+                                        </span>
+                                    </span>
+                                </li>
+                            );
+                        })}
+                    </ol>
+                    <p className="text-muted m-0 mt-4 text-[13.5px] leading-[1.5]">
+                        {!home.data ? (
+                            " "
+                        ) : total ? (
+                            <>
+                                You wrote{" "}
+                                <strong className="text-ink font-semibold">
+                                    {total.toLocaleString()}
+                                </strong>{" "}
+                                {total === 1 ? "word" : "words"} this week
+                            </>
+                        ) : daysWritten ? (
+                            `You wrote on ${daysWritten} ${daysWritten === 1 ? "day" : "days"} this week`
+                        ) : (
+                            "Your writing this week will show here"
+                        )}
+                    </p>
+                </div>
+            </BottomSheet>
+        </>
     );
 }
 

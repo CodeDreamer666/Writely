@@ -108,6 +108,157 @@ export function IconButton({
     );
 }
 
+/**
+ * A panel that rises from the bottom of the screen, with the same slide, scrim and swipe-down-to-close
+ * as the ⋯ menu on phones.
+ */
+export function BottomSheet({
+    open,
+    onClose,
+    title,
+    children,
+}: {
+    open: boolean;
+    onClose: () => void;
+    title: string;
+    children: ReactNode;
+}) {
+    const [entered, setEntered] = useState(false);
+    const [mounted, setMounted] = useState(false);
+    const [dragY, setDragY] = useState<number | null>(null);
+    const drag = useRef<{ y: number; time: number; active: boolean } | null>(
+        null,
+    );
+    const panel = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (open) {
+            // Two frames, so the sheet paints off-screen before it slides up.
+            let second = 0;
+            const first = requestAnimationFrame(() => {
+                setMounted(true);
+                second = requestAnimationFrame(() => {
+                    setEntered(true);
+                    panel.current?.focus({ preventScroll: true });
+                });
+            });
+            return () => {
+                cancelAnimationFrame(first);
+                cancelAnimationFrame(second);
+            };
+        }
+        // Keep the sheet mounted while it slides away.
+        const done = setTimeout(() => {
+            setMounted(false);
+            setEntered(false);
+            setDragY(null);
+        }, 300);
+        return () => clearTimeout(done);
+    }, [open]);
+    useEffect(() => {
+        const el = panel.current;
+        if (!open || !el) return;
+        // A downward pull is for closing the sheet: stop the browser turning it into pull-to-refresh.
+        const move = (e: globalThis.TouchEvent) => {
+            const start = drag.current;
+            if (
+                start?.active &&
+                e.touches[0]!.clientY > start.y &&
+                e.cancelable
+            )
+                e.preventDefault();
+        };
+        const key = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        el.addEventListener("touchmove", move, { passive: false });
+        document.addEventListener("keydown", key);
+        const root = document.documentElement.style;
+        const before = root.overscrollBehaviorY;
+        root.overscrollBehaviorY = "contain";
+        return () => {
+            el.removeEventListener("touchmove", move);
+            document.removeEventListener("keydown", key);
+            root.overscrollBehaviorY = before;
+        };
+    }, [open, onClose]);
+    const touchStart = (e: TouchEvent<HTMLDivElement>) => {
+        // Only a pull from the top of the sheet closes it; otherwise its content scrolls.
+        drag.current = {
+            y: e.touches[0]!.clientY,
+            time: e.timeStamp,
+            active: e.currentTarget.scrollTop <= 0,
+        };
+    };
+    const touchMove = (e: TouchEvent<HTMLDivElement>) => {
+        const start = drag.current;
+        if (!start?.active) return;
+        const dy = e.touches[0]!.clientY - start.y;
+        setDragY(dy > 0 ? dy : 0);
+    };
+    const touchEnd = (e: TouchEvent<HTMLDivElement>) => {
+        const start = drag.current;
+        drag.current = null;
+        if (!start?.active || dragY === null) return;
+        const speed = dragY / Math.max(1, e.timeStamp - start.time);
+        if (dragY > 100 || (dragY > 24 && speed > 0.5)) onClose();
+        else setDragY(null);
+    };
+    if (!open && !mounted) return null;
+    const shown = open && entered;
+    return createPortal(
+        <>
+            <div
+                aria-hidden="true"
+                onClick={onClose}
+                className="fixed inset-0 z-[34] bg-black/40 motion-reduce:transition-none"
+                style={{
+                    opacity: shown
+                        ? dragY === null
+                            ? 1
+                            : Math.max(0, 1 - dragY / 400)
+                        : 0,
+                    transition:
+                        dragY === null
+                            ? "opacity 280ms cubic-bezier(0.32, 0.72, 0, 1)"
+                            : "none",
+                }}
+            />
+            <div
+                ref={panel}
+                role="dialog"
+                aria-modal="true"
+                aria-label={title}
+                tabIndex={-1}
+                className="fixed inset-x-0 bottom-0 z-[35] max-h-[85dvh] w-full overflow-y-auto rounded-t-[14px] bg-[var(--surface)] px-4 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.18)] outline-none motion-reduce:transition-none"
+                onTouchStart={touchStart}
+                onTouchMove={touchMove}
+                onTouchEnd={touchEnd}
+                onTouchCancel={() => setDragY(null)}
+                style={{
+                    transform: shown
+                        ? `translateY(${dragY ?? 0}px)`
+                        : "translateY(100%)",
+                    transition:
+                        dragY === null
+                            ? "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)"
+                            : "none",
+                    overscrollBehavior: "contain",
+                }}
+            >
+                <span
+                    aria-hidden="true"
+                    className="bg-line mx-auto mb-3 block h-1 w-10 rounded-full"
+                />
+                <div className="text-ink px-1 pt-1 pb-4 text-[20px] font-medium">
+                    {title}
+                </div>
+                {children}
+            </div>
+        </>,
+        document.body,
+    );
+}
+
 export type MenuItem = {
     label: string;
     /** Shown beside the label when the menu opens as a bottom sheet on phones. */
