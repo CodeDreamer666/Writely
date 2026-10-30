@@ -32,7 +32,8 @@ export async function saveFeedback(
     const saved = await db.feedback.create({
         data: {
             userId: user.id,
-            category: input.category,
+            // Feedback no longer has a kind; the column keeps it for older rows.
+            category: "other",
             message: input.message,
             contactEmail: input.allowContact ? user.email : null,
             page: input.page ?? null,

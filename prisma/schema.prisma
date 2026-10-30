@@ -194,7 +194,7 @@ model Feedback {
   id           String   @id @default(cuid())
   userId       String?
   user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  // idea | bug | praise | other
+  // idea | bug | praise | other on older rows; the form no longer asks, so new rows are other.
   category     String
   message      String
   contactEmail String?

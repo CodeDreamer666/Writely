@@ -35,7 +35,6 @@ export async function sendResetCode(email: string, otp: string) {
 
 /** Emails a copy of new feedback to FEEDBACK_EMAIL. Does nothing when email isn't configured. */
 export async function sendFeedbackEmail(feedback: {
-    category: string;
     message: string;
     contactEmail: string | null;
     page: string | null;
@@ -53,7 +52,7 @@ export async function sendFeedbackEmail(feedback: {
             ...(feedback.contactEmail
                 ? { reply_to: feedback.contactEmail }
                 : {}),
-            subject: `Writely feedback: ${feedback.category}`,
+            subject: "Writely feedback",
             text: `${feedback.message}
 
 —

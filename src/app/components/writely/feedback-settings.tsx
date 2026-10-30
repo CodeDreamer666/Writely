@@ -9,27 +9,18 @@ import {
     type FormEvent,
 } from "react";
 import {
-    FEEDBACK_CATEGORIES,
     FEEDBACK_MAX,
     FEEDBACK_MIN,
-    type FeedbackCategory,
 } from "~/lib/writely/feedback";
 import { api } from "~/trpc/react";
-import {
-    Segmented,
-    SettingsCard,
-} from "./settings-controls";
+import { SettingsCard } from "./settings-controls";
 import { PRIMARY_BUTTON } from "~/config/ui";
 
-/** The Feedback section of Settings: pick a kind and write a message. */
+/** The Feedback section of Settings: write a message and send it. */
 export function FeedbackSettings() {
-    const [category, setCategory] = useState<FeedbackCategory>(
-        FEEDBACK_CATEGORIES[0][0],
-    );
     const [message, setMessage] = useState("");
     const [sent, setSent] = useState(false);
     const submit = api.feedback.submit.useMutation();
-    const kindId = useId();
     const messageId = useId();
 
     const length = message.trim().length;
@@ -40,7 +31,6 @@ export function FeedbackSettings() {
         if (!ready) return;
         submit.mutate(
             {
-                category,
                 message,
                 allowContact: false,
                 page: "settings",
@@ -92,20 +82,6 @@ export function FeedbackSettings() {
         <form onSubmit={send} className="grid gap-5">
             <SettingsCard divided={false} className="grid gap-5 p-5">
                 <div className="grid gap-2">
-                    <span id={kindId} className="text-[13.5px] font-medium">
-                        What kind of feedback is it?
-                    </span>
-                    <Segmented
-                        labelledBy={kindId}
-                        value={category}
-                        onChange={setCategory}
-                        options={FEEDBACK_CATEGORIES.map(([value, label]) => ({
-                            value,
-                            label,
-                        }))}
-                    />
-                </div>
-                <div className="grid gap-2">
                     <label
                         htmlFor={messageId}
                         className="m-0 text-[13.5px] font-medium"
@@ -122,23 +98,18 @@ export function FeedbackSettings() {
                         maxLength={FEEDBACK_MAX}
                         rows={7}
                         placeholder="What happened, or what would you like to see?"
-                        aria-describedby={`${messageId}-count`}
+                        aria-describedby={`${messageId}-hint`}
                         className="min-h-[160px] w-full resize-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     />
-                    <p
-                        id={`${messageId}-count`}
-                        className="text-muted m-0 flex justify-between gap-3 text-[12px] tabular-nums"
-                    >
-                        <span>
-                            {length > 0 && length < FEEDBACK_MIN
-                                ? `A little more detail helps (${FEEDBACK_MIN} characters at least).`
-                                : ""}
-                        </span>
-                        <span>
-                            {message.length.toLocaleString()} /{" "}
-                            {FEEDBACK_MAX.toLocaleString()}
-                        </span>
-                    </p>
+                    {length > 0 && length < FEEDBACK_MIN && (
+                        <p
+                            id={`${messageId}-hint`}
+                            className="text-muted m-0 text-[12px]"
+                        >
+                            A little more detail helps ({FEEDBACK_MIN}{" "}
+                            characters at least).
+                        </p>
+                    )}
                 </div>
             </SettingsCard>
             {submit.isError && (

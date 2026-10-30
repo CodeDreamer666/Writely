@@ -1,4 +1,8 @@
-import { describe, expect, it } from "vitest";
+import {
+    describe,
+    expect,
+    it,
+} from "vitest";
 import {
     FEEDBACK_MAX,
     FEEDBACK_MIN,
@@ -6,7 +10,6 @@ import {
 } from "../../src/lib/writely/feedback";
 
 const valid = {
-    category: "idea" as const,
     message: "Please add a dark theme for night writing.",
     allowContact: false,
 };
@@ -35,13 +38,17 @@ describe("feedbackSchema", () => {
         ).toBe(false);
     });
 
-    it("rejects whitespace-only messages and unknown categories", () => {
+    it("rejects whitespace-only messages", () => {
         expect(
             feedbackSchema.safeParse({ ...valid, message: " ".repeat(40) })
                 .success,
         ).toBe(false);
+    });
+
+    it("accepts messages far longer than the old 2,000 characters", () => {
         expect(
-            feedbackSchema.safeParse({ ...valid, category: "spam" }).success,
-        ).toBe(false);
+            feedbackSchema.safeParse({ ...valid, message: "x".repeat(10_000) })
+                .success,
+        ).toBe(true);
     });
 });
