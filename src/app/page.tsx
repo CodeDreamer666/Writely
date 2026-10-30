@@ -30,7 +30,6 @@ export default async function Home() {
                     email: session.user.email,
                 }}
                 initialPreferences={readPreferences(workspace.preferences)}
-                firstVisit={!workspace.welcomedAt}
             />
         </Suspense>
     );

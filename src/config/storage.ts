@@ -22,7 +22,7 @@ export const THEME_COOKIE = "writely-theme";
  * Writely kept its documents. They are moved into a new account once.
  *
  * Used in:
- * - src/app/components/library/home-notes.tsx (readLegacyDocuments, FirstVisit)
+ * - src/app/components/library/home-notes.tsx (readLegacyDocuments, LegacyImport)
  * - tests/e2e/*.spec.js (to seed test data)
  *
  * Effect: Must match the key the old version used. Changing it means

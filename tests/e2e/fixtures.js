@@ -55,7 +55,7 @@ const trpc = (page, path, input) =>
     );
 
 /**
- * Seeds the sample manuscripts, dismisses the first-visit Help note and opens "The things we carry" in
+ * Seeds the sample manuscripts, and opens "The things we carry" in
  * the editor. Returns the document id.
  */
 export async function openSample(page) {

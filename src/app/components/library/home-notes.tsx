@@ -85,16 +85,9 @@ function readLegacyDocuments() {
     return null;
 }
 
-/**
- * A new account's first look at the library: a quiet line saying where the Help guides are,
- * with the writing from the browser-only prototype, if any, moved in. The line stays until it is
- * dismissed or followed.
- */
-export function FirstVisit({ onImported }: { onImported: () => void }) {
-    const welcomed = api.account.markWelcomed.useMutation();
+/** Moves writing from the browser-only prototype into the account, once. It shows nothing. */
+export function LegacyImport({ onImported }: { onImported: () => void }) {
     const create = api.documents.create.useMutation();
-    const [shown, setShown] = useState(true);
-    const [imported, setImported] = useState(false);
     const started = useRef(false);
     useEffect(() => {
         if (started.current) return;
@@ -111,46 +104,12 @@ export function FirstVisit({ onImported }: { onImported: () => void }) {
                 {
                     onSuccess: () => {
                         localStorage.removeItem(LEGACY_STORAGE_KEY);
-                        setImported(true);
                         onImported();
                     },
                 },
             );
     }, [create, onImported]);
-    const done = () => {
-        setShown(false);
-        welcomed.mutate();
-    };
-
-    if (!shown) return null;
-    return (
-        <div
-            role="status"
-            className="border-line bg-surface mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border py-2 pr-2 pl-5 text-[14px]"
-        >
-            <span className="font-serif text-[15px]">
-                New to Writely? Short guides live in Settings › Help.
-                {imported && " Your writing from this browser is here too."}
-            </span>
-            <span className="ml-auto flex items-center gap-1">
-                <Link
-                    href="/settings#help"
-                    onClick={done}
-                    className="text-accent inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-[13px] no-underline hover:bg-[var(--control-hover)] focus-visible:[box-shadow:0_0_0_2px_var(--control-ring)] focus-visible:outline-none"
-                >
-                    Open Help
-                    <ArrowRight size={14} aria-hidden="true" />
-                </Link>
-                <button
-                    aria-label="Dismiss"
-                    className="size-10! min-h-10! min-w-10! p-0!"
-                    onClick={done}
-                >
-                    <X size={15} />
-                </button>
-            </span>
-        </div>
-    );
+    return null;
 }
 
 /**
