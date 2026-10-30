@@ -68,6 +68,7 @@ import {
 import {
     WelcomeBack,
     WritingWeek,
+    WritingWeekPill,
 } from "./home-notes";
 
 /**
@@ -429,7 +430,7 @@ export default function Library({
                             aria-label="Library"
                             className="min-w-0 min-[1024px]:max-xl:flex-1"
                         >
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1279px]:grid max-[1279px]:max-w-[440px] max-[1279px]:grid-cols-2 max-[1279px]:gap-2 max-sm:max-w-none max-sm:gap-1.5">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-[1279px]:grid max-[1279px]:max-w-[440px] max-[1279px]:grid-cols-2 max-[1279px]:gap-2 max-sm:max-w-none max-sm:[scrollbar-width:none] max-sm:gap-1.5 max-sm:[&::-webkit-scrollbar]:hidden">
                                 {FILTERS.map(([value, label, Icon]) => {
                                     const current = filter === value;
                                     const count = counts.data?.[value];
@@ -478,9 +479,12 @@ export default function Library({
                                         </li>
                                     );
                                 })}
+                                <li className="shrink-0 self-start sm:hidden">
+                                    <WritingWeekPill />
+                                </li>
                             </ul>
                         </nav>
-                        <div className="border-line border-t pt-7 max-[1279px]:pt-4 min-[1024px]:max-[1279px]:hidden">
+                        <div className="border-line border-t pt-7 max-[1279px]:pt-4 max-sm:hidden min-[1024px]:max-[1279px]:hidden">
                             <WritingWeek />
                         </div>
                     </aside>
