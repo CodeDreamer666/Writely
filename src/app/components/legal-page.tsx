@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -17,9 +18,11 @@ export function LegalPage({
             <article className="mx-auto w-full max-w-[680px]">
                 <Link
                     href="/"
-                    className="text-accent text-[14px] no-underline hover:underline"
+                    aria-label="Back to Writely"
+                    title="Back to Writely"
+                    className="text-muted hover:text-ink -ml-3 inline-flex size-11 items-center justify-center rounded-lg no-underline hover:bg-[var(--control-hover)] focus-visible:[box-shadow:0_0_0_2px_var(--control-ring)] focus-visible:outline-none"
                 >
-                    ← Writely
+                    <ArrowLeft size={18} strokeWidth={1.6} aria-hidden="true" />
                 </Link>
                 <h1 className="mt-6 mb-2 font-serif text-[40px] leading-[1.1] font-normal tracking-[-0.03em] max-md:text-[32px]">
                     {title}
