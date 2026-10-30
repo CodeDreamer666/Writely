@@ -41,7 +41,6 @@ test("settings header returns to the correct parent", async ({ page }) => {
             "export",
             "checklist",
             "shortcuts",
-            "help",
             "account",
         ]) {
             await page.goto(`/settings#${hash}`);
@@ -81,7 +80,6 @@ test("settings shows one section at a time from the sidebar and keeps writing an
         "Document export",
         "Revision checklist",
         "Keyboard shortcuts",
-        "Help",
         "Account",
     ]) {
         const button = sections.getByRole("button", { name, exact: true });

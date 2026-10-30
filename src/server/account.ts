@@ -23,7 +23,7 @@ export async function updatePreferences(
     return next;
 }
 
-/** Records that a new account has seen where Help is, so the library stops pointing it out. */
+/** Sets welcomedAt; nothing in the app reads it any more. */
 export async function markWelcomed(userId: string) {
     await ensureWorkspace(userId);
     await db.workspace.updateMany({

@@ -2,7 +2,6 @@
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
     ChevronRight,
-    CircleHelp,
     FileDown,
     Keyboard,
     ListChecks,
@@ -44,7 +43,6 @@ import {
 } from "./settings-controls";
 import { ShortcutList } from "./shortcuts";
 import { WritingSettings } from "./writing-settings";
-import { TopicList } from "../../help/topic-list";
 import {
     Button,
     DeleteDialog,
@@ -74,7 +72,6 @@ const SECTIONS = [
     ["export", "Document export", FileDown],
     ["checklist", "Revision checklist", ListChecks],
     ["shortcuts", "Keyboard shortcuts", Keyboard],
-    ["help", "Help", CircleHelp],
     ["feedback", "Feedback", MessageSquare],
     ["account", "Account", UserRound],
 ] as const satisfies readonly (readonly [string, string, LucideIcon])[];
@@ -425,15 +422,6 @@ export default function SettingsPage({
                                 <SettingsCard className="px-5 py-4">
                                     <ShortcutList columns={2} />
                                 </SettingsCard>
-                            </SettingsSection>
-                        )}
-                        {shown === "help" && (
-                            <SettingsSection
-                                id="help-title"
-                                title="Help"
-                                hint="Short guides to the parts of Writely that aren’t obvious at first glance."
-                            >
-                                <TopicList />
                             </SettingsSection>
                         )}
                         {shown === "feedback" && (
