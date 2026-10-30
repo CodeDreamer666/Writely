@@ -428,14 +428,14 @@ export default function Library({
                             New document
                         </Button>
                         <nav aria-label="Library" className="min-w-0">
-                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-lg:relative max-lg:max-w-[440px] max-lg:flex-row max-lg:gap-2 max-lg:overflow-x-auto max-md:max-w-none max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden">
+                            <ul className="m-0 flex list-none flex-col gap-1 p-0 max-lg:relative max-lg:w-full max-lg:[scrollbar-width:none] max-lg:flex-row max-lg:gap-2 max-lg:overflow-x-auto max-lg:[&::-webkit-scrollbar]:hidden">
                                 {FILTERS.map(([value, label, Icon]) => {
                                     const current = filter === value;
                                     const count = counts.data?.[value];
                                     return (
                                         <li
                                             key={value}
-                                            className="shrink-0 max-lg:flex-none"
+                                            className="shrink-0 max-lg:flex-auto"
                                         >
                                             <button
                                                 aria-current={
@@ -449,7 +449,7 @@ export default function Library({
                                                                 : value,
                                                     })
                                                 }
-                                                className={`h-[50px]! min-h-[50px]! w-full! justify-start! gap-3.5! rounded-xl! border-0! px-4! text-[15px]! shadow-none! max-lg:h-11! max-lg:min-h-11! max-lg:gap-2! max-lg:px-3! max-lg:text-[13.5px]! max-md:px-2.5! max-md:text-[13px]! ${
+                                                className={`h-[50px]! min-h-[50px]! w-full! justify-start! gap-3.5! rounded-xl! border-0! px-4! text-[15px]! shadow-none! max-lg:h-11! max-lg:min-h-11! max-lg:justify-center! max-lg:gap-2! max-lg:px-3! max-lg:text-[13.5px]! max-lg:whitespace-nowrap max-md:px-2.5! max-md:text-[13px]! ${
                                                     current
                                                         ? "bg-tint! text-ink! font-semibold"
                                                         : "text-muted! hover:text-ink! bg-transparent! hover:bg-[var(--control-hover)]!"
@@ -465,7 +465,7 @@ export default function Library({
                                                             : "text-muted"
                                                     }
                                                 />
-                                                <span className="flex-1 text-left">
+                                                <span className="flex-1 text-left max-lg:flex-none">
                                                     {label}
                                                 </span>
                                                 {count !== undefined && (
@@ -481,7 +481,7 @@ export default function Library({
                                     );
                                 })}
                                 {/* Phones and tablets: a button that opens the week in a bottom sheet. */}
-                                <li className="shrink-0 self-start lg:hidden">
+                                <li className="shrink-0 max-lg:flex-auto lg:hidden [&>button]:max-lg:w-full [&>button]:max-lg:justify-center">
                                     <WritingWeekPill />
                                 </li>
                             </ul>
