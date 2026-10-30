@@ -32,5 +32,3 @@ export const auth = betterAuth({
         deleteUser: { enabled: true },
     },
 });
-
-export type Session = typeof auth.$Infer.Session;

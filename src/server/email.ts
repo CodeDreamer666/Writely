@@ -2,7 +2,7 @@ import "server-only";
 import { env } from "~/env";
 
 /** Whether feedback copies can actually reach an inbox. */
-export const canSendEmail = Boolean(env.RESEND_API_KEY && env.EMAIL_FROM);
+const canSendEmail = Boolean(env.RESEND_API_KEY && env.EMAIL_FROM);
 
 /** Emails a copy of new feedback to FEEDBACK_EMAIL. Does nothing when email isn't configured. */
 export async function sendFeedbackEmail(feedback: {

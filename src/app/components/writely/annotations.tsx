@@ -70,7 +70,7 @@ type Gesture = {
 };
 
 // The outline is drawn at the card's real size, so its corners are never stretched.
-export function CardShape({ layout }: { layout: CardLayout }) {
+function CardShape({ layout }: { layout: CardLayout }) {
     return (
         <svg
             className={

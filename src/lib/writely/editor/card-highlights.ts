@@ -13,7 +13,7 @@ import {
 import type { Card } from "../types";
 
 type Link = { from: number; to: number; cardId: string; color: string };
-export type HighlightRange = {
+type HighlightRange = {
     from: number;
     to: number;
     cardId: string;
@@ -23,7 +23,7 @@ export type HighlightRange = {
     opacity: number;
 };
 
-export const cardHighlightKey = new PluginKey<DecorationSet>(
+const cardHighlightKey = new PluginKey<DecorationSet>(
     "cardTextHighlights",
 );
 

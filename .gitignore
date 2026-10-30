@@ -34,3 +34,6 @@ evidence/
 *.pem
 .DS_Store
 Thumbs.db
+
+# tool run state
+.markloop/

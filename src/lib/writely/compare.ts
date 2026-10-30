@@ -22,7 +22,7 @@ export type Block =
     /** A paragraph only in the later version, or the new side of a rewritten one. */
     | { kind: "added"; text: string; change: number };
 
-export type Comparison = { blocks: Block[]; changes: number };
+type Comparison = { blocks: Block[]; changes: number };
 
 /**
  * What: How alike two paragraphs (or sentences) must be, from 0 to 1, to be compared as an
@@ -34,7 +34,7 @@ export type Comparison = { blocks: Block[]; changes: number };
  * Effect: Raising it shows more passages as rewritten wholesale; lowering it compares more of them
  * word by word.
  */
-export const COMPARE_THRESHOLDS = {
+const COMPARE_THRESHOLDS = {
     paragraph: 0.5,
     sentence: 0.5,
     /**
@@ -99,7 +99,7 @@ const words = (text: string) =>
     text.toLowerCase().match(/[\p{L}\p{N}']+/gu) ?? [];
 
 /** How much two passages share, from 0 to 1, counting words regardless of order. */
-export function similarity(x: string, y: string) {
+function similarity(x: string, y: string) {
     const a = words(x),
         b = words(y);
     if (!a.length && !b.length) return 1;

@@ -33,7 +33,7 @@ const decode = (text: string) =>
     });
 
 /** Curly quotes and dashes match their plain keyboard forms in search. */
-export const normalizeForSearch = (text: string) =>
+const normalizeForSearch = (text: string) =>
     text
         .replace(/[‘’‛′]/g, "'")
         .replace(/[“”‟″]/g, '"')

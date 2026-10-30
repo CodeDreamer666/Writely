@@ -63,7 +63,7 @@ function connect() {
  */
 const SAVE_DELAY = 400;
 
-export type PreferenceSaveState = "idle" | "saving" | "error";
+type PreferenceSaveState = "idle" | "saving" | "error";
 
 /**
  * The signed-in user's preferences. Changes apply immediately everywhere in the app and are saved

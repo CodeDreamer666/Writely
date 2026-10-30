@@ -61,7 +61,7 @@ export function collapsedCardRect(
     return { x, y, width, height };
 }
 
-export function cardZones(g: Geometry): Zone[] {
+function cardZones(g: Geometry): Zone[] {
     const space = Math.max(
         0,
         Math.min(g.paperLeft - 28, g.width - g.paperRight - 28),
@@ -100,7 +100,7 @@ export function constrainSideCard(
 // Expanded cards may be placed anywhere in the workspace, including over the
 // document; only the folded leaf is held to the margins.
 const paperCenter = (g: Geometry) => (g.paperLeft + g.paperRight) / 2;
-export const cardSide = (rect: Rect, g: Geometry): Side =>
+const cardSide = (rect: Rect, g: Geometry): Side =>
     rect.x + rect.width / 2 < paperCenter(g) ? "left" : "right";
 export const cardMaxWidth = (g: Geometry) =>
     Math.max(0, ...cardZones(g).map((zone) => zone.max - zone.min));

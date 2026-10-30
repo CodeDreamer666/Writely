@@ -38,7 +38,6 @@ export const preferencesSchema = z.object({
 });
 
 export type Preferences = z.infer<typeof preferencesSchema>;
-export type Theme = Preferences["theme"];
 
 /**
  * What: Old preference values from earlier versions of Settings and the

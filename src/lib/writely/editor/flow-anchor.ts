@@ -6,7 +6,7 @@ import {
 } from "react";
 
 /** "gentle" follows the line once it nears the bottom; "centred" is typewriter scrolling. */
-export type FlowMode = "gentle" | "centred";
+type FlowMode = "gentle" | "centred";
 
 type ScrollHandler = (view: EditorView) => boolean;
 
@@ -34,7 +34,7 @@ export function flowAdjustment(
 }
 
 /** Keeps continuous writing inside a comfortable focus band, while respecting deliberate navigation. */
-export function installFlowAnchor(
+function installFlowAnchor(
     editor: Editor,
     workspace: HTMLElement,
     mode: FlowMode = "gentle",

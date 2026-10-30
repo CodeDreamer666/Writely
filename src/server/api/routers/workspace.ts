@@ -93,7 +93,7 @@ export const documentInput = z.object({
     cards: z.array(card).max(10_000).optional(),
 });
 
-export const workspaceChangesInput = z.object({
+const workspaceChangesInput = z.object({
     // New cards cycle through every preset, so the next colour is always one of them.
     nextThoughtColour: z
         .number()

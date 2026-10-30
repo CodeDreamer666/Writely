@@ -30,7 +30,7 @@ export const settled = (userId: string) =>
  * Loads the user's workspace in the shape the editor works with, or null if it was never created.
  * With `documentId`, only that document is included (the editor opens one document at a time).
  */
-export async function loadWorkspace(
+async function loadWorkspace(
     userId: string,
     documentId?: string,
 ): Promise<WorkspaceData | null> {
@@ -178,7 +178,7 @@ export function saveWorkspace(userId: string, changes: WorkspaceChangesInput) {
 }
 
 /** Runs a write after the user's earlier saves, so loads and saves see a consistent order. */
-export function queueSave<T>(userId: string, write: () => Promise<T>) {
+function queueSave<T>(userId: string, write: () => Promise<T>) {
     const save = Promise.resolve(settled(userId)).then(write);
     pendingSaves.set(userId, save);
     void save

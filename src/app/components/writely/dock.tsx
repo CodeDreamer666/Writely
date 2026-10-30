@@ -30,7 +30,7 @@ import { TOOLTIP_CLASS } from "~/config/ui";
  * Effect: Changes the size, spacing and pressed style of every dock button.
  * On narrow screens the buttons show only their icon.
  */
-export const DOCK_BUTTON =
+const DOCK_BUTTON =
     "dock-button relative h-11! min-h-11! min-w-11! gap-2! rounded-[10px]! border-0! px-3! text-[12.5px]! font-medium text-muted! whitespace-nowrap hover:bg-[color-mix(in_srgb,var(--text)_6%,transparent)]! hover:text-ink! aria-pressed:bg-tint! aria-pressed:text-accent! max-md:px-0! max-md:w-11!";
 
 export function DockButton({

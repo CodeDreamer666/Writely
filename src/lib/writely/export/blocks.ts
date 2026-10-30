@@ -24,7 +24,7 @@ export type Block =
     | { type: "code"; lines: Run[][] }
     | { type: "rule" };
 
-export type ListItem = { blocks: Block[]; checked?: boolean };
+type ListItem = { blocks: Block[]; checked?: boolean };
 
 type Marks = Omit<Run, "text" | "break">;
 

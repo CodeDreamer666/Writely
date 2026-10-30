@@ -1,13 +1,12 @@
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import type { EditorView } from "@tiptap/pm/view";
 
-export type WordTarget = {
+type WordTarget = {
     kind: "word";
     from: number;
     to: number;
     quote: string;
 };
-export type WordLine = {
+type WordLine = {
     x1: number;
     x2: number;
     y: number;
@@ -97,27 +96,4 @@ export function wordLineFromRects(
         x2 = (right - bounds.left) / scaleX + workspace.scrollLeft,
         y = (bottom - bounds.top) / scaleY + workspace.scrollTop;
     return { x1, x2, y, point: { x: (x1 + x2) / 2, y } };
-}
-
-export function measureWordLines(
-    view: EditorView,
-    workspace: HTMLElement,
-    words: WordTarget[],
-) {
-    const result = new Map<string, WordTarget & WordLine>();
-    for (const word of words) {
-        try {
-            const start = view.domAtPos(word.from, 1),
-                end = view.domAtPos(word.to, -1),
-                range = view.dom.ownerDocument.createRange();
-            range.setStart(start.node, start.offset);
-            range.setEnd(end.node, end.offset);
-            const line = wordLineFromRects(range.getClientRects(), workspace);
-            if (line)
-                result.set(word.from + ":" + word.to, { ...word, ...line });
-        } catch {
-            /* A just-removed word has no live DOM range until the next transaction. */
-        }
-    }
-    return result;
 }

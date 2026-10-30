@@ -9,17 +9,11 @@ import {
 import { createPortal } from "react-dom";
 import { CARD_COLOUR_PRESETS } from "~/config/cards";
 
-/** The preset name for a stored card colour, or undefined for a colour saved before the presets. */
-export const cardColourName = (bg: string) =>
-    CARD_COLOUR_PRESETS.find(
-        ([, preset]) => preset.toLowerCase() === bg.toLowerCase(),
-    )?.[0];
-
 /**
  * The card colour presets as one radio group: a swatch per pastel, arrow keys move between them.
  * Used on a selected card and in the Thoughts drawer.
  */
-export function CardColours({
+function CardColours({
     label,
     value,
     onChange,

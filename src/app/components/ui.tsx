@@ -72,42 +72,6 @@ export function Button({
         </Tooltip.Root>
     );
 }
-export function IconButton({
-    icon: I,
-    label,
-    ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-    icon: LucideIcon;
-    label: string;
-}) {
-    return (
-        <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-                <button
-                    className={
-                        "icon-button [height:44px] [width:44px] shrink-0 [padding:12px] [&[aria-pressed='true']]:[color:var(--accent)] [&[aria-pressed='true']]:[background:var(--tint)] [.workspace-tools_&]:[min-width:44px] [.workspace-tools_&]:[font-size:inherit] [.workspace-tools_&]:[color:var(--text)] max-md:[.workspace-tools_&]:[width:44px] [.workspace-tools_&:active]:[border-top-color:var(--control-border)] [.workspace-tools_&:active]:[border-right-color:var(--control-border)] [.workspace-tools_&:active]:[border-bottom-color:var(--control-border)] [.workspace-tools_&:active]:[border-left-color:var(--control-border)] [.workspace-tools_&:active]:[color:var(--accent)] [.workspace-tools_&:active]:[background:var(--tint)] [.workspace-tools_&:hover]:[border-top-color:var(--control-border)] [.workspace-tools_&:hover]:[border-right-color:var(--control-border)] [.workspace-tools_&:hover]:[border-bottom-color:var(--control-border)] [.workspace-tools_&:hover]:[border-left-color:var(--control-border)] [.workspace-tools_&:hover]:[background:var(--control-hover)] [.workspace-tools_&[aria-pressed='true']]:[color:var(--accent)] [.workspace-tools_&[aria-pressed='true']]:[background:var(--tint)]"
-                    }
-                    aria-label={label}
-                    {...props}
-                >
-                    <I size={18} />
-                </button>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-                <Tooltip.Content
-                    className={
-                        "tooltip [z-index:40] [max-width:240px] [border-radius:4px] [padding:8px_12px] [font-size:11px] [line-height:1.6] [color:var(--bg)] [background:var(--text)] [&_svg]:[fill:var(--text)]"
-                    }
-                    sideOffset={8}
-                >
-                    {label}
-                    <Tooltip.Arrow className="tooltip-arrow" />
-                </Tooltip.Content>
-            </Tooltip.Portal>
-        </Tooltip.Root>
-    );
-}
-
 /**
  * A panel that rises from the bottom of the screen, with the same slide, scrim and swipe-down-to-close
  * as the ⋯ menu on phones.
@@ -259,7 +223,7 @@ export function BottomSheet({
     );
 }
 
-export type MenuItem = {
+type MenuItem = {
     label: string;
     /** Shown beside the label when the menu opens as a bottom sheet on phones. */
     icon?: LucideIcon;

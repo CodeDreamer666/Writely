@@ -11,7 +11,7 @@ export type ConnectorTarget = {
     orphaned?: boolean;
 };
 
-export type Connector = {
+type Connector = {
     id: string;
     anchor?: Anchor;
     target: ConnectorTarget;

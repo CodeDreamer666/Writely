@@ -19,7 +19,7 @@ export type TextObstacle = {
  * Effect: A larger value keeps connector lines further from the text, so they
  * take longer detours. A smaller value lets them pass closer to words.
  */
-export const TEXT_CLEARANCE = 2;
+const TEXT_CLEARANCE = 2;
 
 // Range rectangles describe ink-bearing runs (including punctuation), rather
 // than block boxes, so real inter-line and inter-word whitespace stays usable.

@@ -5,7 +5,7 @@ import {
 } from "react";
 
 // Phones and tablets: below 1024px. From 1024px on, every device gets the desktop layout.
-export const COMPACT_LAYOUT = "(max-width: 1023.98px)";
+const COMPACT_LAYOUT = "(max-width: 1023.98px)";
 
 const subscribe = (notify: () => void) => {
     const media = window.matchMedia(COMPACT_LAYOUT);

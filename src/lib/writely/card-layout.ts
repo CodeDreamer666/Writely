@@ -9,7 +9,7 @@ import {
     CARD_MAX_WIDTH,
 } from "../../config/cards";
 
-export type CardContent = {
+type CardContent = {
     left: number;
     top: number;
     width: number;
@@ -44,7 +44,7 @@ if (typeof document !== "undefined")
     document.fonts?.addEventListener?.("loadingdone", () => textWidths.clear());
 
 // Width of each authored line laid out on a single row, used to choose a column width.
-export function naturalTextLines(text?: string | null) {
+function naturalTextLines(text?: string | null) {
     const source = String(text || "An unfinished thought…");
     const cached = textWidths.get(source);
     if (cached) return cached;

@@ -192,12 +192,3 @@ export async function exportSource(userId: string, id: string) {
         select: { title: true, html: true, updated: true },
     });
 }
-
-/** The most recently edited document, for "continue where you left off". */
-export function latestDocument(userId: string) {
-    return db.document.findFirst({
-        where: { userId },
-        orderBy: { updated: "desc" },
-        select: { id: true, title: true, updated: true },
-    });
-}

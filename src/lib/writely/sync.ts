@@ -5,7 +5,7 @@ import type {
 } from "./types";
 
 /** A changed document; its collections are included only when they changed. */
-export type DocumentChanges = Omit<
+type DocumentChanges = Omit<
     WritingDocument,
     "drafts" | "checks" | "cards"
 > &

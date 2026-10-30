@@ -6,7 +6,7 @@ import type {
 } from "./types";
 import { DEFAULT_GOAL_TEXTS } from "../../config/revisions";
 
-export type UniversalCheck = Check & { universalId: string };
+type UniversalCheck = Check & { universalId: string };
 
 export function migrateRevisions(data: UnmigratedWorkspace): WorkspaceData {
     if (data.revisionSchemaVersion === 2) return data as WorkspaceData;

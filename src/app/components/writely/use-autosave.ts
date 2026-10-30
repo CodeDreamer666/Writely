@@ -17,7 +17,7 @@ import { api } from "~/trpc/react";
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 /** Unsaved changes are kept per document, since the editor opens one document at a time. */
-export const unsavedKey = (userId: string, documentId: string) =>
+const unsavedKey = (userId: string, documentId: string) =>
     `writely.unsaved.v2:${userId}:${documentId}`;
 // Before documents had their own pages, the whole workspace was kept under one key.
 const workspaceUnsavedKey = (userId: string) => `writely.unsaved.v1:${userId}`;
@@ -52,7 +52,7 @@ export function readUnsavedWorkspace(
     return old && doc ? { ...old, docs: [doc], active: documentId } : null;
 }
 
-export function forgetUnsavedWorkspace(userId: string, documentId?: string) {
+function forgetUnsavedWorkspace(userId: string, documentId?: string) {
     try {
         if (documentId) localStorage.removeItem(unsavedKey(userId, documentId));
         localStorage.removeItem(workspaceUnsavedKey(userId));

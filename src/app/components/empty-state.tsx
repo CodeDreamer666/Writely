@@ -7,7 +7,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 /** A hint card inside an empty state; with an action it becomes a button or link. */
-export type EmptyCard = {
+type EmptyCard = {
     icon: LucideIcon;
     title: string;
     text: string;

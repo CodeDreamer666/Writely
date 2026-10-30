@@ -20,7 +20,7 @@ export type Rect = {
     side?: Side;
 };
 export type XY = { x: number; y: number };
-export type TargetMode =
+type TargetMode =
     "selection" | "word" | "sentence" | "paragraph" | "essay";
 export type SelectionSnapshot = { from: number; to: number; quote: string };
 
@@ -68,7 +68,7 @@ export const cardArrowPoint = (
     rect: Rect,
     points?: Partial<Record<Anchor, Point>>,
 ) => anchorPoint(rect, cardArrowAnchor(rect), points);
-export const clamp = (n: number, min: number, max: number) =>
+const clamp = (n: number, min: number, max: number) =>
     Math.max(min, Math.min(max, n));
 
 export function targetAtPosition(
